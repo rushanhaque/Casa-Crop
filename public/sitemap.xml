@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Domain assumed from the trade address; correct on deployment. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://casaandcrop.com/</loc></url>
+  <url><loc>https://casaandcrop.com/casa.html</loc></url>
+  <url><loc>https://casaandcrop.com/collections.html</loc></url>
+  <url><loc>https://casaandcrop.com/about.html</loc></url>
+  <url><loc>https://casaandcrop.com/connect.html</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=funeral</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=lighting</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=kitchenware</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=decor</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=accessories</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=furniture</loc></url>
+  <url><loc>https://casaandcrop.com/range.html?r=bathroom</loc></url>
+</urlset>

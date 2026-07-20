@@ -1,0 +1,683 @@
+/*  ─────────────────────────────────────────────────────────────
+    CASA
+
+    The page alternates density and calm on purpose: a held hero, the
+    ranges, capability at a steady industrial rhythm, materials as one
+    wide gesture, then heritage and a closing statement. A page that
+    runs at one intensity throughout reads as loud rather than rich.
+
+    Every boundary in the body of the page is square. The one tilted
+    edge on the site belongs to the footer, so the diagonal reads as
+    the close of the document rather than as a repeating texture.
+    ───────────────────────────────────────────────────────────── */
+
+/*  The well the plates sit in. Deliberately the deepest value on the
+    site: where two plates meet, any subpixel rounding shows this
+    rather than a bright line, so the join reads as a shadow. */
+.page {
+  background: var(--c-void);
+  color: var(--c-casa-ink);
+}
+
+/*  Present for structure, absent from the composition. clip-path
+    rather than display:none or visibility:hidden — both of those
+    remove the element from the accessibility tree along with the
+    view, which would defeat the entire purpose of keeping it. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.9rem 1.4rem;
+  background: var(--c-casa-ink);
+  color: var(--c-surface);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip:focus {
+  left: 0;
+}
+
+/* ── 1. Landing ──────────────────────────────────────────────── */
+
+.hero {
+  /*  Two declarations, not one. --art is the PNG every browser can
+      read; --art-set adds the modern formats. They are separate custom
+      properties rather than one overriding the other because a custom
+      property accepts almost any token at parse time — an unsupported
+      image-set would sail through here and then fail where it is USED,
+      taking the background with it and leaving a blank panel. The
+      @supports test below chooses between them explicitly instead. */
+  --art: url('/casa-hero.png');
+  --art-set: image-set(
+    url('/casa-hero.avif') type('image/avif'),
+    url('/casa-hero.webp') type('image/webp'),
+    url('/casa-hero.png') type('image/png')
+  );
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--c-casa-ground);
+  padding: var(--gutter);
+}
+
+@supports not (height: 100dvh) {
+  .hero {
+    height: 100vh;
+  }
+}
+
+/*  Carries the entrance only. Its scale compounds with the child's
+    parallax overscale rather than fighting it. */
+.heroArtWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.heroArt {
+  position: absolute;
+  inset: 0;
+  background-image: var(--art, none);
+  background-size: cover;
+  background-position: center;
+  /*  Oversized so the parallax travel never exposes an edge. Set here
+      rather than in the keyframe so it holds where view timelines are
+      unsupported. */
+  transform: scale(1.14);
+}
+
+.heroLight {
+  position: absolute;
+  inset: -30%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 43%,
+    rgba(240, 217, 168, 0.07) 49%,
+    rgba(255, 246, 232, 0.13) 51%,
+    rgba(240, 217, 168, 0.07) 53%,
+    transparent 59%
+  );
+  transform: translate3d(-120%, 0, 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .heroLight {
+    animation: hero-rake 1900ms var(--ease-veil) 700ms 1 both;
+  }
+
+  @keyframes hero-rake {
+    to {
+      transform: translate3d(120%, 0, 0);
+    }
+  }
+}
+
+.heroInner {
+  position: relative;
+  max-width: 62rem;
+}
+
+/*  A pool of warm light behind the type. Not a glow on the glyphs —
+    a light on the wall behind them, which is why it is offset below
+    and left rather than centred on the text. Static, painted once,
+    and it gives the wordmark something to sit in rather than on. */
+.heroInner::before {
+  content: '';
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: -30%;
+  bottom: -60%;
+  z-index: -1;
+  background: radial-gradient(
+    58% 62% at 22% 68%,
+    rgba(201, 177, 145, 0.16) 0%,
+    rgba(201, 177, 145, 0.05) 42%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+/* ── Shared section rhythm ───────────────────────────────────── */
+
+.collections,
+.materials,
+.signature,
+.heritage,
+.about {
+  position: relative;
+  /*  Contains the plate's negative z-index so it sits behind this
+      section's content but above the page beneath. */
+  isolation: isolate;
+  /*  No wedge allowance anywhere in the body of the page. The tilt is
+      now a single event at the very end of the document, so no section
+      reserves space for an angle and none is pulled up over its
+      neighbour — every boundary here is square and every section owns
+      exactly its own box. */
+  padding: clamp(6rem, 15vh, 13rem) var(--gutter);
+  scroll-margin-top: 2rem;
+}
+
+/*  THE TILT IS NOW THE FOOTER'S ALONE.
+
+    It ran across five section boundaries, then two. Both were too
+    many: repeated across a scroll a diagonal stops being an event and
+    becomes a texture — page-builder vocabulary, and the thing it was
+    introduced to avoid. Held back to exactly one appearance, at the
+    close of the document, it is a gesture again.
+
+    So every plate in the body of the page is square, and the footer
+    carries the only angled edge on the site. */
+.collections::before,
+.materials::before,
+.signature::before,
+.heritage::before,
+.about::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--c-surface);
+  background-image: var(--grain), var(--depth-vignette);
+  background-repeat: repeat, no-repeat;
+  background-size: var(--grain-size), cover;
+  /*  The lit top edge and shaded foot belong to the plate. */
+  box-shadow: var(--rim);
+}
+
+/*  Beige plates carry no vignette — a darkening at the edges reads as
+    a stain on a pale ground rather than as light falling off. */
+[data-tone='beige']::before {
+  background-image: var(--grain);
+  background-repeat: repeat;
+  background-size: var(--grain-size);
+}
+
+.head {
+  position: relative;
+  max-width: 46rem;
+}
+
+/*  The header settles on its own scrubbed timeline, slower than the
+    content beneath it, so scrolling has a hierarchy — the title is
+    still arriving while the cards are already present. Scrubbed on
+    the WRAPPER: the title's own spans carry reveal transitions, and
+    an animation on the same elements would silently override them.
+
+    The from-frame only: each property returns to its natural value,
+    so this cannot fight anything set elsewhere. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .head {
+      animation: head-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 38%;
+    }
+
+    @keyframes head-drift {
+      from {
+        opacity: 0.2;
+        transform: translate3d(0, 2.4rem, 0);
+      }
+    }
+  }
+}
+
+.sectionTitle {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  /*  Larger than the editorial register called for. Modern luxury
+      states things at scale; archival restraint whispers them, and
+      whispering is what made this page forgettable. */
+  font-size: clamp(2.6rem, 7.5vw, 6.5rem);
+  line-height: 0.94;
+  letter-spacing: var(--track-xl);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.standfirst {
+  max-width: 34rem;
+  margin-top: clamp(1.2rem, 2.4vw, 2rem);
+  font-family: var(--f-text);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.55;
+  color: var(--c-ink-muted);
+}
+
+/* ── 2. Ranges — composed to hold on one screen ──────────────── */
+
+.collections {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
+  padding-top: clamp(4rem, 9vh, 7rem);
+  padding-bottom: clamp(3rem, 7vh, 5rem);
+}
+
+@supports not (height: 100dvh) {
+  .collections {
+    min-height: 100vh;
+  }
+}
+
+/*  The standfirst sits beside the heading rather than beneath it, so
+    the header costs one block of height instead of two. */
+.collections .head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  align-items: end;
+  gap: clamp(1rem, 3vw, 3rem);
+  max-width: none;
+}
+
+.collections .standfirst {
+  margin-top: 0;
+  padding-bottom: 0.35rem;
+}
+
+/* ── 4. Materials ────────────────────────────────────────────── */
+
+/*  Materials and Heritage were the two shallowest stops on the page —
+    a marquee or a figure row passed in a glance reads as filler, where
+    the same content given room reads as a chapter. Centred with flex
+    so the added height becomes breathing space around the content
+    rather than a gap above it. */
+.materials,
+.heritage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 82vh;
+}
+
+/*  Heritage takes the whole screen. It carries the figures a buyer is
+    actually weighing, so it gets a viewport to itself and is read as
+    one held view rather than passed through.
+
+    dvh rather than vh: on a phone the browser chrome retracts as you
+    scroll, and vh sizes to the tallest state — the section would
+    overflow at rest and the fit would be wrong exactly where screens
+    are smallest. */
+.heritage {
+  min-height: 100dvh;
+}
+
+@supports not (height: 100dvh) {
+  .heritage {
+    min-height: 100vh;
+  }
+}
+
+/* ── 5. Signature ────────────────────────────────────────────── */
+
+/*  The plate number behind the object — stroke-only tooling, not a
+    watermark. */
+.vitrineGhost {
+  position: absolute;
+  left: -0.04em;
+  top: -0.12em;
+  z-index: 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(9rem, 26vw, 24rem);
+  line-height: 0.8;
+  letter-spacing: var(--track-xl);
+  color: rgba(237, 229, 216, 0.04);
+  pointer-events: none;
+  user-select: none;
+}
+
+@supports (-webkit-text-stroke: 1px #000) {
+  .vitrineGhost {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(237, 229, 216, 0.07);
+  }
+}
+
+/*  The raking light, at vitrine scale — the same pass of light the
+    cards catch, so the reference and its catalogue share one sun. */
+.vitrineRake {
+  position: absolute;
+  inset: -40% -60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(237, 229, 216, 0.06) 48%,
+    rgba(237, 229, 216, 0.14) 50%,
+    rgba(237, 229, 216, 0.06) 52%,
+    transparent 58%
+  );
+  transform: translate3d(-70%, 0, 0);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .vitrineRake {
+      animation: vitrine-rake linear both;
+      animation-timeline: view();
+      animation-range: entry 10% exit 90%;
+    }
+
+    @keyframes vitrine-rake {
+      from {
+        transform: translate3d(-70%, 0, 0);
+      }
+      to {
+        transform: translate3d(70%, 0, 0);
+      }
+    }
+  }
+}
+
+.vitrine {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  align-items: end;
+  gap: clamp(2rem, 6vw, 5rem);
+  margin-top: clamp(3rem, 8vh, 6rem);
+}
+
+/*  The frame clips; the object drifts inside it. Without the clip the
+    parallax would expose the figure's own edge as it travels. */
+.vitrineFrame {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-2), var(--rim);
+  max-width: 46rem;
+  justify-self: center;
+  width: 100%;
+  max-height: 80vh;
+}
+
+.vitrineArt {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.notes {
+  margin: 0;
+  padding: 0 0 clamp(1rem, 4vh, 3rem);
+}
+
+/*  The annotation leader: a hairline running from the note back
+    toward the object, tipped with a brass node where it would meet
+    the surface. Positioned in the column gap, drawn by the shared
+    draw reveal — origin left, so it extends FROM the object TOWARD
+    the note, the direction a draughtsman rules it. */
+.leader {
+  position: absolute;
+  top: 1.75rem;
+  right: 100%;
+  width: calc(clamp(2rem, 6vw, 5rem) - 0.9rem);
+  height: 1px;
+  margin-right: 0.45rem;
+  background: var(--c-stamp);
+}
+
+.leaderDot {
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--c-specular);
+}
+
+.note {
+  position: relative;
+  padding: 1.1rem 0;
+  border-top: var(--seam-width) solid var(--c-rule);
+}
+
+.note:last-child {
+  border-bottom: var(--seam-width) solid var(--c-rule);
+}
+
+.noteKey {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.noteValue {
+  margin: 0.4rem 0 0;
+  font-family: var(--f-display);
+  font-size: clamp(0.98rem, 1.3vw, 1.18rem);
+  line-height: 1.3;
+}
+
+/* ── 6. Heritage ─────────────────────────────────────────────── */
+
+/* ── Standing figures ───────────────────────────────────────────
+   Capability stated as quantities. The figure leads and the label
+   follows it, because the number is the argument — a buyer scanning
+   this section is looking for scale, not for prose. */
+
+.standing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  margin: clamp(3rem, 8vh, 5rem) 0 0;
+}
+
+.stat {
+  padding-top: 1.2rem;
+  /*  An end-faded rule rather than a hard 1px line. Same cost, and it
+      stops the section reading as a ruled table. */
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--c-rule-strong) 12%,
+        var(--c-rule-strong) 78%,
+        transparent 100%
+      )
+      top left / 100% 1px no-repeat;
+}
+
+.statValue {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: var(--track-lg);
+  /*  Tabular figures so the digits do not jostle as the number ticks
+      up — proportional figures make the whole row twitch. */
+  font-variant-numeric: tabular-nums lining-nums;
+  background: var(--metal-brass);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/*  If the clip is not understood the fill would render transparent,
+    so the colour is restored wherever it is unsupported. */
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .statValue {
+    background: none;
+    color: var(--c-casa-ink);
+  }
+}
+
+.statLabel {
+  display: block;
+  margin-top: 0.9rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-casa-ink);
+}
+
+.statNote {
+  margin: 0.5rem 0 0;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  line-height: 1.5;
+  color: var(--c-ink-muted);
+}
+
+/* ── 7. About ────────────────────────────────────────────────── */
+
+.statement {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(2rem, 6.4vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: var(--track-xl);
+  margin: 0;
+  max-width: 18ch;
+}
+
+.aboutBody {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  max-width: 62rem;
+  margin-top: clamp(2.5rem, 6vh, 4.5rem);
+  margin-left: auto;
+  font-family: var(--f-text);
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+}
+
+.aboutBody p {
+  margin: 0;
+}
+
+/*  The call to action. A rule and a fill, not a pill — the fill wipes
+    up from the base on hover and the label inverts with it. */
+.cta {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  padding: clamp(0.9rem, 1.8vw, 1.2rem) clamp(1.4rem, 3vw, 2.2rem);
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ctaLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  transition:
+    color var(--dur-micro) var(--ease-settle),
+    letter-spacing var(--dur-micro) var(--ease-settle);
+}
+
+.ctaFill {
+  position: absolute;
+  inset: -10%;
+  background: var(--c-casa-ink);
+  transform-origin: bottom left;
+  transform: translateY(110%) skewY(6deg);
+  transition: transform var(--dur-micro) var(--ease-veil);
+}
+
+.ctaRule {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 var(--seam-width) var(--c-rule-strong);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover .ctaFill {
+    transform: translateY(0) skewY(0);
+  }
+
+  .cta:hover .ctaLabel {
+    color: var(--c-surface);
+    letter-spacing: var(--track-caps);
+  }
+}
+
+.cta:focus-visible .ctaFill {
+  transform: none;
+}
+
+.cta:focus-visible .ctaLabel {
+  color: var(--c-surface);
+}
+
+/* ── Small screens ───────────────────────────────────────────── */
+
+@media (max-width: 64rem) {
+  .collections {
+    min-height: 0;
+    padding-top: clamp(5rem, 12vh, 9rem);
+    padding-bottom: clamp(5rem, 12vh, 9rem);
+  }
+
+  .collections .head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
+@media (max-width: 60rem) {
+  .vitrine {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .entry,
+  .step {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .aboutBody {
+    margin-left: 0;
+  }
+}
+
+/*  AVIF where it is understood, WebP next, PNG last. The hero is the
+    Largest Contentful Paint element, so its weight is very nearly the
+    LCP figure on a slow connection — 640KB of PNG became 31KB of AVIF. */
+@supports (background-image: image-set(url('/x.avif') type('image/avif'))) {
+  .heroArt {
+    background-image: var(--art-set, var(--art, none));
+  }
+}

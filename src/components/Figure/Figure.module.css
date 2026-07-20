@@ -1,0 +1,37 @@
+/*  The box exists before the image does. aspect-ratio holds the space
+    from first paint, so nothing below it ever moves when the file
+    finally decodes. */
+.figure {
+  position: relative;
+  margin: 0;
+  aspect-ratio: var(--ratio, 3 / 4);
+  overflow: hidden;
+  background: var(--c-casa-ground);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /*  Photography is set fractionally warm and desaturated to sit
+      inside the palette rather than fight it. Applied once at rest —
+      never animated, since a filter transition on a full-bleed image
+      is one of the most expensive things a weak GPU can be asked to
+      do. */
+  filter: saturate(0.94);
+}
+
+/*  An empty slot is not a broken slot. A hairline inset marks the
+    reserved space as deliberate while the photography is outstanding,
+    and disappears the moment a src is provided. */
+.figure[data-empty]::after {
+  content: '';
+  position: absolute;
+  inset: var(--gutter);
+  border: var(--seam-width) solid var(--c-rule);
+  pointer-events: none;
+}

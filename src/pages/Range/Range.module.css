@@ -1,0 +1,337 @@
+/*  RANGE — one programme in detail. A pattern-book plate: the ghost
+    numeral is the architecture, the spec bar is the contract, and the
+    catalogue plates are designed to look finished while empty. */
+
+.page {
+  background-color: var(--c-surface);
+  background-image: var(--grain), var(--depth-vignette);
+  background-repeat: repeat, no-repeat;
+  background-size: var(--grain-size), cover;
+  color: var(--c-casa-ink);
+}
+
+/* ── Masthead ────────────────────────────────────────────────── */
+
+.masthead {
+  position: relative;
+  padding: clamp(5rem, 14vh, 10rem) var(--gutter) clamp(2.5rem, 6vh, 4rem);
+  overflow: hidden;
+}
+
+/*  The plate number, ghosted at architectural scale. Stroke-only where
+    supported so it reads as tooling, not as a watermark. */
+.ghost {
+  position: absolute;
+  right: -0.06em;
+  top: 0.02em;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(12rem, 34vw, 30rem);
+  line-height: 0.8;
+  letter-spacing: var(--track-xl);
+  color: rgba(237, 229, 216, 0.045);
+  pointer-events: none;
+  user-select: none;
+}
+
+@supports (-webkit-text-stroke: 1px #000) {
+  .ghost {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(237, 229, 216, 0.08);
+  }
+}
+
+.crumb {
+  margin: 0 0 clamp(1rem, 2vw, 1.6rem);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.crumbLink {
+  color: var(--c-stamp);
+  text-decoration: none;
+}
+
+.crumbLink:hover,
+.crumbLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.title {
+  position: relative;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(3rem, 10vw, 9rem);
+  line-height: 0.94;
+  letter-spacing: var(--track-xl);
+  margin: 0;
+}
+
+.lede {
+  position: relative;
+  max-width: 42rem;
+  margin: clamp(1.4rem, 3vw, 2.2rem) 0 0;
+  font-family: var(--f-text);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+}
+
+.miss {
+  margin: 1rem 0 0;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  color: var(--c-stamp);
+}
+
+/* ── Spec bar ────────────────────────────────────────────────── */
+
+.specBar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1.5rem, 4vh, 2.5rem) var(--gutter);
+  border-top: 1px solid var(--c-rule);
+  border-bottom: 1px solid var(--c-rule);
+}
+
+.specCell {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.specKey {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.specValue {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  letter-spacing: var(--track-md);
+}
+
+/* ── The plates ──────────────────────────────────────────────── */
+
+.plates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: clamp(1.2rem, 2.5vw, 2rem);
+  /*  A deeper foot than head: the catalogue is the last thing on the
+      page now, and it has to clear the footer's tilted edge — which is
+      pulled up over whatever precedes it — by more than the tilt. */
+  padding: clamp(3rem, 7vh, 5rem) var(--gutter) clamp(6rem, 13vh, 9rem);
+}
+
+.plate {
+  position: relative;
+  border-radius: var(--radius);
+  padding: clamp(0.7rem, 1.2vw, 1rem);
+  background:
+    linear-gradient(
+        180deg,
+        rgba(237, 229, 216, 0.08) 0%,
+        rgba(237, 229, 216, 0) 30%
+      )
+      padding-box,
+    linear-gradient(180deg, #211d17 0%, #191613 100%) padding-box;
+  box-shadow: var(--elev-1), var(--rim);
+  /*  Transform only. The deeper hover shadow is a pre-painted layer
+      crossfaded below — transitioning box-shadow itself interpolates
+      the blur and repaints the plate every frame, the exact cost this
+      site's cards were built to avoid. */
+  transition: transform var(--dur-ui) var(--ease-ui);
+  overflow: hidden;
+}
+
+.plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow: var(--elev-2);
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+  pointer-events: none;
+}
+
+/*  The raking light, plate-sized, scrubbed by each plate's own
+    passage — the grid catches the light in sequence as you scroll. */
+.plate::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 44%,
+    rgba(237, 229, 216, 0.05) 49%,
+    rgba(237, 229, 216, 0.11) 51%,
+    rgba(237, 229, 216, 0.05) 53%,
+    transparent 58%
+  );
+  transform: translate3d(-70%, 0, 0);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .plate::after {
+      animation: plate-rake linear both;
+      animation-timeline: view();
+      animation-range: entry 15% exit 85%;
+    }
+
+    @keyframes plate-rake {
+      from {
+        transform: translate3d(-70%, 0, 0);
+      }
+      to {
+        transform: translate3d(70%, 0, 0);
+      }
+    }
+  }
+}
+
+/*  A ghost numeral per plate — the pattern-book read carried into the
+    grid, and what makes an empty plate look designed rather than
+    unfinished. */
+.plateGhost {
+  position: absolute;
+  right: 0.15rem;
+  top: -0.35em;
+  z-index: 1;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: 5.5rem;
+  line-height: 1;
+  color: rgba(237, 229, 216, 0.05);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plate:hover {
+    transform: translate3d(0, -5px, 0);
+  }
+
+  .plate:hover::before {
+    opacity: 1;
+  }
+}
+
+.plateWell {
+  border-radius: max(0px, calc(var(--radius) - 0.7rem));
+  overflow: hidden;
+}
+
+/*  The reserved slot: fixed aspect so photography can never shift the
+    grid when it lands. */
+.plateArt {
+  aspect-ratio: 4 / 5;
+  background: color-mix(in srgb, var(--c-casa-ink) 5%, transparent);
+}
+
+.plateFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-top: 0.8rem;
+}
+
+.plateSku {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-casa-ink);
+}
+
+.plateState {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+/* ── The pour ────────────────────────────────────────────────────
+   Molten brass rising from the foot of the well. The surface line is
+   the site's tilt, cut as a static clip on the layer's own top edge —
+   the layer then simply translates, so the moving part is transform
+   only and the molten surface arrives already tilted. */
+
+.platePour {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0.9rem 0.8rem;
+  background: var(--metal-brass);
+  clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 100%);
+  transform: translate3d(0, 103%, 0);
+  transition: transform 480ms var(--ease-veil);
+  pointer-events: none;
+}
+
+.pourCue {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-void);
+  opacity: 0;
+  transform: translate3d(0, 0.4rem, 0);
+  transition:
+    opacity var(--dur-ui) var(--ease-ui) 180ms,
+    transform var(--dur-ui) var(--ease-ui) 180ms;
+}
+
+.plateWell {
+  position: relative;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plate:hover .platePour {
+    transform: none;
+  }
+
+  .plate:hover .pourCue {
+    opacity: 1;
+    transform: none;
+  }
+
+  .plate:hover .plateGhost {
+    color: transparent;
+    -webkit-text-stroke: 1.25px rgba(240, 217, 168, 0.28);
+    transition: -webkit-text-stroke-color var(--dur-ui) var(--ease-ui);
+  }
+}
+
+.plate:active {
+  transform: translate3d(0, -2px, 0) scale(0.995);
+  transition-duration: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platePour {
+    transition: none;
+  }
+}

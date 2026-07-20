@@ -1,0 +1,12 @@
+{
+  "name": "Casa and Crop",
+  "short_name": "Casa & Crop",
+  "description": "Manufacturers and exporters of home metalware.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#12100E",
+  "theme_color": "#12100E",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,19 @@
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 2px;
+  pointer-events: none;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  /*  Real metal, not a flat accent. The gradient is static — only the
+      transform moves — so it costs one paint, ever. */
+  background: var(--metal-brass);
+  transform: scaleX(0);
+  transform-origin: left center;
+}

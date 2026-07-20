@@ -1,0 +1,21 @@
+/*  The mask clips; the line inside it travels.
+
+    The padding/negative-margin pair gives descenders somewhere to be
+    hidden. Without it a 'g' or 'y' is sliced off at the baseline
+    while the line is out of view, and the clip reads as a bug rather
+    than a curtain. The negative margin cancels the padding's effect
+    on layout, so the line box measures exactly as it would have. */
+.mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.line {
+  display: block;
+  /*  No will-change. These animate once, and permanently promoting
+      every line of type on the page is precisely how a device runs
+      out of texture memory. */
+}
+

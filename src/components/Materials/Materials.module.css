@@ -1,0 +1,168 @@
+/*  ─────────────────────────────────────────────────────────────
+    MATERIALS — an endless row
+
+    The set is rendered twice and the track travels exactly one set's
+    width. The second set being identical to the first is what makes
+    the loop seamless: the frame at -50% is pixel-identical to the
+    frame at 0, so there is no jump to hide.
+
+    One transform on one element — compositor-only, never on the main
+    thread. It does keep a layer promoted permanently, which is the
+    honest cost of anything that runs forever; the pause on hover and
+    focus is what stops that being wasteful as well as what stops the
+    row being unreadable.
+    ───────────────────────────────────────────────────────────── */
+
+.shell {
+  position: relative;
+  margin-top: clamp(3rem, 8vh, 6rem);
+  overflow: hidden;
+  /*  Room above the specimens for the hover growth, which would
+      otherwise be clipped by this very overflow. */
+  padding-top: 1.75rem;
+  padding-bottom: 0.5rem;
+
+  /*  The row runs off both edges rather than stopping at a hard cut,
+      so it reads as continuing rather than as ending — which is the
+      point of an endless row. Static, painted once. */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 clamp(2rem, 6vw, 6rem),
+    #000 calc(100% - clamp(2rem, 6vw, 6rem)),
+    transparent 100%
+  );
+}
+
+.track {
+  --marquee: 62s;
+  display: flex;
+  /*  Sized by its contents, not by the shell, or the two sets would be
+      squeezed to fit and the travel distance would stop matching one
+      set's width. */
+  width: max-content;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  animation: materials-drift var(--marquee) linear infinite;
+}
+
+/*  Exactly one set. The gap between the two sets is accounted for by
+    translating half the TRACK, which includes it. */
+@keyframes materials-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/*  Stop whenever someone is reading. A specification that slides out
+    from under a sentence is worse than no specification. */
+.shell:hover .track,
+.shell:focus-within .track {
+  animation-play-state: paused;
+}
+
+.alloy {
+  flex: 0 0 clamp(10rem, 15vw, 14rem);
+}
+
+/* ── The specimen ────────────────────────────────────────────────
+   A tall block rather than a chip, so the material reads as stock
+   rather than as a colour picker. */
+
+.swatch {
+  display: block;
+  height: clamp(8rem, 17vw, 15rem);
+  background: var(--swatch);
+  background-image: var(--sheen);
+  border-radius: var(--radius);
+  /*  A solid held against a surface, so it takes the same elevation as
+      everything else, plus a keyline that separates a pale material
+      from a pale ground. */
+  /*  The keyline stays, but at a whisper. It is functional rather
+      than decorative: a pale ceramic or resin swatch on a beige ground
+      is only a few points apart, and with no edge at all it dissolves
+      into the section. At this strength it separates without reading
+      as a border. */
+  box-shadow:
+    var(--elev-2),
+    inset 0 0 0 1px rgba(46, 36, 24, 0.07);
+  /*  Grows from its own base — anchored, the way a sample held against
+      a bench would be, rather than swelling from its middle. */
+  transform-origin: center bottom;
+  transition:
+    transform var(--dur-ui) var(--ease-ui),
+    opacity var(--dur-ui) var(--ease-ui);
+}
+
+.body {
+  display: block;
+  padding-top: 0.9rem;
+}
+
+.name {
+  display: block;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.2;
+  letter-spacing: var(--track-md);
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+.spec {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-sm);
+  color: var(--c-ink-muted);
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+
+/* ── Address ─────────────────────────────────────────────────────
+   The row is already paused by the time any of this is visible, so
+   the specimen is never growing and travelling at once. */
+
+@media (hover: hover) and (pointer: fine) {
+  .alloy:hover .swatch {
+    transform: scaleY(1.06);
+  }
+
+  /*  SIBLING RESPONSE — handling one specimen sets the others back, so
+      the row reports which material is being considered rather than
+      merely that a swatch is hoverable. */
+  .track:has(.alloy:hover) .alloy:not(:hover) .swatch {
+    opacity: 0.45;
+  }
+
+  .track:has(.alloy:hover) .alloy:not(:hover) .name,
+  .track:has(.alloy:hover) .alloy:not(:hover) .spec {
+    opacity: 0.4;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────
+   Nothing drifts. The row becomes an ordinary scroller instead, so
+   every material is still reachable — stopping the animation without
+   restoring scrolling would leave the last few permanently offscreen. */
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+
+  .shell {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-rule-strong) transparent;
+  }
+
+  .swatch {
+    transform: none !important;
+  }
+}

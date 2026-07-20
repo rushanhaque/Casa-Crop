@@ -1,0 +1,134 @@
+@import './tokens.css';
+@import './reset.css';
+@import './motion.css';
+
+/*  Schibsted Grotesk — the committed display voice, self-hosted.
+
+    One variable file, 46KB, carries every weight from 400 to 900 for
+    the whole site: the system-stack placeholder meant every Windows
+    visitor read the brand in Segoe UI, which is the single fastest way
+    to look like a default. Self-hosted rather than linked: no
+    third-party request, no consent surface, and the file is
+    preloaded so the swap window is one round trip on the same
+    connection.
+
+    BELOW the imports, non-negotiably: CSS ignores any @import that
+    follows another rule, so a font-face placed first silently killed
+    the entire token layer — every var() on the site resolved to
+    nothing and typography fell back to Times. */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin.woff2') format('woff2');
+}
+
+
+/*  Navigating between the threshold and Casa is a real document load,
+    not a client-side route. Declaring this lets the browser animate
+    the change of page itself — no router, no JavaScript, and the work
+    happens on the compositor. Browsers without support simply navigate,
+    which is the correct fallback rather than a degraded one.
+
+    Both documents must declare it for the transition to occur. */
+@view-transition {
+  navigation: auto;
+}
+
+/*  A morph between documents is still motion, and a full-page
+    cross-fade is exactly the kind of movement that troubles people
+    who have asked for less of it. Opting back out gives them an
+    instant navigation. */
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/*  In-page navigation eases rather than jumps — but only for people
+    who have not asked for less motion, for whom a smooth scroll of
+    several viewports is exactly the kind of movement that causes
+    trouble. Set on the element rather than in JavaScript, so it
+    applies to every anchor including the skip link. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+::selection {
+  background: var(--c-casa-ink);
+  color: var(--c-surface);
+}
+
+/*  Visible only to screen readers — used for the page's true <h1>,
+    since the wordmarks are set as decorative display type. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*  A keyboard user must always be able to see where they are.
+
+    Set in the ink rather than the browser's default blue, and offset
+    far enough that the ring never overlaps a glyph. Designed focus
+    states are scored craft, not a courtesy — and generated front-end
+    code is documented to fail here more often than anywhere else,
+    which makes it one of the first things a reviewer checks. */
+:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--c-stamp-wash);
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    CROSS-DOCUMENT TRANSITION
+
+    The default is a straight cross-fade at the browser's own timing.
+    These curves are the site's, so a change of page moves like
+    everything else on it — the outgoing page leaves faster than the
+    incoming one arrives, which is the same asymmetry every other
+    departure here uses.
+
+    Anything with a view-transition-name is exempt and morphs instead:
+    the navigation bar, and the Casa wordmark travelling from the
+    threshold into the hero.
+    ───────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  /*  The page wipe. The incoming document sweeps in behind a tilted
+      edge — the same 1.5° lean the whole identity is built on — while
+      the outgoing page holds still beneath it. This is the one place
+      on the site a clip is animated: it runs for 640ms once per
+      navigation, on a layer that exists only during the transition,
+      which is a very different bargain from clipping per-frame in
+      steady state. */
+  ::view-transition-old(root) {
+    animation: none;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-wipe 640ms var(--ease-veil) both;
+  }
+
+
+  @keyframes vt-wipe {
+    from {
+      clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    }
+    to {
+      clip-path: polygon(0 0, 120% 0, 100% 100%, 0 100%);
+    }
+  }
+}

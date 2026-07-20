@@ -1,0 +1,14 @@
+/*  Entry-page only.
+
+    The threshold is a fixed, non-scrolling composition, so the viewport
+    is locked here rather than in JavaScript — doing it in CSS avoids the
+    layout shift that setting overflow after mount would cause.
+
+    This deliberately does NOT live in global.css: the Casa page scrolls,
+    and a shared lock would break it. */
+
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}

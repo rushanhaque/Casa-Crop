@@ -1,0 +1,735 @@
+/*  ─────────────────────────────────────────────────────────────
+    RANGES — louvred cards
+
+    Each card is a stack of seven slats. Closed they compose one
+    continuous image; addressed, they turn in sequence from the slat
+    the pointer crossed and show the specification on the reverse.
+
+    THE COMPOSITION
+    Every face holds a panel as wide as the whole card, shifted left by
+    that slat's own index. So a slat is a window onto its strip of one
+    picture — not one of seven pictures — and the same arithmetic on
+    the reverse gives seven strips of one spec sheet. Get the offset
+    wrong by a pixel and the image visibly breaks at every seam, which
+    is why both figures derive from --i and --n rather than being
+    written out.
+
+    THE TWO PERSPECTIVES
+    There are deliberately two, and it is not redundancy. .cell's
+    perspective is what lets the whole card travel toward the viewer.
+    .card carries overflow:hidden for its rounded corners, and per spec
+    any overflow other than visible forces transform-style to flatten —
+    so the slats cannot inherit the cell's 3D space through it. .card
+    therefore opens a fresh perspective of its own for its descendants.
+
+    The result is exactly right rather than a workaround: the card is a
+    flat window containing its own three-dimensional scene, and the
+    window itself moves in depth.
+    ───────────────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  /*  Twelve, because the two rows divide differently: four across
+      then three. Twelve is the smallest count both divide into, so
+      row one spans three columns per card and row two spans four,
+      and every card in a row is exactly equal without a single
+      hand-tuned width. */
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(1rem, 2vw, 2rem);
+  list-style: none;
+  margin: clamp(3rem, 6vh, 5rem) 0 0;
+  padding: 0;
+}
+
+.cell {
+  position: relative;
+  min-width: 0;
+  height: clamp(25rem, 45vh, 35rem);
+  /*  Lets the card travel in Z. Per-cell rather than one for the whole
+      grid: a shared vanishing point would put the outer cards at a
+      severe angle to it and they would shear rather than lift. */
+  perspective: 1300px;
+  z-index: 1;
+}
+
+.cell:hover,
+.cell:focus-within {
+  z-index: 2;
+}
+
+/*  Arrival, scrubbed by the cell's own passage. On the CELL because
+    the card's transform belongs to the hover lift and the slats' to
+    their transitions — an animation on either would silently override
+    them for good. The cell owns no other transform, so it is the one
+    safe host. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cell {
+      animation: cell-arrive var(--ease-reveal) both;
+      animation-timeline: view();
+      animation-range: entry calc(4% + var(--i, 0) * 3%) entry
+        calc(52% + var(--i, 0) * 3%);
+    }
+
+    @keyframes cell-arrive {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 2.2rem, 0);
+      }
+    }
+  }
+}
+
+/*  THE LIFTED SHADOW.
+
+    box-shadow cannot be animated cheaply — interpolating a blur
+    repaints the element on every frame. So the deeper shadow lives on
+    its own layer behind the card and is CROSS-FADED in, which is pure
+    opacity and stays on the compositor. It sits on the cell rather
+    than the card because the card clips its own overflow and would
+    swallow it. */
+.cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--elev-3);
+  opacity: 0;
+  transition: opacity var(--dur-micro) var(--ease-settle);
+  pointer-events: none;
+}
+
+.cell:hover::after,
+.cell:focus-within::after {
+  opacity: 1;
+}
+
+/*  Row 1 — three cards, four columns each.
+
+    The wider measure goes at the top now, so the section opens on
+    three generous cards and then steps down to a finer four. Opening
+    wide and tightening reads as a considered sequence; opening narrow
+    and widening reads as a row that ran out of items. */
+.cell[data-cell='1'],
+.cell[data-cell='2'],
+.cell[data-cell='3'] {
+  grid-column: span 4;
+}
+
+/*  Row 2 — four cards, three columns each. */
+.cell[data-cell='4'],
+.cell[data-cell='5'],
+.cell[data-cell='6'],
+.cell[data-cell='7'] {
+  grid-column: span 3;
+}
+
+/*  Four across needs a wide field. Two is the honest intermediate —
+    dropping straight from four to one wastes most of a tablet.
+    grid-column:auto here beats the span rules above on source order,
+    not on specificity: both are a class plus an attribute. */
+@media (max-width: 64rem) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cell[data-cell] {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 40rem) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cell[data-cell] {
+    grid-column: 1 / -1;
+    height: auto;
+    min-height: clamp(18rem, 32vh, 24rem);
+  }
+}
+
+/* ── Per-card tints ──────────────────────────────────────────────
+   Placeholders until photography lands. Lifts rather than shades:
+   black on a near-black ground is invisible. */
+
+.cell[data-cell='1'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 4%, transparent);
+}
+.cell[data-cell='2'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 7%, transparent);
+}
+.cell[data-cell='3'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 5%, transparent);
+}
+.cell[data-cell='4'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 9%, transparent);
+}
+.cell[data-cell='5'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 3%, transparent);
+}
+.cell[data-cell='6'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 8%, transparent);
+}
+.cell[data-cell='7'] .image {
+  background-color: color-mix(in srgb, var(--c-casa-ink) 6%, transparent);
+}
+
+/* ── The card ────────────────────────────────────────────────── */
+
+.card {
+  --card-pad: clamp(0.6rem, 1.1vw, 1rem);
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: var(--card-pad);
+  /*  No border. The gradient edge that used to live here was the
+      third outline drawn round this rectangle, after the elevation
+      ring and the corner specular — together they read as a bordered
+      box rather than as a lit object. */
+  border: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  /*  Three layers, one paint:
+      1. surface light falling from the head — short falloff, so it
+         reads as light rather than as a gradient;
+      2. the fill, lighter at its top because it is lit;
+      3. the machined edge, brightest where the light is and darkest
+         opposite. */
+  background:
+    linear-gradient(
+        180deg,
+        rgba(237, 229, 216, 0.1) 0%,
+        rgba(237, 229, 216, 0) 28%
+      )
+      padding-box,
+    linear-gradient(180deg, #241f19 0%, #1b1814 100%) padding-box;
+
+  box-shadow: var(--elev-2), var(--rim);
+
+  /*  A second, inner perspective. This element's overflow flattens it
+      as a group, so its descendants need a 3D context of their own. */
+  perspective: 1300px;
+}
+
+/*  The frame: a ring that lights, and a rule that draws along the foot.
+    Both pseudo-elements, so neither needs markup of its own. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: var(--radius);
+  /*  A wash rather than a ring — the card brightens on approach
+      instead of being outlined. */
+  background: radial-gradient(
+    120% 90% at 50% 0%,
+    rgba(201, 177, 145, 0.1) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--dur-micro) var(--ease-settle);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  height: var(--seam-width);
+  background: var(--c-foil);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-veil) var(--ease-draw);
+  pointer-events: none;
+}
+
+/* ── The sweep ───────────────────────────────────────────────────
+   A band of light crossing the face when the card is addressed.
+
+   Oversized and rotated so it crosses as a diagonal and never shows
+   its own ends, and translated rather than repositioned: animating
+   background-position repaints the element every frame, where a
+   transform is composited. It is the one moment on the card that is
+   pure surface rather than structure, and it is what makes the thing
+   read as material with a finish rather than as a coloured box. */
+
+.gloss {
+  position: absolute;
+  inset: -40% -60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(237, 229, 216, 0.08) 48%,
+    rgba(237, 229, 216, 0.18) 50%,
+    rgba(237, 229, 216, 0.08) 52%,
+    transparent 58%
+  );
+  transform: translate3d(-70%, 0, 0);
+}
+
+/*  Raked by SCROLL rather than by the pointer.
+
+    Tying it to hover would mean a touch visitor never sees it at all,
+    and would put the animation on the main thread. Bound to the card's
+    own passage through the viewport, it plays for everyone, on the
+    compositor, and it means the whole grid catches the light as you
+    move down the page rather than only the one card under the
+    cursor. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .gloss {
+      animation: card-rake linear both;
+      animation-timeline: view();
+      animation-range: entry 15% exit 85%;
+    }
+
+    @keyframes card-rake {
+      from {
+        transform: translate3d(-70%, 0, 0);
+      }
+      to {
+        transform: translate3d(70%, 0, 0);
+      }
+    }
+  }
+}
+
+/* ── The louvres ─────────────────────────────────────────────────
+   No overflow here, deliberately. This element carries preserve-3d,
+   and any overflow other than visible would flatten it and squash the
+   slats rather than turning them. The card above already clips. */
+
+.louvres {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  /*  See the pivot below — the whole stack turns a few degrees as the
+      card crosses the viewport. */
+  /*  Concentric with the card, not equal to it: an inner corner
+      sharing its parent's radius always reads as slightly wrong,
+      because the two curves are not parallel. */
+  border-radius: max(0px, calc(var(--radius) - var(--card-pad)));
+  /*  The card clips to the radius, so the slats need none of their
+      own — and must not have any, or the seams between them would
+      show as rounded gaps. */
+}
+
+.slat {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: calc(100% / var(--n));
+  left: calc(var(--i) * 100% / var(--n));
+  transform-style: preserve-3d;
+  /*  Long enough to read as weight turning, short enough that the last
+      slat in the cascade is not still moving after the eye has
+      settled. With a six-slat spread at 52ms the gesture lands inside
+      about 1.1 seconds.
+
+      Deliberately no will-change. Thirty-five permanently promoted
+      full-height strips is a great deal of texture memory to hold for
+      an effect that runs a second at a time, and overrunning that
+      budget on a weak GPU shows as tiles flashing rather than as a
+      graceful slowdown. The transition promotes each slat while it
+      moves and releases it afterwards. */
+  transition: transform 780ms var(--ease-veil);
+}
+
+.faceFront,
+.faceBack {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.faceBack {
+  transform: rotateY(180deg);
+  background: var(--c-surface);
+}
+
+/*  As wide as the whole card, shifted left by this slat's index. */
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: calc(100% * var(--n));
+  transform: translateX(calc(var(--i) * -100% / var(--n)));
+}
+
+/*  Keeps the class the per-card tints are set against, so those go on
+    working until photography arrives. */
+.image {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+/*  THE PIVOT.
+
+    The card's interior — the whole slat stack — turns gently in 3D as
+    the card crosses the viewport, like an object on a vitrine turntable
+    passed at walking pace. Under the card's 1300px perspective the slat
+    edges and depth offsets shift against each other, so the card reads
+    as containing a scene rather than a picture.
+
+    Scrubbed by the card's own passage, not by the pointer: it runs on
+    the compositor, it cannot be jank-coupled to the main thread, and —
+    unlike every hover effect — it exists on touch, which is where the
+    cards otherwise stand still.
+
+    On the PARENT deliberately. The slats' own transforms are owned by
+    transitions (entrance and turn), and an animation on the same
+    elements would silently override both — the exact bug this codebase
+    has already caught twice. The parent composes with them instead. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .louvres {
+      animation: stack-pivot linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    @keyframes stack-pivot {
+      from {
+        transform: rotateY(3.5deg);
+      }
+      to {
+        transform: rotateY(-3.5deg);
+      }
+    }
+  }
+}
+
+/*  The numeral on the face — tooling, not a watermark, and inside
+    the panel so the louvres slice one numeral into strips exactly as
+    they slice the photograph. */
+.cardGhost {
+  position: absolute;
+  right: 0.1em;
+  top: -0.16em;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(6rem, 12vw, 11rem);
+  line-height: 1;
+  letter-spacing: var(--track-xl);
+  color: rgba(237, 229, 216, 0.05);
+  pointer-events: none;
+  user-select: none;
+}
+
+@supports (-webkit-text-stroke: 1px #000) {
+  .cardGhost {
+    color: transparent;
+    -webkit-text-stroke: 1.25px rgba(237, 229, 216, 0.09);
+  }
+}
+
+/* ── The reverse ─────────────────────────────────────────────── */
+
+.papers {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: clamp(1.2rem, 2.6vw, 2.4rem);
+}
+
+.papersIndex {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  color: var(--c-stamp);
+}
+
+.papersName {
+  font-family: var(--f-display);
+  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.014em;
+  margin-top: 0.25rem;
+}
+
+.papersMeta {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+  margin-bottom: 0.5rem;
+}
+
+.papersList {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.papersRow {
+  display: grid;
+  gap: 0.1rem;
+  padding-top: 0.4rem;
+  border-top: var(--seam-width) solid var(--c-rule);
+}
+
+.papersKey {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.papersValue {
+  font-family: var(--f-display);
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  line-height: 1.25;
+}
+
+/* ── The caption ─────────────────────────────────────────────────
+   Sits above the slats and does not turn with them, so the name stays
+   readable through the gesture rather than disappearing at the moment
+   of most movement. It recedes once the reverse is showing, because
+   the reverse carries the name too. */
+
+.info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: clamp(1rem, 2vw, 1.6rem);
+  pointer-events: none;
+  /*  A flat gradient scrim so the type holds against whatever
+      photograph lands behind it. Never a backdrop-filter — that reads
+      back everything behind it on every frame. */
+  background: linear-gradient(
+    to top,
+    var(--c-surface) 0%,
+    color-mix(in srgb, var(--c-surface) 68%, transparent) 55%,
+    transparent 100%
+  );
+  transition: opacity var(--dur-veil) var(--ease-veil);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  line-height: 1.05;
+  letter-spacing: -0.012em;
+  color: var(--c-casa-ink);
+}
+
+.meta {
+  margin: 0;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+/* ── The plain specification ─────────────────────────────────────
+   The same content as the reverse, kept as real text. Hidden from view
+   where the card can be turned, shown where it cannot. One element
+   answering three problems: a screen reader is not read seven copies
+   of the slat content, a touch device with no hover can still read the
+   spec, and the card still says everything with JavaScript disabled. */
+
+.specPlain {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── State ───────────────────────────────────────────────────────
+   Slats lie flat by default — with no scripting the card is an
+   ordinary picture. data-turned, set by the louvre engine, turns
+   them; nothing else does. The old chain held slats edge-on until an
+   observer callback arrived, which is exactly what left cards
+   invisible whenever that callback never came.
+   ───────────────────────────────────────────────────────────── */
+
+.card[data-turned] .slat {
+  transform: rotateY(180deg);
+}
+
+/* ── Address ─────────────────────────────────────────────────────
+   Confined to a real pointer. An ungated hover state is one of the
+   clearest fingerprints of generated CSS, and on a touchscreen it
+   leaves states stuck after a tap.
+   ───────────────────────────────────────────────────────────── */
+
+@media (hover: hover) and (pointer: fine) {
+  /*  THE LIFT.
+
+      Selector specificity is load-bearing here. The card is a reveal
+      target, and the revealed state sets transform:none at a
+      specificity of three — so a plain .card:hover, at two, would be
+      silently overruled and the card would never move. Qualifying
+      through .grid and .cell raises this to four. */
+  .grid .cell:hover .card,
+  .grid .cell:focus-within .card {
+    transform: translate3d(0, 0, 26px);
+  }
+
+  .card {
+    transition:
+      transform 420ms var(--ease-settle),
+      opacity var(--dur-veil) var(--ease-veil);
+  }
+
+  .card:hover::before,
+  .card:focus-visible::before {
+    opacity: 1;
+  }
+
+  .card:hover::after,
+  .card:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /*  The caption recedes as the slats turn — the reverse carries the
+      name, and holding both would be saying it twice. */
+  .card[data-turned] .info {
+    opacity: 0;
+  }
+
+  /*  THE PRESS. A card is a link; clicking it should feel like
+      committing, not like hovering harder. Down 2px and a hair
+      narrower for the 120ms before navigation — quick enough that the
+      page wipe reads as the consequence of the press. */
+  .grid .cell:active .card {
+    transform: translate3d(0, 0, 12px) translateY(1px) scale(0.997);
+    transition-duration: 120ms;
+  }
+
+  /*  SIBLING RESPONSE — addressing one range sets the other four back,
+      so the grid reports which thing is being considered rather than
+      merely that a card is hoverable. */
+  /*  Raised from 0.42, which was punishing. There is also a
+      structural reason to keep this above the floor: opacity below 1
+      group-flattens a subtree, so a dimmed sibling collapses its own
+      preserve-3d and its slats stop being three-dimensional while a
+      neighbour is addressed. */
+  .grid:has(.card:hover) .cell:not(:hover) .card {
+    opacity: 0.62;
+  }
+}
+
+/* ── Touch ───────────────────────────────────────────────────────
+   No hover means no turn, so the reverse would be unreachable. The
+   card becomes a picture with the specification set beneath it. */
+
+@media (hover: none) {
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .louvres {
+    position: relative;
+    flex: 0 0 auto;
+    height: 58%;
+  }
+
+  .info {
+    position: static;
+    background: none;
+    padding-bottom: 0.4rem;
+  }
+
+  .specPlain {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 clamp(1rem, 2vw, 1.6rem) clamp(1rem, 2vw, 1.6rem);
+  }
+
+  .specRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.35rem;
+    border-top: var(--seam-width) solid var(--c-rule);
+  }
+
+  .specKey {
+    font-family: var(--f-text);
+    font-size: var(--t-1);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-ink-muted);
+  }
+
+  .specValue {
+    font-family: var(--f-display);
+    font-size: 0.9rem;
+    text-align: right;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────
+   The louvres do not turn at all. This is a large rotation across a
+   third of the viewport — precisely the movement that request is
+   about — so it is removed rather than shortened, and the reverse is
+   read from the plain specification instead. */
+
+@media (prefers-reduced-motion: reduce) {
+  /*  Motion goes. Dimension stays — the shadows, the edge light and
+      the surface gradient are not motion and have no reason to. */
+  .gloss {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  /*  The turn is a large rotation across a third of the viewport —
+      precisely the movement reduced motion is about. The specification
+      is read from the plain copy instead. */
+  .louvres .slat,
+  .card[data-turned] .slat {
+    transform: none;
+    transition: none;
+  }
+
+  .card {
+    transform: none !important;
+  }
+}

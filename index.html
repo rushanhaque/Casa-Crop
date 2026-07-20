@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>Casa and Crop</title>
+    <meta
+      name="description"
+      content="Casa and Crop — manufacturers and exporters of home metalware in brass, copper and steel, from Moradabad to 34 countries. Casa is the house; Crop, the land, arrives soon."
+    />
+
+    <!-- Paints the page surface before any CSS arrives, so the first frame is
+         never a white flash ahead of a near-black ground — the worst version
+         of this failure, and the one people actually notice. Mirrors
+         --c-surface. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Casa and Crop" />
+    <meta property="og:description" content="Manufacturers and exporters of home metalware — Moradabad to 34 countries." />
+    <meta name="theme-color" content="#12100E" />
+
+    <!-- Font preloads land here once the typefaces are chosen. Deliberately
+         empty for now: an unused preload is a wasted round trip, not a free one. -->
+      <link rel="preload" as="image" href="/casa-cover.avif" type="image/avif" />
+    <link rel="preload" as="image" href="/crop-cover.avif" type="image/avif" />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/schibsted-grotesk-latin.woff2"
+      crossorigin
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

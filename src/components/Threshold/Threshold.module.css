@@ -1,0 +1,450 @@
+/*  ─────────────────────────────────────────────────────────────
+    THRESHOLD — the 60/40 division
+
+    Both halves are full-viewport layers, each showing through a
+    clip window, so artwork never scales or squishes to fit its
+    side. The division is a tilted line: every edge that touches it
+    is derived from --seam-top and --seam-bottom, so the two panels
+    and the hairline share one geometry and cannot disagree.
+
+    The entrance is pure CSS keyframes wired through data-enter in the
+    markup — the page still ships no JavaScript. After the arrival
+    settles, nothing runs: no listeners, no timelines, and no layer is
+    held except Crop's softened artwork, which the filter requires.
+    ───────────────────────────────────────────────────────────── */
+
+.threshold {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--c-surface);
+}
+
+/*  Older engines that do not resolve dvh still get a full viewport. */
+@supports not (height: 100dvh) {
+  .threshold {
+    height: 100vh;
+  }
+}
+
+/* ── Panels ──────────────────────────────────────────────────── */
+
+.panel {
+  position: absolute;
+  inset: 0;
+}
+
+/*  The two polygons share the same two edge points, so the seam is
+    a single shared boundary rather than two lines that happen to
+    meet. Any change to the tilt moves both halves together. */
+.casa {
+  --art: url('/casa-cover.png');
+  --art-set: image-set(
+    url('/casa-cover.avif') type('image/avif'),
+    url('/casa-cover.webp') type('image/webp'),
+    url('/casa-cover.png') type('image/png')
+  );
+  clip-path: polygon(
+    0 0,
+    calc(var(--seam-top) * 100%) 0,
+    calc(var(--seam-bottom) * 100%) 100%,
+    0 100%
+  );
+  background: var(--c-casa-ground);
+  color: var(--c-casa-ink);
+}
+
+.crop {
+  --art: url('/crop-cover.png');
+  --art-set: image-set(
+    url('/crop-cover.avif') type('image/avif'),
+    url('/crop-cover.webp') type('image/webp'),
+    url('/crop-cover.png') type('image/png')
+  );
+  clip-path: polygon(
+    calc(var(--seam-top) * 100%) 0,
+    100% 0,
+    100% 100%,
+    calc(var(--seam-bottom) * 100%) 100%
+  );
+  background: var(--c-crop-ground);
+  color: var(--c-crop-ink);
+}
+
+/* ── Artwork ─────────────────────────────────────────────────────
+   Deliberately empty. Set --art on a panel to drop an image in;
+   until then the ground colour carries the composition. */
+
+.artWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain), var(--art, none);
+  background-repeat: repeat, no-repeat;
+  background-size: var(--grain-size), cover;
+  background-position: center;
+}
+
+/*  Crop is not launched yet, so its artwork is softened and the
+    whole side is shaded back. The blur is on the artwork only.
+
+    Worth knowing when the real photograph lands: a runtime blur of
+    this size over a large surface is one of the more expensive
+    things a weak GPU can be asked to do. Shipping a pre-blurred
+    image and dropping this filter costs nothing at runtime and
+    looks identical. */
+.crop .art {
+  filter: blur(var(--crop-blur));
+  transform: scale(var(--crop-bleed));
+}
+
+/*  The shade sits above the artwork but below the type, so Crop
+    reads as set back without its wordmark losing definition. */
+.crop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--c-crop-scrim);
+  pointer-events: none;
+}
+
+/* ── Wordmarks ───────────────────────────────────────────────────
+   Each block is a full-viewport flex centre, then translated so its
+   centre lands in the middle of its own side. Because the tilt is
+   symmetrical about --seam, the midpoint of each region is still
+   governed by --seam alone and the offsets stay simple. */
+
+.inner {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+}
+
+/*  Casa's block is an anchor. Stripping the default link presentation
+    rather than restyling it, since the wordmark is the affordance. */
+.entry {
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* centre of Casa's region is at (seam / 2) of the viewport */
+.casa .inner {
+  transform: translateX(calc(var(--seam) * 50% - 50%));
+}
+
+/* centre of Crop's region is at (1 + seam) / 2 of the viewport */
+.crop .inner {
+  transform: translateX(calc(var(--seam) * 50%));
+}
+
+.wordmark {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  line-height: 0.86;
+  margin: 0;
+}
+
+/*  Casa holds the larger field, so it is set larger and tighter.
+    Crop is given less room by the 60/40 split — rather than let it
+    read as the loser, it is set smaller and opened up with tracking.
+    The asymmetry then reads as an editorial decision instead of an
+    accident of the grid. */
+.casa .wordmark {
+  font-size: clamp(3.2rem, 8.4vw, 9.5rem);
+  letter-spacing: var(--track-xl);
+}
+
+/*  Crop was set tracked-open in the old register, buying apparent
+    width in its narrower field. Positive tracking on display type is
+    the heritage tell this site purged everywhere else — Crop now
+    holds its ground with weight rather than air. */
+.crop .wordmark {
+  font-size: clamp(2.1rem, 4.4vw, 5rem);
+  letter-spacing: var(--track-lg);
+}
+
+/*  Small uppercase text, so it has to clear 4.5:1. The quieter
+    0.62 this started at measured 4.19:1 on Casa and 3.29:1 on
+    Crop's shaded ground — both short of the floor. These values
+    keep the legends subordinate while staying legible. Crop needs
+    the higher figure because its scrim lifts the ground it sits on. */
+.legend {
+  margin-top: 1.35rem;
+  font-family: var(--f-text);
+  font-size: clamp(0.62rem, 0.82vw, 0.74rem);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  opacity: 0.76;
+}
+
+.crop .legend {
+  opacity: 0.88;
+}
+
+/*  Hidden until Crop is hovered, then rises into place. */
+.coming {
+  display: block;
+  margin-top: 1.6rem;
+  padding: 0.5rem 1.4rem;
+  font-family: var(--f-text);
+  font-size: clamp(0.58rem, 0.72vw, 0.66rem);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-crop-ink);
+  border: var(--seam-width) solid var(--c-crop-ink);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transform: translateY(0.6rem);
+  transition:
+    opacity 500ms var(--ease-rise),
+    transform 500ms var(--ease-rise);
+  pointer-events: none;
+}
+
+/* ── The seam ────────────────────────────────────────────────────
+   The hairline is a full-bleed block clipped to a narrow
+   parallelogram running between the same two points as the panel
+   edges. Drawing it this way — rather than rotating a positioned
+   line — means the tilt is expressed once, in --seam-tilt, and the
+   rule can never drift out of register with the division it marks.
+
+   --seam-width is measured horizontally, so the line's true
+   perpendicular thickness is that figure times the cosine of the
+   lean. At this angle the difference is well under half a percent. */
+
+.rule {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  /*  Brass, not the utility grey — this is the mark itself, not a
+      rule between paragraphs. */
+  background: var(--c-stamp);
+  clip-path: polygon(
+    calc(var(--seam-top) * 100%) 0,
+    calc(var(--seam-top) * 100% + var(--seam-width)) 0,
+    calc(var(--seam-bottom) * 100% + var(--seam-width)) 100%,
+    calc(var(--seam-bottom) * 100%) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Hover ───────────────────────────────────────────────────────
+   The interaction is built on sibling response through :has(), the
+   same pattern as the Collections grid: addressing one panel dims
+   the other and lifts its own artwork, so the composition's
+   attention shifts rather than a single element reacting in
+   isolation.
+
+   Every property animated is transform or opacity — compositor-
+   only, per the motion rules. The art zoom is 1.06, slow enough
+   (900ms with --ease-settle) that it reads as a drift, not a pop.
+   The opposing panel recedes to 0.55 opacity, enough to feel
+   subordinate without disappearing.
+
+   Gated behind hover + fine pointer + reduced-motion preference,
+   so touch devices and motion-sensitive users see nothing. */
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  /*  Base transitions on the elements that will move. Set once here
+      so hover-on and hover-off both ease rather than snapping. */
+  .art {
+    transition: transform 900ms var(--ease-settle);
+  }
+
+  .panel {
+    transition: opacity 700ms var(--ease-settle);
+  }
+
+  .wordmark {
+    transition: transform 700ms var(--ease-settle);
+  }
+
+  .legend {
+    transition:
+      opacity 700ms var(--ease-settle),
+      letter-spacing 700ms var(--ease-settle);
+  }
+
+  /*  ── Casa hovered ───────────────────────────────────────────
+      The artwork drifts to 1.06 — enough movement to feel alive,
+      small enough that no edge of the cover image is exposed.
+      The wordmark lifts 4px. The legend gains presence. Crop
+      recedes. */
+  .threshold:has(.casa:hover) .casa .art {
+    transform: scale(1.06);
+  }
+
+  .threshold:has(.casa:hover) .casa .wordmark {
+    transform: translateY(-4px);
+  }
+
+  .threshold:has(.casa:hover) .casa .legend {
+    opacity: 1;
+    letter-spacing: 0.30em;
+  }
+
+  .threshold:has(.casa:hover) .crop {
+    opacity: 0.55;
+  }
+
+  /*  ── Crop hovered ───────────────────────────────────────────
+      Same gesture, reversed. Crop's art already carries a blur
+      and a scale(--crop-bleed), so the hover scale compounds on
+      top of that — visually identical treatment despite the
+      different base state. */
+  .threshold:has(.crop:hover) .crop .art {
+    transform: scale(calc(var(--crop-bleed) * 1.06));
+  }
+
+  .threshold:has(.crop:hover) .crop .wordmark {
+    transform: translateY(-4px);
+  }
+
+  .threshold:has(.crop:hover) .crop .legend {
+    opacity: 1;
+    letter-spacing: 0.30em;
+  }
+
+  .threshold:has(.crop:hover) .casa {
+    opacity: 0.55;
+  }
+
+  .threshold:has(.crop:hover) .coming {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /*  ── The seam ─────────────────────────────────────────────
+      The hairline brightens slightly when either panel is
+      hovered, a quiet signal that the division is live. */
+  .rule {
+    transition: opacity 700ms var(--ease-settle);
+  }
+
+  .threshold:has(.panel:hover) .rule {
+    opacity: 0.6;
+  }
+}
+
+/* ── Small screens ───────────────────────────────────────────────
+   The same figures, transposed: Casa takes the upper 60%, Crop the
+   lower 40%, and the tilt runs across the width instead of down the
+   height. The proportion, the hierarchy and the lean all survive
+   the change of axis, so the phone layout is the same idea rather
+   than a stacked fallback. */
+
+@media (max-width: 46rem) {
+  .casa {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(var(--seam-bottom) * 100%),
+      0 calc(var(--seam-top) * 100%)
+    );
+  }
+
+  .crop {
+    clip-path: polygon(
+      0 calc(var(--seam-top) * 100%),
+      100% calc(var(--seam-bottom) * 100%),
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .casa .inner {
+    transform: translateY(calc(var(--seam) * 50% - 50%));
+  }
+
+  .crop .inner {
+    transform: translateY(calc(var(--seam) * 50%));
+  }
+
+  .rule {
+    clip-path: polygon(
+      0 calc(var(--seam-top) * 100%),
+      100% calc(var(--seam-bottom) * 100%),
+      100% calc(var(--seam-bottom) * 100% + var(--seam-width)),
+      0 calc(var(--seam-top) * 100% + var(--seam-width))
+    );
+  }
+
+  .crop .wordmark {
+    font-size: clamp(1.9rem, 9vw, 3rem);
+  }
+}
+
+/*  Modern formats where supported, the original PNG otherwise. Kept as
+    two custom properties and chosen by @supports, because an
+    unsupported image-set inside a custom property fails at use rather
+    than at parse — which would blank the panel instead of falling
+    back. */
+@supports (background-image: image-set(url('/x.avif') type('image/avif'))) {
+  .art {
+    background-image: var(--grain), var(--art-set, var(--art, none));
+    background-repeat: repeat, no-repeat;
+    background-size: var(--grain-size), cover;
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE INVITATION
+
+    The entrance itself is wired in the markup through the global
+    data-enter system; nothing here re-declares it, because a second
+    animation on the same elements would silently override those
+    delays — and a finished fill-both animation also beats any hover
+    transition on the same element, which is why the hover lift below
+    sits on .inner (which only carries a static centring transform)
+    rather than on the wordmark (which carries enter-line).
+
+    The brightening layer is pre-painted and cross-faded — never a
+    filter, which would repaint the photograph on every frame. */
+
+.casa .art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(237, 229, 216, 0.05);
+  opacity: 0;
+  transition: opacity 220ms var(--ease-ui, ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .casa .inner {
+    transition: transform 260ms var(--ease-ui, ease);
+  }
+
+  .casa:hover .art::after {
+    opacity: 1;
+  }
+
+  /*  The base centring transform must ride along: a bare translateY
+      here would replace it and throw the block off its own axis. */
+  .casa:hover .inner {
+    transform: translateX(calc(var(--seam) * 50% - 50%)) translateY(-4px);
+  }
+}
+
+/*  A narrow window on a hover device stacks the panels vertically, and
+    there the centring axis is Y — the desktop hover rule above would
+    replace it with the X form and throw the block sideways. */
+@media (hover: hover) and (pointer: fine) and (max-width: 46rem) {
+  .casa:hover .inner {
+    transform: translateY(calc(var(--seam) * 50% - 50%)) translateY(-4px);
+  }
+}

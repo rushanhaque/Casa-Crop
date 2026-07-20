@@ -1,0 +1,44 @@
+.page {
+  background-color: var(--c-surface);
+  background-image: var(--grain), var(--depth-vignette);
+  background-repeat: repeat, no-repeat;
+  background-size: var(--grain-size), cover;
+  color: var(--c-casa-ink);
+}
+
+.masthead {
+  padding: clamp(5rem, 14vh, 10rem) var(--gutter) clamp(2rem, 5vh, 3.5rem);
+  max-width: 70rem;
+}
+
+.title {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(3rem, 9vw, 8rem);
+  line-height: 0.94;
+  letter-spacing: var(--track-xl);
+  margin: 0;
+}
+
+.standfirst {
+  max-width: 40rem;
+  margin: clamp(1.4rem, 3vw, 2.2rem) 0 0;
+  font-family: var(--f-text);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+}
+
+.gridWrap {
+  padding: 0 var(--gutter) clamp(3rem, 8vh, 5rem);
+}
+
+.note {
+  max-width: 44rem;
+  margin: 0;
+  padding: 0 var(--gutter) clamp(5rem, 12vh, 8rem);
+  font-family: var(--f-text);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+}

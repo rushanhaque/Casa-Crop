@@ -1,0 +1,419 @@
+/*  ─────────────────────────────────────────────────────────────
+    TOKENS — single source of truth for the art direction
+
+    PRIMARY: shades of black. SECONDARY: shades of beige.
+
+    Neither family is neutral. The blacks all carry a warm cast — red
+    runs a few points ahead of blue in every one — so they read as ink
+    and patinated metal rather than as switched-off screen. A
+    blue-black would fight the beige.
+
+    The beiges are deliberately LOW-CHROMA. Beige is not pale gold:
+    gold gets its character from a wide spread between its channels,
+    beige from a narrow one. The accent here spans 56 points between
+    its highest and lowest channel where the gold it replaced spanned
+    104 — that halving is the whole difference between the two, and it
+    is what stops the scheme reading as a hotel logo.
+
+    Pure #000000 appears nowhere. It is the clearest amateur tell in a
+    dark scheme: it has no relationship to any other colour, it flares
+    against light type on cheap panels, and no material is that
+    colour. The deepest value here is #0A0908.
+
+    TONES
+    The page alternates black and beige grounds. Rather than restyling
+    every component twice, a tone re-declares the same semantic tokens
+    on a scope — so anything built from --c-surface and --c-casa-ink
+    inverts on its own, and a component never needs to know which
+    ground it is standing on. Both tones are contrast-checked
+    independently; the beige one needs markedly darker apparatus ink
+    than a naive inversion would give it.
+    ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Primary: the blacks, as a lit ladder ────────────────────
+     Six surfaces, not four, and the two that were missing are the
+     ones that matter: a card tier and an addressed tier.
+
+     The old ladder put cards at #171512 on a #12100E plate — five RGB
+     points apart. Five points is not a surface, it is a rounding
+     error, and it is the single mechanical reason the page read as
+     flat. #211D17 is fifteen points clear and separates on light
+     alone, with no border needed to explain it.
+
+     The steps tighten as they lighten (+8, +8, +7, +7, +6), which is
+     how diffuse light actually falls off, and the warm spread widens
+     with lightness (2 → 18) because more light means more of the hue
+     shows. */
+  --s-0: #0a0908; /* the well — page ground, footer */
+  --s-1: #12100e; /* section plate */
+  --s-2: #1a1713; /* raised panel, media frame */
+  --s-3: #211d17; /* CARD AT REST — the tier that was missing */
+  --s-4: #282219; /* card addressed */
+  --s-5: #2e271c; /* pressed */
+
+  --c-void: var(--s-0);
+  --c-surface: var(--s-1);
+  --c-surface-raised: var(--s-2);
+  --c-casa-ground: var(--s-3);
+  --c-crop-ground: #0e0d0b;
+
+  /* ── Secondary: the beiges ───────────────────────────────── */
+  /*  The pale end. Primary reading colour — 15.2:1 on the ground. */
+  --c-casa-ink: #ede5d8;
+  --c-crop-ink: #e2dacd;
+
+  /*  The apparatus tier: captions, folio marks, marginalia. 6.9:1 on
+      the ground, clearing the small-text floor with room. This is the
+      tier where dark schemes quietly fail, because a value that looks
+      subtle on a designer's monitor is unreadable on a phone in
+      daylight. */
+  --c-ink-muted: #a69b88;
+
+  /*  The accent. A warm sand — 9.2:1, so it can carry text and not
+      only decoration. */
+  --c-stamp: #c9b191;
+  --c-stamp-wash: #1f1c16;
+
+  /*  Lighter still, and used exactly once: the hairline beneath the
+      Casa wordmark. Flat, never a gradient — a flat rule reads as a
+      stamped edge, a gradient reads as template. */
+  --c-foil: #dccbb2;
+
+  /*  Flat #C9B191 is the beige-paper read that was being rejected —
+      metal is never one value. Seven stops lighting toward the upper
+      left, with the channel spread held under 55 so it stays brass
+      and never tips into hotel gold. Used through background-clip on
+      figures and as a border-image on section rules; never as a fill. */
+  --metal-brass: linear-gradient(
+    145deg,
+    #d8c7a6 0%,
+    #ede0c8 12%,
+    #c9b191 32%,
+    #a28d6c 50%,
+    #c9b191 68%,
+    #e4d5b8 86%,
+    #877254 100%
+  );
+  --c-specular: #f0d9a8;
+
+  /*  The dark pour. Same seven-stop construction as the brass and lit
+      from the same upper-left corner, so it reads as the identical
+      material event in a different metal — iron rather than brass.
+      A flat black would have filled the letterform without describing
+      anything; this keeps the molten read on a pale ground, where a
+      gold fill was competing with the beige instead of landing on it. */
+  --metal-dark: linear-gradient(
+    145deg,
+    #4a443a 0%,
+    #5a5348 12%,
+    #2e2a24 32%,
+    #12100e 50%,
+    #241f19 68%,
+    #453f35 86%,
+    #0a0908 100%
+  );
+
+  /*  Crop-side keyline only, at hairline scale. */
+  --c-field: #8b8271;
+
+  /* ── Rules ───────────────────────────────────────────────── */
+  /*  Lifted blacks rather than translucent white: a white at low alpha
+      shifts with whatever sits behind it, where these hold. */
+  --c-rule: #2e2a24;
+  --c-rule-strong: #453f35;
+
+  --c-focus: #c9b191;
+
+  /*  The colour every shadow on the dark tone is made of. */
+  --sh: 30deg 24% 2%;
+
+  /* ── Depth ───────────────────────────────────────────────────
+     What gives the black sections their slight relief. Three cues,
+     all of them things a real raised panel does: the top edge catches
+     light, the bottom edge falls into shade, and the panel throws a
+     little shadow onto whatever it sits against.
+
+     The vignette is the fourth and quietest — a surface lit from
+     above is never evenly lit, and a perfectly flat field is the one
+     thing that always reads as screen rather than as material.
+
+     All four are static. Nothing here animates, so nothing here costs
+     anything after the first paint. */
+  --depth-highlight: rgba(237, 229, 216, 0.07);
+  --depth-shade: rgba(0, 0, 0, 0.55);
+  --depth-cast: 0 24px 48px -32px rgba(0, 0, 0, 0.9);
+  /*  A baked grain tile, not a live filter. An SVG turbulence filter
+      re-runs its noise every frame and is one of the most expensive
+      things a weak GPU can be asked to do; a 6KB PNG tiles for free
+      and looks identical. This is what stops a large flat field
+      reading as screen rather than as material — the alpha is 14/255,
+      felt rather than seen. */
+  --grain: url('/grain.png');
+  --grain-size: 128px 128px;
+
+  --depth-vignette: radial-gradient(
+    128% 88% at 50% 0%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.34) 100%
+  );
+
+  /* ── Type ────────────────────────────────────────────────────
+     THE DISPLAY VOICE IS NO LONGER A SERIF.
+
+     This is the single change that does most of the work. A serif
+     display face IS the archival signal — it is not a flourish on top
+     of the register, it is the register, and no amount of shadow
+     craft overcomes it. Modern luxury sets its headlines in a
+     grotesk with weight and tight tracking, and reserves the serif
+     for one deliberate italic moment.
+
+     Which is what --f-quote is for: a single large italic pull-quote
+     per page. Used once it reads as a considered voice; used as the
+     system display face it reads as a heritage brand. */
+  --f-display: 'Schibsted Grotesk', ui-sans-serif, system-ui,
+    -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --f-text: 'Schibsted Grotesk', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --f-quote: ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+
+  /*  Display weight. A grotesk carrying a headline needs mass, or it
+      reads as UI chrome rather than as a statement. */
+  --w-display: 560;
+
+  /* ── Tracking ────────────────────────────────────────────────
+     Track TIGHTER as type gets larger, and open it only below 14px.
+
+     Positive tracking on large type is the loudest heritage tell
+     there is — measurably so: the archival register runs +0.05 to
+     +0.09em on everything, while the modern one runs negative and
+     scales the negative with size. Every value above 13px on this
+     site was positive. */
+  --track-xl: -0.032em; /* above 96px */
+  --track-lg: -0.022em; /* 48px       */
+  --track-md: -0.014em; /* 24px       */
+  --track-sm: 0.02em; /* 13px and under — the ONLY positive tier */
+  --track-caps: 0.14em; /* small caps under 13px only */
+
+  /*  Scale stepped at 1.5×, not the usual 1.25. 1.5 is the 3:2 ratio,
+      and 3:2 is exactly the 60/40 division the site is built on — the
+      type scale and the page geometry are the same proportion
+      expressed twice. */
+  --t-1: 0.75rem;
+  --t-2: 1.125rem;
+  --t-3: 1.6875rem;
+  --t-4: 2.5625rem;
+  --t-5: 3.8125rem;
+  --t-6: 5.75rem;
+  --t-7: 8.625rem;
+  --t-8: 12.9375rem;
+
+  --t-body: 1.0625rem;
+
+  /* ── Proportion ──────────────────────────────────────────── */
+  --seam: 0.6;
+  --seam-width: 1.25px;
+
+  /*  The division is tilted rather than plumb, leaning so Casa is
+      narrower at the top and wider at the base. A form that widens as
+      it descends reads as planted rather than toppling. */
+  --seam-tilt: 0.055;
+  --seam-top: calc(var(--seam) - var(--seam-tilt) / 2);
+  --seam-bottom: calc(var(--seam) + var(--seam-tilt) / 2);
+
+  --rule-lean: 1.6deg;
+  --rule-band: 3.5rem;
+
+  /* ── Crop's holding state ────────────────────────────────── */
+  --crop-blur: 7px;
+  --c-crop-scrim: rgba(8, 7, 6, 0.5);
+  --crop-bleed: 1.06;
+
+  /* ── Measure ─────────────────────────────────────────────── */
+  --gutter: clamp(1.25rem, 3.2vw, 3.5rem);
+
+  /*  A radius scale, because 3px was invisible.
+
+      3px on a 400px card is not restraint, it is a rounding error —
+      it reads as a square corner that someone failed to finish. The
+      register this brand wants is modern luxury, not archival print,
+      and modern luxury rounds enough that you can see it. 14px is the
+      point where a corner reads as deliberately eased without
+      tipping into the soft, bubbly radius of consumer software. */
+  --radius-sm: 10px;
+  --radius: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  /* ── Elevation ───────────────────────────────────────────────
+     The light on this page comes from above and slightly in front.
+     Every shadow here is built to agree with that, which is what
+     separates depth from decoration: a contact shadow tight under
+     the element, an ambient shadow for the body, and a long key
+     shadow thrown down and away.
+
+     One light source, three layers, consistently. The single most
+     common tell of a fake shadow is a soft blur with no contact —
+     an object touching a surface always has a hard, tight, dark line
+     where it meets it. */
+  /*  Shadows are never pure black here.
+
+      A shadow at rgba(0,0,0,·) laid on a #12100E ground has almost no
+      luminance left to give — it is already nearly the darkest thing
+      on screen, so it reads as nothing. A shadow carrying the ground's
+      own hue at a lower lightness actually separates.
+
+      The offsets hold a constant 4:1 vertical-to-horizontal ratio, so
+      every shadow on the page agrees about where the light is. And the
+      spread on the far layers is MINUS A THIRD of the blur, not minus
+      a half: at −½ the layer is cancelled to nothing, which is exactly
+      why the old elev-2 and elev-3 were indistinguishable.
+
+      The stacks deliberately carry NO zero-blur ring. A ring is a
+      full outline by another name, and with a gradient border and a
+      corner specular already on the card it was the third line drawn
+      round the same rectangle. Depth here comes from the shadow
+      layers and the lit lip alone. */
+  --elev-1:
+    0 1px 2px -0.5px hsl(var(--sh) / 0.5),
+    1px 4px 8px -3px hsl(var(--sh) / 0.42);
+  --elev-2:
+    0 1px 2px -0.5px hsl(var(--sh) / 0.55),
+    2px 8px 14px -5px hsl(var(--sh) / 0.5),
+    5px 22px 36px -12px hsl(var(--sh) / 0.55);
+  --elev-3:
+    0 2px 4px -1px hsl(var(--sh) / 0.6),
+    3px 14px 24px -8px hsl(var(--sh) / 0.55),
+    9px 40px 64px -22px hsl(var(--sh) / 0.6);
+
+  /*  The rim. A raised edge catches light along its top and falls
+      into shade along its foot — one inset pair, and the cheapest
+      dimensional cue there is. */
+  /*  Both of these were roughly three times too weak to register.
+      A short strong falloff reads as light; a long weak one reads as
+      a gradient — that difference is the whole effect. */
+  --rim:
+    inset 0 1px 0 rgba(237, 229, 216, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+
+  /*  A surface lit from above is brighter at its head. Very slight —
+      at this strength it is not read as a gradient, only as light. */
+  --sheen: linear-gradient(
+    180deg,
+    rgba(237, 229, 216, 0.1) 0%,
+    rgba(237, 229, 216, 0) 28%
+  );
+
+  /* ── The tilt ────────────────────────────────────────────────
+     Declared as an ANGLE and the rise derived from it, not the other
+     way round.
+
+     As a length, the angle drifted with the viewport: 4.10° on a
+     phone, 2.29° on a laptop, 1.61° on a wide desktop. At 1.61° the
+     boundary stops reading as a decision and starts reading as a
+     rectangle someone failed to align. Declaring the angle makes it
+     3.2° at every width.
+
+     The overlap is the other half of it. Two shapes authored to share
+     an exact coordinate will still show a hairline seam at 110% zoom;
+     extending each plate three-quarters of a pixel past the shared
+     line means the fields overlap rather than abut, and there is no
+     shared coordinate left to misalign. */
+  /*  Slight. 3.2° was assertive enough to read as a graphic device
+      in its own right; 1.5° reads as the page being very slightly out
+      of square, which is the effect worth having. */
+  --tilt-angle: 1.5deg;
+  --tilt: clamp(0.8rem, 2.618vw, 3.6rem);
+  --seam-overlap: 0.75px;
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE BEIGE TONE
+
+    Not an inversion. A naive flip — swapping the ink and the ground —
+    would leave the apparatus tier at 4.4:1 and the accent at 3.6:1,
+    both under the floor, because a mid value that reads as quiet
+    against black reads as washed-out against beige. Every value here
+    was solved against its own ground rather than derived from the
+    dark one.
+    ───────────────────────────────────────────────────────────── */
+
+[data-tone='beige'] {
+  --c-surface: #e8e0d2;
+  --c-casa-ground: #efe9dd;
+  --c-surface-raised: #f3eee4;
+
+  --c-casa-ink: #191612; /* 13.8:1 */
+  --c-ink-muted: #625849; /* 5.3:1 — solved, not inverted */
+  --c-stamp: #6c5236; /* 5.5:1 — solved, not inverted */
+  --c-stamp-wash: #ded3be;
+  --c-foil: #8a6f4e;
+  --c-field: #6b6151;
+
+  --c-rule: #cfc5b2;
+  --c-rule-strong: #b8ac96;
+  --c-focus: #6c5236;
+
+  /*  A shadow on a light ground has to be far tighter and weaker, or
+      it reads as dirt rather than as depth. */
+
+  /*  The shadow hue for a light ground: warmer and far lighter, or a
+      long dark throw against pale beige reads as grime. */
+  --sh: 32deg 26% 12%;
+  --elev-1:
+    0 1px 2px -0.5px hsl(var(--sh) / 0.1),
+    1px 3px 6px -2px hsl(var(--sh) / 0.12);
+  --elev-2:
+    0 1px 2px -0.5px hsl(var(--sh) / 0.12),
+    2px 7px 12px -4px hsl(var(--sh) / 0.14),
+    5px 18px 30px -10px hsl(var(--sh) / 0.16);
+  --elev-3:
+    0 2px 4px -1px hsl(var(--sh) / 0.14),
+    3px 12px 20px -6px hsl(var(--sh) / 0.18),
+    9px 32px 52px -18px hsl(var(--sh) / 0.2);
+
+  /*  The rim inverts. On a pale surface the top edge is the one in
+      shade — light from above lands on the face, not the lip. */
+  --rim:
+    inset 0 1px 0 rgba(255, 252, 245, 0.75),
+    inset 0 -1px 0 hsl(var(--sh) / 0.14);
+
+  --sheen: linear-gradient(
+    180deg,
+    rgba(255, 252, 245, 0.6) 0%,
+    rgba(255, 252, 245, 0) 30%
+  );
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    TONE SURFACES
+
+    A tone now only re-declares tokens. It does NOT paint anything —
+    the painting is done by each section's tilted plate, which reads
+    those tokens through inheritance. That separation is what lets the
+    colour boundary between two sections be a diagonal rather than a
+    straight edge with a diagonal drawn on it.
+    ───────────────────────────────────────────────────────────── */
+
+[data-tone] {
+  color: var(--c-casa-ink);
+}
+
+/*  Where trigonometry is available, derive the rise exactly. */
+@supports (width: calc(1px * tan(45deg))) {
+  :root {
+    --tilt: calc(100vw * tan(var(--tilt-angle)));
+  }
+}
+
+/*  Keeps 100vw honest against the plate's real width when a scrollbar
+    is present — otherwise the derived rise is computed from a width
+    the plate does not actually have. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/*  --seam is intentionally left unregistered. An @property block would
+    only earn its place if the value were animated, and animating a
+    custom property forces a paint on every frame — so the elegant
+    one-number implementation becomes a trap the moment it moves. */

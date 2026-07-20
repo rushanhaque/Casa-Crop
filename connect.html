@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>Connect — Casa and Crop</title>
+    <meta
+      name="description"
+      content="Trade enquiries for Casa — home metal products, manufactured and exported."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Connect — Casa and Crop" />
+    <meta property="og:description" content="Trade enquiries: drawings, samples, minimums and lead times." />
+    <meta name="theme-color" content="#12100E" />
+
+    <!-- Marks that scripting is available, before the first paint.
+         Every hidden-until-revealed rule is scoped to .js, so if this
+         line never runs the page renders fully visible instead of
+         blank. Inline and in <head> deliberately: loaded as a separate
+         file it would arrive after paint and the revealed content
+         would flash before hiding itself. -->
+    <script>
+      document.documentElement.classList.add('js')
+    </script>
+      <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/schibsted-grotesk-latin.woff2"
+      crossorigin
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/connect.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,422 @@
+/*  ─────────────────────────────────────────────────────────────
+    NAV — the letterhead
+
+    A square plate, transparent over the hero, taking its ground as
+    the page scrolls — on the
+    document's own scroll timeline — position, not direction, so it
+    never hides itself while being reached for and costs no script.
+    ───────────────────────────────────────────────────────────── */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+}
+
+/*  The plate. Grain, ground and a cast shadow arrive together as one
+    opacity — the shadow never animates on its own, it rides a layer
+    crossfade, which is the house pattern for every "shadow change" on
+    the site. */
+/*  Square. The bar's lower edge was the site's one other diagonal;
+    with the tilt held back to the footer alone, the letterhead reads
+    on its plate and its grain, not on an angle. */
+.plate {
+  position: absolute;
+  inset: 0;
+  background-color: var(--s-1);
+  background-image: var(--grain);
+  background-repeat: repeat;
+  background-size: var(--grain-size);
+  box-shadow: 0 8px 24px -12px hsl(var(--sh) / 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*  Legible over anything if scroll timelines are absent. */
+@supports not (animation-timeline: scroll(root block)) {
+  .plate {
+    opacity: 0.96;
+  }
+}
+
+@supports (animation-timeline: scroll(root block)) {
+  .plate {
+    animation: nav-plate linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 80vh;
+  }
+
+  @keyframes nav-plate {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 0.96;
+    }
+  }
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(1.2rem, 3vw, 3rem);
+  padding: clamp(0.9rem, 1.8vh, 1.3rem) var(--gutter);
+}
+
+/* ── The mark ────────────────────────────────────────────────── */
+
+.mark {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  letter-spacing: var(--track-md);
+  color: var(--c-casa-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+/*  The ampersand is the one brass character — the seam of the name. */
+.markAmp {
+  padding: 0 0.14em;
+  background: var(--metal-brass);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .markAmp {
+    background: none;
+    color: var(--c-stamp);
+  }
+}
+
+.mark:active {
+  transform: translateY(1px);
+}
+
+/* ── The roller links ────────────────────────────────────────── */
+
+.links {
+  margin-left: auto;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.2rem, 2.6vw, 2.4rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  color: var(--c-casa-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--f-text);
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*  The slot: one line tall, two labels stacked inside. Hover rolls
+    the stack one line up — the label replaced by its brass self
+    rising from beneath. The pour, at link scale. */
+.slot {
+  display: block;
+  height: 1.4em;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.labelInk,
+.labelBrass {
+  display: block;
+  height: 1.4em;
+  transition: transform 340ms var(--ease-veil);
+}
+
+.labelBrass {
+  background: var(--metal-brass);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .labelBrass {
+    background: none;
+    color: var(--c-stamp);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover .labelInk,
+  .link:hover .labelBrass {
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+.link:focus-visible .labelInk,
+.link:focus-visible .labelBrass {
+  transform: translate3d(0, -100%, 0);
+}
+
+.link:active .slot {
+  transform: translateY(1px);
+}
+
+/*  The current page carries a brass node — a set stamp, not a rule. */
+.node {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c-specular);
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform var(--dur-ui) var(--ease-ui);
+}
+
+.link[aria-current='page'] .node {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── The Connect action ──────────────────────────────────────── */
+
+.cta {
+  position: relative;
+  overflow: hidden;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--c-rule-strong);
+  color: var(--c-casa-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--f-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.ctaLabel {
+  position: relative;
+  z-index: 1;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.ctaFill {
+  position: absolute;
+  inset: 0;
+  background: var(--metal-brass);
+  transform: translate3d(0, 101%, 0);
+  transition: transform 340ms var(--ease-veil);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover .ctaFill,
+  .cta[aria-current='page'] .ctaFill {
+    transform: none;
+  }
+
+  .cta:hover .ctaLabel,
+  .cta[aria-current='page'] .ctaLabel {
+    color: var(--c-void);
+  }
+}
+
+.cta[aria-current='page'] .ctaFill {
+  transform: none;
+}
+
+.cta[aria-current='page'] .ctaLabel {
+  color: var(--c-void);
+}
+
+.cta:focus-visible .ctaFill {
+  transform: none;
+}
+
+.cta:focus-visible .ctaLabel {
+  color: var(--c-void);
+}
+
+.cta:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* ── Small-screen toggle + panel ─────────────────────────────── */
+
+.toggle {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--c-casa-ink);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.toggleLabel {
+  display: block;
+}
+
+.toggleBars {
+  position: relative;
+  display: block;
+  width: 1.35rem;
+  height: 0.55rem;
+}
+
+.toggleBars i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.toggleBars i:first-child {
+  top: 0;
+}
+
+.toggleBars i:last-child {
+  bottom: 0;
+}
+
+/*  The two bars cross rather than swap for an icon — the same object
+    rearranging, not a glyph exchange. */
+.nav[data-open] .toggleBars i:first-child {
+  transform: translateY(0.26rem) rotate(12deg);
+}
+
+.nav[data-open] .toggleBars i:last-child {
+  transform: translateY(-0.26rem) rotate(-12deg);
+}
+
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  padding: 5.5rem var(--gutter) var(--gutter);
+  background-color: var(--s-1);
+  background-image: var(--grain), var(--depth-vignette);
+  background-repeat: repeat, no-repeat;
+  background-size: var(--grain-size), cover;
+  opacity: 0;
+  transform: translate3d(0, -1.25rem, 0);
+  visibility: hidden;
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform 420ms var(--ease-veil),
+    visibility 0s linear 420ms;
+}
+
+.nav[data-open] .panel {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform 420ms var(--ease-veil),
+    visibility 0s;
+}
+
+.panelList {
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.panelItem {
+  overflow: hidden;
+  border-top: 1px solid var(--c-rule);
+}
+
+.panelItem:last-child {
+  border-bottom: 1px solid var(--c-rule);
+}
+
+.panelLink {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: clamp(0.9rem, 3vw, 1.4rem) 0;
+  color: var(--c-casa-ink);
+  text-decoration: none;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1.6rem, 8vw, 2.6rem);
+  letter-spacing: var(--track-lg);
+  transform: translate3d(0, 110%, 0);
+  transition: transform 420ms var(--ease-veil);
+}
+
+.nav[data-open] .panelLink {
+  transform: none;
+  transition-delay: calc(var(--i) * 55ms + 100ms);
+}
+
+.panelIndex {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  color: var(--c-stamp);
+}
+
+@media (max-width: 56rem) {
+  .links,
+  .cta {
+    display: none;
+  }
+
+  .toggle {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .panel {
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panelLink,
+  .labelInk,
+  .labelBrass,
+  .ctaFill {
+    transition: none;
+  }
+}

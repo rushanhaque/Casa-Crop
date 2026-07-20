@@ -1,0 +1,367 @@
+/*  ─────────────────────────────────────────────────────────────
+    FOOTER — the sign-off, and the working navigation
+
+    Flips to the beige tone and arrives behind the only tilted edge on
+    the site, so the document plainly ENDS rather than fading out.
+
+    THE POUR
+    The brand is set hollow — stroke only, an empty mould — and on
+    hover molten IRON rises inside each letterform, staggered along
+    the line. Dark metal, not gold: on a pale ground a gold fill is
+    two warm values competing at one lightness, where the dark lands. Double-translate mechanics: the clipping window and the
+    fill inside it move in opposition, so the brass appears to rise
+    within a stationary glyph. Transform and opacity only; the brass
+    gradient never moves, so nothing repaints.
+    ───────────────────────────────────────────────────────────── */
+
+/*  The footer was blending into the pages — same black family, same
+    grain, no boundary — so the document just faded out instead of
+    ENDING. It now flips to the beige tone and arrives behind the
+    site's tilted edge: unmistakably a different material, and the
+    diagonal announces the close the way it announces the sections.
+
+    The plate is a ::before (clip-path on the footer itself would
+    shave the pour's oversized glyphs), and the footer is pulled up by
+    the tilt so the beige edge cuts INTO the page above it. */
+.footer {
+  position: relative;
+  isolation: isolate;
+  color: var(--c-casa-ink);
+  /*  The foot is generous because the mark is now the last thing on
+      the page. With the colophon beneath it a tight bottom margin
+      read as spacing; without one it would read as a crop. */
+  padding: calc(clamp(4rem, 10vh, 7rem) + var(--tilt)) var(--gutter)
+    clamp(3.5rem, 8vh, 6rem);
+  margin-top: calc(var(--tilt) * -1);
+  overflow: hidden;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--c-surface);
+  background-image: var(--grain);
+  background-repeat: repeat;
+  background-size: var(--grain-size);
+  /*  The edge falls to the right: level at the left gutter, deepest
+      at the right.
+
+      The opposite lean was tried — it agrees with the molten meniscus
+      in the range plates, which rises to the right — and it looked
+      worse. Falling to the right runs with the reading direction, so
+      the eye is carried down into the close instead of being lifted
+      out of it at the last moment. The theoretical consistency was not
+      worth the actual composition; do not flip it back.
+
+      The padding above reserves --tilt, and the deepest incursion is
+      exactly --tilt, so content clears the plate on either lean. */
+  clip-path: polygon(0 0, 100% var(--tilt), 100% 100%, 0 100%);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: clamp(2rem, 5vw, 4rem);
+  padding-bottom: clamp(3.5rem, 9vh, 6.5rem);
+}
+
+.col {
+  min-width: 0;
+}
+
+.key {
+  display: block;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+  margin-bottom: 1.1rem;
+}
+
+.address {
+  margin: 0 0 1rem;
+  font-family: var(--f-text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--c-casa-ink);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.link {
+  position: relative;
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+  font-family: var(--f-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.linkLabel {
+  display: block;
+}
+
+.linkRule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.1em;
+  height: 1px;
+  background: var(--c-stamp);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-ui) var(--ease-draw);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover .linkRule {
+    transform: scaleX(1);
+  }
+}
+
+.link:focus-visible .linkRule {
+  transform: scaleX(1);
+}
+
+.link:active {
+  transform: translateY(1px);
+}
+
+.link {
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.brand:active .brandLine {
+  transform: translateY(2px);
+}
+
+.brandLine {
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+/* ── The pour ────────────────────────────────────────────────── */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.brand {
+  display: block;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  /*  The wordmark is the affordance; no focus ring rectangle over a
+      viewport-wide headline. The letters brighten instead. */
+  outline: none;
+}
+
+.brandLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  /*  Centred: the sign-off is the one element on the page that should
+      sit on the page's own axis rather than on the text column's. The
+      data columns above stay left-ranged, so the brand reads as the
+      mark the document closes on rather than as another column. */
+  justify-content: center;
+  text-align: center;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  /*  Sized to the viewport so the line IS the footer's architecture.
+      8.5vw lands the eleven glyphs of "Casa & Crop" a shade inside
+      one line at any width. */
+  font-size: clamp(3rem, 8.5vw, 11rem);
+  line-height: 1.04;
+  letter-spacing: var(--track-xl);
+  user-select: none;
+}
+
+.letter {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+}
+
+/*  No tracking compensation on the last letter, and that is a
+    measured decision rather than an oversight. The instinct with
+    negative letter-spacing is to give the final glyph its trailing
+    space back so the box matches the ink — correct for inline text,
+    wrong here. These letters are FLEX ITEMS, so the tracking is
+    absorbed inside each item's own box symmetrically across the line
+    and there is no trailing gap left to return. Measured against the
+    true ink extents: uncompensated sits 0.3px off centre, compensated
+    1.4px. The simpler rule is also the accurate one. */
+
+/*  The mould: hollow glyphs, drawn by their stroke. Where text-stroke
+    is unsupported the letters fall back to the muted ink — legible,
+    just not hollow. */
+.hollow {
+  display: inline-block;
+  color: var(--c-ink-muted);
+  transition: opacity 340ms var(--ease-ui);
+}
+
+@supports (-webkit-text-stroke: 1px #000) {
+  .hollow {
+    color: transparent;
+    /*  Resolves through the tone, so the mould reads on beige exactly
+        as it read on black — a hard-coded pale stroke would vanish
+        against the pale ground. */
+    -webkit-text-stroke: 1.5px
+      color-mix(in srgb, var(--c-ink-muted) 65%, transparent);
+  }
+}
+
+/*  The window the brass rises in. Overlays the hollow glyph exactly. */
+.pourMask {
+  position: absolute;
+  inset: 0;
+  display: inline-block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/*  The molten fill: the same glyph, cast in the brass gradient, held
+    one glyph-height below its window. Rising is two transforms in
+    opposition — window contents up, glyph down-within — the classic
+    double-translate, entirely on the compositor. */
+.pour {
+  display: inline-block;
+  transform: translate3d(0, 102%, 0);
+  /*  Iron, not brass. The footer stands on the beige tone, and gold on
+      beige is two warm values competing at the same lightness — the
+      mark filled but did not resolve. Poured in the dark metal it
+      lands hard against the pale ground, and the mould's faint outline
+      giving way to a solid black letterform is a far stronger arrival
+      than gold-into-cream ever was. */
+  background: var(--metal-dark);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: transform 480ms var(--ease-veil);
+  /*  Staggered along the line: each letter's pour starts a beat after
+      its neighbour, so the fill reads as one ladle passed left to
+      right rather than eleven simultaneous events. */
+  transition-delay: calc(var(--l) * 34ms);
+}
+
+/*  Where background-clip:text is unsupported the pour would be an
+    opaque slab; suppress it and let the hollow fallback carry. */
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .pourMask {
+    display: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .brand:hover .pour {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .brand:hover .hollow {
+    opacity: 0.25;
+  }
+
+  /*  Draining is quicker than pouring, and runs in reverse stagger —
+      the last letter filled is the first to empty, like a ladle drawn
+      back along the line. */
+  .brand:not(:hover) .pour {
+    transition-duration: 360ms;
+    transition-delay: calc((10 - var(--l)) * 22ms);
+  }
+}
+
+/*  Keyboard focus pours the whole line at once — the stagger is a
+    pointer pleasure, but focus needs an unambiguous state. */
+.brand:focus-visible .pour {
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0ms;
+}
+
+.brand:focus-visible .hollow {
+  opacity: 0.25;
+}
+
+/*  On touch there is no hover: the brand simply IS brass. The pour is
+    a flourish for pointers, not the only way to see the wordmark. */
+@media (hover: none) {
+  .pour {
+    transform: none;
+  }
+
+  .hollow {
+    opacity: 0.25;
+  }
+}
+
+/*  The casting bed — a brass line drawing itself beneath the brand
+    as the footer arrives, scrubbed by the footer's own entry. The
+    mould sits on its bed before anything is poured into it. */
+.brand::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin-top: clamp(0.6rem, 1.5vh, 1rem);
+  /*  Narrower than the full measure and centred under the mark — a
+      bed the width of the casting, not a rule across the page. */
+  width: min(38%, 26rem);
+  margin-inline: auto;
+  /*  The bed is cast from what the mark is cast from. */
+  background: var(--metal-dark);
+  transform: scaleX(0);
+  /*  Grows outward from the middle now the brand above it is centred;
+      a bed unfurling from the left under a centred word reads as a
+      misalignment rather than as a drawing. */
+  transform-origin: center;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .brand::after {
+      animation: casting-bed linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 90%;
+    }
+
+    @keyframes casting-bed {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand::after {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pour {
+    transform: none;
+    transition: none;
+  }
+
+  .hollow {
+    opacity: 0.25;
+    transition: none;
+  }
+}

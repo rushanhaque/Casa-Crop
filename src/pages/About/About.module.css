@@ -1,0 +1,273 @@
+/*  ABOUT — the house, stated plainly. One statement, four figures,
+    three principles, one quote. Density falling as the page descends. */
+
+.page {
+  background-color: var(--c-surface);
+  background-image: var(--grain), var(--depth-vignette);
+  background-repeat: repeat, no-repeat;
+  background-size: var(--grain-size), cover;
+  color: var(--c-casa-ink);
+}
+
+.masthead {
+  padding: clamp(5rem, 14vh, 10rem) var(--gutter) clamp(3rem, 8vh, 6rem);
+  max-width: 70rem;
+}
+
+.title {
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(2.8rem, 8.5vw, 7.5rem);
+  line-height: 0.96;
+  letter-spacing: var(--track-xl);
+  margin: 0;
+}
+
+.standfirst {
+  max-width: 44rem;
+  margin: clamp(1.6rem, 3.5vw, 2.6rem) 0 0;
+  font-family: var(--f-text);
+  font-size: clamp(1rem, 1.35vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+}
+
+/* ── Figures ─────────────────────────────────────────────────── */
+
+.figures {
+  padding: clamp(2rem, 6vh, 4rem) var(--gutter);
+}
+
+.figureRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin: 0;
+}
+
+.figure {
+  padding-top: 1.1rem;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--c-rule-strong) 12%,
+        var(--c-rule-strong) 78%,
+        transparent 100%
+      )
+      top left / 100% 1px no-repeat;
+}
+
+.figureValue {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(2.6rem, 5.5vw, 4.6rem);
+  line-height: 0.92;
+  letter-spacing: var(--track-lg);
+  font-variant-numeric: tabular-nums lining-nums;
+  background: var(--metal-brass);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .figureValue {
+    background: none;
+    color: var(--c-casa-ink);
+  }
+}
+
+.figureLabel {
+  margin-top: 0.8rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+/* ── Principles ──────────────────────────────────────────────── */
+
+.principles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: clamp(2rem, 5vw, 4rem);
+  padding: clamp(4rem, 10vh, 7rem) var(--gutter);
+}
+
+.principle {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.4rem, 2.5vw, 2.2rem);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(
+        180deg,
+        rgba(237, 229, 216, 0.08) 0%,
+        rgba(237, 229, 216, 0) 30%
+      )
+      padding-box,
+    linear-gradient(180deg, #211d17 0%, #191613 100%) padding-box;
+  box-shadow: var(--elev-1), var(--rim);
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .principle:hover {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+.principle::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 44%,
+    rgba(237, 229, 216, 0.05) 49%,
+    rgba(237, 229, 216, 0.1) 51%,
+    rgba(237, 229, 216, 0.05) 53%,
+    transparent 58%
+  );
+  transform: translate3d(-70%, 0, 0);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .principle::after {
+      animation: principle-rake linear both;
+      animation-timeline: view();
+      animation-range: entry 15% exit 85%;
+    }
+
+    @keyframes principle-rake {
+      from {
+        transform: translate3d(-70%, 0, 0);
+      }
+      to {
+        transform: translate3d(70%, 0, 0);
+      }
+    }
+  }
+}
+
+.principleIndex {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  color: var(--c-stamp);
+}
+
+.principleTitle {
+  margin: 0.7rem 0 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  line-height: 1.1;
+  letter-spacing: var(--track-md);
+}
+
+.principleBody {
+  margin: 0.8rem 0 0;
+  font-family: var(--f-text);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+}
+
+/* ── Close ───────────────────────────────────────────────────── */
+
+.close {
+  padding: clamp(4rem, 10vh, 7rem) var(--gutter) clamp(6rem, 14vh, 10rem);
+  max-width: 60rem;
+}
+
+.quoteRule {
+  display: block;
+  width: clamp(3rem, 8vw, 6rem);
+  height: 1px;
+  margin-bottom: clamp(1.2rem, 3vh, 2rem);
+  background: var(--metal-brass);
+  transform-origin: left center;
+}
+
+/*  The single serif appearance per page. */
+.quote {
+  margin: 0;
+}
+
+.quote p {
+  margin: 0;
+  font-family: var(--f-quote);
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.6vw, 3rem);
+  line-height: 1.25;
+  color: var(--c-casa-ink);
+}
+
+.cta {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+  padding: clamp(0.9rem, 1.8vw, 1.2rem) clamp(1.6rem, 3.5vw, 2.6rem);
+  border-radius: var(--radius);
+  color: inherit;
+  text-decoration: none;
+}
+
+.ctaLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.ctaFill {
+  position: absolute;
+  inset: 0;
+  background: var(--c-casa-ink);
+  transform: translate3d(0, 101%, 0);
+  transition: transform var(--dur-ui) var(--ease-veil);
+}
+
+.ctaRule {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--c-rule-strong);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover .ctaFill {
+    transform: none;
+  }
+
+  .cta:hover .ctaLabel {
+    color: var(--c-void);
+  }
+}
+
+.cta:active {
+  transform: translateY(1px) scale(0.99);
+  transition: transform 120ms var(--ease-ui);
+}
+
+.cta:focus-visible .ctaFill {
+  transform: none;
+}
+
+.cta:focus-visible .ctaLabel {
+  color: var(--c-void);
+}

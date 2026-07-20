@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vite
+
+# Licensed font binaries must never be committed to a public repo.
+public/fonts/*
+!public/fonts/.gitkeep

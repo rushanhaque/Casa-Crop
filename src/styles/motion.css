@@ -1,0 +1,338 @@
+/*  ─────────────────────────────────────────────────────────────
+    MOTION VOCABULARY
+
+    THE NO-OVERSHOOT GUARANTEE
+    Every curve keeps both control-point Y values inside 0..1 — a
+    cubic-bezier can only overshoot if a Y leaves that range, so
+    nothing on this site can wobble or bounce. Mathematics, not
+    discipline.
+
+    THE COMPOSITOR RULE
+    Only transform and opacity are reliably free. Static clip-path is
+    used liberally; animated clip-path, backdrop-filter, animated
+    box-shadow, animated custom properties and `transition: all` are
+    banned. (One deliberate exception: the cross-document wipe in
+    global.css animates a clip for ~600ms once per navigation.)
+
+    REVEALS — V2, FAIL-OPEN
+    The first reveal system hid content and un-hid it from an
+    IntersectionObserver callback. Twice it was patched with
+    failsafes; the report from a real browser was still "text is not
+    visible". So the architecture is inverted: everything is VISIBLE
+    BY DEFAULT, and where scroll-driven animations are supported the
+    hidden pose is applied and scrubbed away by the element's own
+    passage through the viewport. No observer, no callback, no class
+    — the failure mode of every dependency now is "content simply
+    shows", and the reveals are genuinely scroll-coupled rather than
+    fired-once.
+    ───────────────────────────────────────────────────────────── */
+
+:root {
+  --ease-draw: cubic-bezier(0.65, 0, 0.08, 1);
+  --ease-rise: cubic-bezier(0.22, 0.68, 0.12, 1);
+  --ease-veil: cubic-bezier(0.5, 0.02, 0.14, 1);
+  --ease-settle: cubic-bezier(0.38, 0.02, 0.16, 1);
+  --ease-recede: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+
+  --ease-ui: cubic-bezier(0.32, 0.08, 0.24, 1);
+  --ease-reveal: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --dur-micro: 380ms;
+  --dur-ui: 220ms;
+  --dur-reveal: 320ms;
+  --dur-rise: 900ms;
+  --dur-veil: 1200ms;
+  --dur-draw: 1400ms;
+
+  --stagger: 92ms;
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    SCRUBBED REVEALS
+
+    Each variant declares only its FROM pose; every property returns
+    to its natural computed value, so no reveal can fight a hover or
+    a base style. --i shifts the range so siblings arrive in
+    sequence; if an engine cannot parse the calc() the range falls
+    back to its initial value and the reveal still plays.
+    ───────────────────────────────────────────────────────────── */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      --i: 0;
+      animation-timing-function: var(--ease-reveal);
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry calc(5% + var(--i) * 4%) entry
+        calc(55% + var(--i) * 4%);
+    }
+
+    [data-reveal='line'] {
+      animation-name: rv-line;
+    }
+
+    [data-reveal='rise'] {
+      animation-name: rv-rise;
+    }
+
+    [data-reveal='margin'] {
+      animation-name: rv-margin;
+    }
+
+    [data-reveal='settle'] {
+      animation-name: rv-settle;
+    }
+
+    [data-reveal='draw'] {
+      animation-name: rv-draw;
+      transform-origin: left center;
+    }
+
+    @keyframes rv-line {
+      from {
+        transform: translate3d(0, 110%, 0);
+      }
+    }
+
+    @keyframes rv-rise {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 1.4rem, 0);
+      }
+    }
+
+    @keyframes rv-margin {
+      from {
+        opacity: 0;
+        transform: translate3d(-0.8rem, 0, 0);
+      }
+    }
+
+    @keyframes rv-settle {
+      from {
+        opacity: 0;
+        transform: scale(1.045);
+      }
+    }
+
+    @keyframes rv-draw {
+      from {
+        transform: scaleX(0);
+      }
+    }
+  }
+}
+
+/*  A generic clipping wrapper for line reveals. */
+.mask {
+  display: block;
+  overflow: hidden;
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    SCRUBBED EFFECTS — continuous, position-coupled
+    ───────────────────────────────────────────────────────────── */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-scrub='progress'] {
+      transform-origin: left center;
+      animation: scrub-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes scrub-progress {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    [data-scrub='parallax'] {
+      --parallax: 5%;
+      animation: scrub-parallax linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    /*  SINK — a masthead being left behind. As its section exits,
+        the title settles back and dims — the page reads as moving on
+        from it rather than merely cropping it. Exit range only, so
+        nothing happens while it is being read. */
+    [data-scrub='sink'] {
+      animation: scrub-sink linear both;
+      animation-timeline: view();
+      animation-range: exit 15% exit 100%;
+    }
+
+    @keyframes scrub-sink {
+      to {
+        opacity: 0.22;
+        transform: translate3d(0, -10%, 0);
+      }
+    }
+
+    /*  FLOAT — the shallow drift for ghost numerals and other
+        apparatus: slower than the page, so the tooling layer sits
+        visibly behind the content layer. */
+    [data-scrub='float'] {
+      animation: scrub-float linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    @keyframes scrub-float {
+      from {
+        transform: translate3d(0, -0.9rem, 0);
+      }
+      to {
+        transform: translate3d(0, 0.9rem, 0);
+      }
+    }
+
+    /*  DRIFT — a shallow counter-movement for a column beside a
+        parallaxed image, so the two travel at different rates and the
+        section reads in layers rather than as one sheet. */
+    [data-scrub='drift'] {
+      animation: scrub-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    @keyframes scrub-drift {
+      from {
+        transform: translate3d(0, 1.6rem, 0);
+      }
+      to {
+        transform: translate3d(0, -1.6rem, 0);
+      }
+    }
+
+    @keyframes scrub-parallax {
+      from {
+        transform: translate3d(0, calc(var(--parallax) * -1), 0) scale(1.14);
+      }
+      to {
+        transform: translate3d(0, var(--parallax), 0) scale(1.14);
+      }
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    ENTRANCE — on load, pure CSS keyframes
+
+    Used where content is above the fold on arrival (the threshold,
+    the hero). Runs with no JavaScript at all.
+    ───────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-enter] {
+    --enter-delay: 0ms;
+    animation-duration: var(--dur-veil);
+    animation-timing-function: var(--ease-veil);
+    animation-delay: var(--enter-delay);
+    animation-fill-mode: both;
+  }
+
+  [data-enter='ground'] {
+    animation-name: enter-ground;
+    animation-duration: 1800ms;
+  }
+
+  @keyframes enter-ground {
+    from {
+      transform: scale(1.06);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  [data-enter='line'] {
+    animation-name: enter-line;
+  }
+
+  @keyframes enter-line {
+    from {
+      transform: translate3d(0, 110%, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  [data-enter='draw'] {
+    animation-name: enter-draw;
+    animation-timing-function: var(--ease-draw);
+    transform-origin: left center;
+  }
+
+  @keyframes enter-draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  [data-enter='rise'] {
+    animation-name: enter-rise;
+    animation-timing-function: var(--ease-rise);
+  }
+
+  @keyframes enter-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 1.25rem, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    POINTER PROXIMITY
+    ───────────────────────────────────────────────────────────── */
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-pointer] {
+    --px: 0.5;
+    --py: 0.5;
+  }
+
+  [data-magnetic] {
+    --pull: 0.3rem;
+    transition: transform var(--dur-ui) var(--ease-ui);
+  }
+
+  [data-magnetic]:hover {
+    transform: translate3d(
+      calc((var(--px) - 0.5) * 2 * var(--pull)),
+      calc((var(--py) - 0.5) * 2 * var(--pull)),
+      0
+    );
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    REDUCED MOTION — movement goes, responsiveness stays
+    ───────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-scrub],
+  [data-enter] {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
