@@ -203,10 +203,12 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .plate:hover {
-    transform: translate3d(0, -5px, 0);
-  }
-
+  /*  The plate no longer LIFTS on hover — it lights. The card was
+      rising 5px toward the pointer, which is the generic "clickable
+      tile" gesture the rest of the site was built to avoid; on a
+      catalogue of held objects it read as restlessness. The deeper
+      shadow still crossfades in, so the plate reports the hover by
+      gaining presence where it stands rather than by jumping. */
   .plate:hover::before {
     opacity: 1;
   }
@@ -341,8 +343,11 @@
   }
 }
 
+/*  The press settles slightly INTO the page rather than lifting off
+    it — a committing gesture, not a hover held harder — and no longer
+    carries the −2px rise the removed hover left behind. */
 .plate:active {
-  transform: translate3d(0, -2px, 0) scale(0.995);
+  transform: scale(0.994);
   transition-duration: 120ms;
 }
 

@@ -178,9 +178,14 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /*  Content seated slightly low in the room rather than dead-centre
+      — the stacked counterpart of the horizontal corridor's lower
+      hang, a heavier head than foot. */
+  justify-content: flex-start;
+  padding-top: clamp(9rem, 22vh, 15rem);
   gap: clamp(1.6rem, 4vh, 3rem);
-  padding: clamp(5rem, 12vh, 8rem) var(--gutter);
+  padding-inline: var(--gutter);
+  padding-bottom: clamp(5rem, 12vh, 8rem);
   overflow: clip;
 }
 
@@ -359,30 +364,6 @@
   pointer-events: none;
 }
 
-.cue {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-top: clamp(1rem, 2.4vh, 1.6rem);
-}
-
-.cueLabel {
-  font-family: var(--f-text);
-  font-size: var(--t-1);
-  font-weight: 500;
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--c-stamp);
-}
-
-.cueRule {
-  height: 1px;
-  background: var(--c-stamp);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform var(--dur-micro) var(--ease-draw);
-}
-
 @media (hover: hover) and (pointer: fine) {
   .exhibit:hover .plinth {
     transform: translateY(-6px);
@@ -390,10 +371,6 @@
 
   .exhibit:hover .plinth::before {
     opacity: 1;
-  }
-
-  .exhibit:hover .cueRule {
-    transform: scaleX(1);
   }
 
   /*  Addressing the exhibit primes the page transition: the room's
@@ -417,8 +394,8 @@
   }
 }
 
-.exhibit:focus-visible .cueRule {
-  transform: scaleX(1);
+.exhibit:focus-visible .plinth {
+  transform: translateY(-6px);
 }
 
 .exhibit:active .plinth {
@@ -501,18 +478,6 @@
   font-family: var(--f-display);
   font-size: 0.95rem;
   text-align: right;
-}
-
-/* ── Wayfinding ──────────────────────────────────────────────── */
-
-.roomSign {
-  display: none;
-  font-family: var(--f-text);
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--c-ink-muted);
 }
 
 /*  The compass exists only where the corridor is horizontal. */
@@ -608,11 +573,17 @@
       min-height: 0;
       height: 100%;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) minmax(16rem, 24rem);
-      grid-template-areas: 'sign exhibit plaque';
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+      grid-template-areas: 'exhibit plaque';
       align-items: center;
       column-gap: clamp(2rem, 5vw, 5rem);
-      padding: 12vh 3vw 14vh;
+      /*  The exhibit is seated lower in the room than it was — a
+          heavier top margin than foot, so the plinth and its label
+          sit below the true centre line and the enormous numeral has
+          the head-room above them a gallery hang gives a wall. The
+          content shifts down as one because align-items centres the
+          whole grid inside this padding box. */
+      padding: 22vh 3vw 8vh;
       /*  Bounds invalidation to the room and clips the light pass at
           the room's own edge, so a pass never bleeds into the
           neighbouring room. */
@@ -740,14 +711,6 @@
     .plaque {
       grid-area: plaque;
       justify-self: start;
-      align-self: center;
-    }
-
-    .roomSign {
-      display: block;
-      grid-area: sign;
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
       align-self: center;
     }
 

@@ -206,10 +206,6 @@ export default function CollectionsPage() {
                       <span className={s.plinthWell} />
                       <span className={s.plinthLip} aria-hidden="true" />
                     </span>
-                    <span className={s.cue}>
-                      <span className={s.cueLabel}>View the range</span>
-                      <span className={s.cueRule} aria-hidden="true" />
-                    </span>
                   </a>
 
                   {/*  The tombstone label — the museum's wall card,
@@ -231,12 +227,6 @@ export default function CollectionsPage() {
                       ))}
                     </dl>
                   </aside>
-
-                  {/*  Wayfinding, set on the wall edge the way a room
-                      number is. */}
-                  <span className={s.roomSign} aria-hidden="true">
-                    Room {ROMAN[i]} · Programme {ex.index}
-                  </span>
                 </li>
               ))}
             </ol>
