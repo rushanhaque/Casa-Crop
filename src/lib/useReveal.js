@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { initReveal } from './reveal'
 import { initPointer } from './pointer'
 import { initLouvres } from './louvres'
+import { initSpecular } from './specular'
 
 /**
- * Wires up the page's three pieces of behaviour: scroll reveals,
- * pointer proximity, and the louvre cascade on the range cards.
+ * Wires up the page's four pieces of behaviour: scroll reveals,
+ * pointer proximity, the louvre cascade on the range cards, and the
+ * lagged pointer specular.
  *
  * That is the entire runtime cost of this page. Everything else — the
  * entrance sequence, every hover, every scrubbed effect — is CSS the
@@ -16,10 +18,12 @@ export function useReveal() {
     const stopReveal = initReveal()
     const stopPointer = initPointer()
     const stopLouvres = initLouvres()
+    const stopSpecular = initSpecular()
     return () => {
       stopReveal()
       stopPointer()
       stopLouvres()
+      stopSpecular()
     }
   }, [])
 }

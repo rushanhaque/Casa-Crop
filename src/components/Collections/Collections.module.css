@@ -207,11 +207,11 @@
   background:
     linear-gradient(
         180deg,
-        rgba(237, 229, 216, 0.1) 0%,
-        rgba(237, 229, 216, 0) 28%
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0) 28%
       )
       padding-box,
-    linear-gradient(180deg, #241f19 0%, #1b1814 100%) padding-box;
+    linear-gradient(180deg, #23262b 0%, #15181c 100%) padding-box;
 
   box-shadow: var(--elev-2), var(--rim);
 
@@ -273,9 +273,9 @@
   background: linear-gradient(
     105deg,
     transparent 42%,
-    rgba(237, 229, 216, 0.08) 48%,
-    rgba(237, 229, 216, 0.18) 50%,
-    rgba(237, 229, 216, 0.08) 52%,
+    rgba(255, 255, 255, 0.08) 48%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.08) 52%,
     transparent 58%
   );
   transform: translate3d(-70%, 0, 0);
@@ -431,7 +431,7 @@
   font-size: clamp(6rem, 12vw, 11rem);
   line-height: 1;
   letter-spacing: var(--track-xl);
-  color: rgba(237, 229, 216, 0.05);
+  color: rgba(255, 255, 255, 0.05);
   pointer-events: none;
   user-select: none;
 }
@@ -439,7 +439,7 @@
 @supports (-webkit-text-stroke: 1px #000) {
   .cardGhost {
     color: transparent;
-    -webkit-text-stroke: 1.25px rgba(237, 229, 216, 0.09);
+    -webkit-text-stroke: 1.25px rgba(255, 255, 255, 0.09);
   }
 }
 

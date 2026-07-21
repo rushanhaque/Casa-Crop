@@ -1,3 +1,4 @@
+import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Lines from '../../components/Lines/Lines'
 import Nav from '../../components/Nav/Nav'
@@ -46,6 +47,31 @@ const TERMS = [
 export default function Connect() {
   useReveal()
 
+  /*  No server is wired, and pointing the form at a placeholder
+      endpoint would silently swallow a real buyer's enquiry — the
+      one failure this page must never have. Instead the form
+      composes the enquiry into the buyer's own mail client,
+      addressed to the export desk: nothing is ever swallowed,
+      because nothing is ever held. Replace with a real handler when
+      one exists; the markup will not need to change. */
+  const onSubmit = (e) => {
+    e.preventDefault()
+    const data = new FormData(e.currentTarget)
+    const regarding = data.get('enquiry-type') || 'Trade enquiry'
+    const body = [
+      `Name: ${data.get('name') || ''}`,
+      `Company: ${data.get('company') || ''}`,
+      `Country: ${data.get('country') || ''}`,
+      `Email: ${data.get('email') || ''}`,
+      '',
+      data.get('message') || '',
+    ].join('\n')
+    const subject = `${regarding} — ${data.get('name') || 'enquiry'}`
+    window.location.href = `mailto:export@casaandcrop.com?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`
+  }
+
   return (
     <>
       <a className={s.skip} href="#enquiry">
@@ -64,6 +90,7 @@ export default function Connect() {
             lines={['Tell us what', 'you need made.']}
             enter
             enterDelay={160}
+            split="chars"
           />
           <p className={s.standfirst} data-reveal="rise" style={{ '--i': 1 }}>
             Send a drawing, a sample, or a photograph and a description. We will come
@@ -79,12 +106,11 @@ export default function Connect() {
               Enquiry
             </h2>
 
-            {/*  No endpoint is wired to this form yet. It is deliberately
-                left without an action rather than pointed at a
-                placeholder that would silently swallow a real buyer's
-                enquiry — the export address above it works today, and
-                this needs a form handler before launch. */}
-            <form className={s.form} noValidate>
+            {/*  Native validation deliberately left ON: the browser's
+                required-field messages are the one piece of borrowed
+                interface this page keeps, because they are translated
+                into the buyer's own language for free. */}
+            <form className={s.form} onSubmit={onSubmit}>
               <div className={s.fieldGrid}>
                 {FIELDS.map((field, i) => (
                   <p className={s.field} key={field.name} data-reveal="rise" style={{ '--i': i }}>
@@ -145,7 +171,7 @@ export default function Connect() {
                 <span className={s.fieldRule} aria-hidden="true" data-reveal="draw" style={{ '--i': 5 }} />
               </p>
 
-              <button className={s.submit} type="submit">
+              <button className={s.submit} type="submit" data-pointer data-magnetic>
                 <span className={s.submitLabel}>Send enquiry</span>
                 <span className={s.submitFill} aria-hidden="true" />
                 <span className={s.submitRule} aria-hidden="true" />
@@ -204,6 +230,7 @@ export default function Connect() {
       </main>
 
       <Footer />
+      <Cart />
     </>
   )
 }

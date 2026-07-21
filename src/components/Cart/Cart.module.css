@@ -1,0 +1,478 @@
+/*  ─────────────────────────────────────────────────────────────
+    THE SHORTLIST — the case, and the drawer
+
+    The list is set as a pluckable index, after the Cordes design: a
+    hairline-topped run of entries, each one a name with its piece
+    italicised beside it, its range pushed out to the margin, and a
+    real string for a rule. The string is the only canvas on the
+    site; it rings when a line arrives and when it is pulled, and
+    sleeps otherwise.
+
+    Everything that moves here is transform or opacity.
+    ───────────────────────────────────────────────────────────── */
+
+/* ── The case ────────────────────────────────────────────────── */
+
+.fab {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2.2rem);
+  bottom: clamp(1rem, 3vw, 2.2rem);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem 0.75rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, #23262b 0%, #101215 100%);
+  color: var(--c-casa-ink);
+  box-shadow: var(--elev-3), var(--rim);
+  -webkit-tap-highlight-color: transparent;
+
+  /*  Absent until it has something to carry, and it arrives from
+      under its own corner rather than fading in on the spot. */
+  opacity: 0;
+  transform: translate3d(0, 1.4rem, 0) scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 420ms var(--ease-settle),
+    transform 420ms var(--ease-settle);
+}
+
+.fab[data-shown] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.fabMark {
+  display: block;
+  width: 1.3rem;
+  height: 1.3rem;
+  color: var(--c-stamp);
+}
+
+.fabCount {
+  font-family: var(--f-text);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+  font-variant-numeric: tabular-nums;
+  min-width: 1ch;
+  text-align: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fab[data-shown]:hover {
+    transform: translate3d(0, -3px, 0);
+  }
+}
+
+.fab:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  transition-duration: 120ms;
+}
+
+/* ── The scrim ───────────────────────────────────────────────── */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 79;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 4, 5, 0.66);
+  opacity: 0;
+  visibility: hidden;
+  cursor: default;
+  transition:
+    opacity var(--dur-micro) var(--ease-ui),
+    visibility 0s linear var(--dur-micro);
+}
+
+.scrim[data-open] {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--dur-micro) var(--ease-ui),
+    visibility 0s;
+}
+
+/* ── The drawer ──────────────────────────────────────────────── */
+
+.pane {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  width: min(30rem, 100vw);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--s-1);
+
+  box-shadow: -24px 0 60px -30px rgba(0, 0, 0, 0.9);
+  color: var(--c-casa-ink);
+  transform: translate3d(101%, 0, 0);
+  visibility: hidden;
+  transition:
+    transform 480ms var(--ease-veil),
+    visibility 0s linear 480ms;
+}
+
+.pane[data-open] {
+  transform: none;
+  visibility: visible;
+  transition:
+    transform 480ms var(--ease-veil),
+    visibility 0s;
+}
+
+.pane:focus {
+  outline: none;
+}
+
+/*  The drawer's leading edge is milled, like every other cut on the
+    site — a brass hairline down the full height. */
+.pane::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--c-stamp) 18%,
+    var(--c-stamp) 82%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* ── Head ────────────────────────────────────────────────────── */
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1.5rem, 4vh, 2.2rem) clamp(1.2rem, 4vw, 2rem) 1.2rem;
+}
+
+.headKey {
+  display: block;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-stamp);
+}
+
+.headCount {
+  margin: 0.5rem 0 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1;
+  letter-spacing: var(--track-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.close {
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: grid;
+  place-items: center;
+  color: var(--c-ink-muted);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.closeBars {
+  position: relative;
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.closeBars i {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+.closeBars i:first-child {
+  transform: rotate(45deg);
+}
+
+.closeBars i:last-child {
+  transform: rotate(-45deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .close:hover {
+    color: var(--c-casa-ink);
+  }
+
+  .close:hover .closeBars i:first-child {
+    transform: rotate(135deg);
+  }
+
+  .close:hover .closeBars i:last-child {
+    transform: rotate(45deg);
+  }
+}
+
+/* ── The pluckable index ─────────────────────────────────────── */
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  margin: 0;
+  padding: 0 clamp(1.2rem, 4vw, 2rem);
+  border-top: 1px solid var(--c-rule);
+}
+
+.row {
+  position: relative;
+  padding: 1.25rem 0 1.9rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .row {
+    animation: row-in 520ms var(--ease-rise) both;
+    animation-delay: calc(var(--i) * 45ms);
+  }
+
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 1.1rem, 0);
+    }
+  }
+}
+
+.info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+}
+
+/*  The entry: the SKU is the name a buyer quotes, so it leads; the
+    piece it belongs to is set italic beside it, the way the Cordes
+    index sets its material. */
+.name {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: 0.98rem;
+  letter-spacing: var(--track-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.name i {
+  font-family: var(--f-quote);
+  font-style: italic;
+  font-size: 0.82rem;
+  letter-spacing: 0;
+  color: var(--c-ink-muted);
+  margin-left: 0.55rem;
+}
+
+.meta {
+  margin-left: auto;
+  font-family: var(--f-text);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+  white-space: nowrap;
+}
+
+/* ── Quantity ────────────────────────────────────────────────── */
+
+.qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: none;
+}
+
+.step {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--f-text);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--c-ink-muted);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--dur-ui) var(--ease-ui),
+    background-color var(--dur-ui) var(--ease-ui);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .step:hover {
+    color: var(--c-void);
+    background-color: var(--c-stamp);
+  }
+}
+
+.qtyValue {
+  min-width: 2ch;
+  text-align: center;
+  font-family: var(--f-text);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/*  Struck, not deleted — the register of a ledger line ruled
+    through rather than a row vanishing from a table. */
+.strike {
+  flex: none;
+  font-family: var(--f-text);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+  opacity: 0.65;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    color var(--dur-ui) var(--ease-ui);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strike:hover {
+    opacity: 1;
+    color: var(--c-stamp);
+    text-decoration: line-through;
+  }
+}
+
+/* ── The string ──────────────────────────────────────────────── */
+
+.string {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  cursor: ns-resize;
+  touch-action: pan-y;
+}
+
+.string canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Foot ────────────────────────────────────────────────────── */
+
+.foot {
+  padding: 1.2rem clamp(1.2rem, 4vw, 2rem) clamp(1.4rem, 4vh, 2rem);
+  border-top: 1px solid var(--c-rule);
+}
+
+.footNote {
+  margin: 0 0 1.1rem;
+  font-family: var(--f-text);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--c-ink-muted);
+}
+
+.actions {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.action {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 0.95rem 1.2rem;
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--c-rule-strong);
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.actionLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.actionFill {
+  position: absolute;
+  inset: 0;
+  background: var(--c-casa-ink);
+  transform: translate3d(0, 101%, 0);
+  transition: transform var(--dur-micro) var(--ease-veil);
+}
+
+/*  The first action is the one this trade actually uses, so it is
+    filled at rest and the other is offered as an outline. */
+.actionWhats .actionFill {
+  background: var(--metal-brass);
+  transform: none;
+}
+
+.actionWhats .actionLabel {
+  color: var(--c-void);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .action:hover .actionFill {
+    transform: none;
+  }
+
+  .action:hover .actionLabel {
+    color: var(--c-void);
+  }
+}
+
+.action:focus-visible .actionFill {
+  transform: none;
+}
+
+.action:focus-visible .actionLabel {
+  color: var(--c-void);
+}
+
+.action:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab,
+  .pane,
+  .scrim,
+  .actionFill {
+    transition-duration: 0.01ms;
+  }
+}

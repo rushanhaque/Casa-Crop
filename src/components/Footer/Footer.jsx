@@ -45,10 +45,12 @@ const BRAND = 'Casa & Crop'
  */
 export default function Footer() {
   return (
-    <footer className={s.footer} data-tone="beige">
-      {/*  The tone flip: every token inside — ink, rules, brass — is
-          re-declared by [data-tone='beige'], so the footer inverts
-          without knowing a thing about it. */}
+    <footer className={s.footer}>
+      {/*  The footer stands on the dark tone with the rest of the
+          site — no flip. It separates from the page above by VALUE
+          rather than by polarity: its plate is the deepest black on
+          the site, so the document closes into the well, and the
+          milled hairline on its tilted edge is what marks the join. */}
       <div className={s.grid}>
         <nav className={s.col} aria-label="Site" data-reveal="rise" style={{ '--i': 0 }}>
           <span className={s.key}>Site</span>

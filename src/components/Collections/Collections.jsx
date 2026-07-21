@@ -157,9 +157,13 @@ export default function Collections() {
             </span>
 
             {/*  Sits above the slats and does not turn with them, so the
-                name stays readable through the gesture. */}
+                name stays readable through the gesture. data-vt-title:
+                while the card is addressed, this caption carries the
+                view-transition-name the range masthead answers to, so
+                committing to the card sends its name travelling into
+                the next document's headline. */}
             <span className={s.info}>
-              <span className={s.title}>{item.title}</span>
+              <span className={s.title} data-vt-title>{item.title}</span>
               <span className={s.meta}>{item.meta}</span>
             </span>
 

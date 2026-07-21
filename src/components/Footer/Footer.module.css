@@ -1,29 +1,69 @@
 /*  ─────────────────────────────────────────────────────────────
     FOOTER — the sign-off, and the working navigation
 
-    Flips to the beige tone and arrives behind the only tilted edge on
-    the site, so the document plainly ENDS rather than fading out.
+    Arrives behind the only tilted edge on the site, so the document
+    plainly ENDS rather than fading out.
 
     THE POUR
     The brand is set hollow — stroke only, an empty mould — and on
-    hover molten IRON rises inside each letterform, staggered along
-    the line. Dark metal, not gold: on a pale ground a gold fill is
-    two warm values competing at one lightness, where the dark lands. Double-translate mechanics: the clipping window and the
-    fill inside it move in opposition, so the brass appears to rise
+    hover molten BRASS rises inside each letterform, staggered along
+    the line. Double-translate mechanics: the clipping window and the
+    fill inside it move in opposition, so the metal appears to rise
     within a stationary glyph. Transform and opacity only; the brass
     gradient never moves, so nothing repaints.
+
+    The mark carries the close by itself now — there is no rule under
+    it — so it is set large enough to be the last thing the page
+    says.
     ───────────────────────────────────────────────────────────── */
 
-/*  The footer was blending into the pages — same black family, same
-    grain, no boundary — so the document just faded out instead of
-    ENDING. It now flips to the beige tone and arrives behind the
-    site's tilted edge: unmistakably a different material, and the
-    diagonal announces the close the way it announces the sections.
+/*  The footer closes the document by VALUE, not by polarity.
+
+    It was flipped to beige for a while, on the reasoning that a
+    different material announces the end more loudly than a darker
+    one. It does — too loudly. A pale slab under a black site reads
+    as a separate page stapled to the bottom, and it threw the one
+    genuinely bright thing on the screen at the least important
+    content on it.
+
+    So the footer stays dark, and separates the way the plates on the
+    Casa page separate from each other: by sitting at a different
+    step of the black ladder. Its plate is --c-void, the deepest
+    value on the site, so the page does not so much end as settle
+    into the well. The tilted edge still cuts the section above, and
+    a milled hairline rides that cut — on near-black on near-black
+    the chamfer IS the boundary, which is exactly how a join between
+    two dark metal plates actually reads.
 
     The plate is a ::before (clip-path on the footer itself would
-    shave the pour's oversized glyphs), and the footer is pulled up by
-    the tilt so the beige edge cuts INTO the page above it. */
+    shave the pour's oversized glyphs), and the footer is pulled up
+    by the tilt so its edge cuts INTO the page above it. */
+/*  ── THE FOOTER IS PINNED ────────────────────────────────────
+    The site's ladder was recut in jet — neutral blacks with a cool
+    whisper, porcelain in place of sand — and the footer is
+    deliberately exempt. It re-declares the OLD warm values on its
+    own scope, so it keeps the exact colour it was signed off in
+    while every plate above it moves.
+
+    That this is possible at all is the tone architecture paying for
+    itself: a scope re-declares tokens and everything inside it
+    follows, so holding one region back costs eight lines rather
+    than a fork of the stylesheet.
+
+    These are literals on purpose. Pointing them at the ladder would
+    mean the next time the ladder moves, the exemption moves with it
+    — which is the one thing it exists not to do. */
 .footer {
+  --s-0: #0a0908;
+  --c-void: #0a0908;
+  --c-surface: #12100e;
+  --c-surface-raised: #1a1713;
+  --c-casa-ink: #ede5d8;
+  --c-ink-muted: #a69b88;
+  --c-rule: #2e2a24;
+  --c-rule-strong: #453f35;
+  --sh: 30deg 24% 2%;
+
   position: relative;
   isolation: isolate;
   color: var(--c-casa-ink);
@@ -36,12 +76,45 @@
   overflow: hidden;
 }
 
+/*  The chamfer. A machined plate's edge is never a bare cut — it is
+    broken, and the break catches the room. One hairline of paper-
+    light riding the exact polygon edge the plate is clipped to, a
+    shade brighter at its centre than its ends, as an edge under a
+    single lamp actually is. Static paint; the page above is the
+    site's deepest black, so the occlusion side of the chamfer comes
+    free. */
+.footer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /*  Brass rather than paper-light now the join is black on black:
+      a warm edge is what a cut in metal returns, and it is the only
+      thing declaring the boundary at all. */
+  background: linear-gradient(
+    90deg,
+    rgba(201, 177, 145, 0.35),
+    rgba(240, 217, 168, 0.8) 55%,
+    rgba(201, 177, 145, 0.4)
+  );
+  clip-path: polygon(
+    0 0,
+    100% var(--tilt),
+    100% calc(var(--tilt) + 1.25px),
+    0 1.25px
+  );
+}
+
 .footer::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-color: var(--c-surface);
+  /*  The well — deliberately a step below every section that can
+      precede it, so the footer is the darkest thing on any page and
+      the document closes downward. */
+  background-color: var(--c-void);
   background-image: var(--grain);
   background-repeat: repeat;
   background-size: var(--grain-size);
@@ -184,10 +257,22 @@
   text-align: center;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  /*  Sized to the viewport so the line IS the footer's architecture.
-      8.5vw lands the eleven glyphs of "Casa & Crop" a shade inside
-      one line at any width. */
-  font-size: clamp(3rem, 8.5vw, 11rem);
+  /*  Sized to the viewport so the line IS the footer's architecture —
+      and with the casting bed gone beneath it, the mark has to carry
+      the close on its own, so it is set considerably larger. 12.5vw
+      still lands the eleven glyphs of "Casa & Crop" inside one line
+      at every width the site is built for; the cap is what stops it
+      running away on an ultrawide, where vw stops being a useful
+      proxy for "big".
+
+      The FLOOR stays at 3rem and is not negotiable. It does not
+      scale with the viewport, so on the narrowest phones it is the
+      value that actually applies — and measured, the eleven glyphs
+      at 3.4rem are 301px of ink trying to fit the 280px a 320px
+      screen has left after its gutters. Four hundredths of the
+      viewport is the difference between a sign-off and a two-line
+      wrap. */
+  font-size: clamp(3rem, 12.5vw, 16rem);
   line-height: 1.04;
   letter-spacing: var(--track-xl);
   user-select: none;
@@ -245,13 +330,14 @@
 .pour {
   display: inline-block;
   transform: translate3d(0, 102%, 0);
-  /*  Iron, not brass. The footer stands on the beige tone, and gold on
-      beige is two warm values competing at the same lightness — the
-      mark filled but did not resolve. Poured in the dark metal it
-      lands hard against the pale ground, and the mould's faint outline
-      giving way to a solid black letterform is a far stronger arrival
-      than gold-into-cream ever was. */
-  background: var(--metal-dark);
+  /*  Brass again, now the footer is dark. The mark was poured in iron
+      only because it stood on beige, where gold-on-cream was two warm
+      values competing at one lightness. Against the well that
+      argument reverses completely: dark metal on near-black fills the
+      mould with nothing, where brass rising inside a hollow letterform
+      on black is the foundry in one gesture — and it is the only
+      moment on the page where the site's metal is poured at scale. */
+  background: var(--metal-brass);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -311,48 +397,15 @@
   }
 }
 
-/*  The casting bed — a brass line drawing itself beneath the brand
-    as the footer arrives, scrubbed by the footer's own entry. The
-    mould sits on its bed before anything is poured into it. */
-.brand::after {
-  content: '';
-  display: block;
-  height: 1px;
-  margin-top: clamp(0.6rem, 1.5vh, 1rem);
-  /*  Narrower than the full measure and centred under the mark — a
-      bed the width of the casting, not a rule across the page. */
-  width: min(38%, 26rem);
-  margin-inline: auto;
-  /*  The bed is cast from what the mark is cast from. */
-  background: var(--metal-dark);
-  transform: scaleX(0);
-  /*  Grows outward from the middle now the brand above it is centred;
-      a bed unfurling from the left under a centred word reads as a
-      misalignment rather than as a drawing. */
-  transform-origin: center;
-}
+/*  THE CASTING BED IS GONE.
 
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .brand::after {
-      animation: casting-bed linear both;
-      animation-timeline: view();
-      animation-range: entry 20% entry 90%;
-    }
-
-    @keyframes casting-bed {
-      to {
-        transform: scaleX(1);
-      }
-    }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .brand::after {
-    transform: scaleX(1);
-  }
-}
+    A brass rule used to draw itself beneath the wordmark as the
+    footer arrived — the mould sitting on its bed before anything was
+    poured into it. It was a nice idea and it was one line too many:
+    the colophon already rules off below, so the mark was pinned
+    between two horizontals and read as a banner rather than as a
+    signature. The mark closes the document on its own.
+    ───────────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   .pour {
@@ -365,3 +418,4 @@
     transition: none;
   }
 }
+

@@ -5,6 +5,11 @@ import { resolve } from 'node:path'
 export default defineConfig({
   plugins: [react()],
 
+  server: {
+    port: Number(process.env.PORT) || 5173,
+    strictPort: false,
+  },
+
   build: {
     // Baseline chosen so Vite does not down-compile modern syntax we rely on.
     // Every one of these supports clip-path and CSS custom properties.

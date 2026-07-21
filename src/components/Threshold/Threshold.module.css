@@ -149,11 +149,28 @@
   transform: translateX(calc(var(--seam) * 50%));
 }
 
+/*  The wordmark's own clipping box. The padding/negative-margin pair
+    gives descenders somewhere to be hidden while the glyphs are below
+    the line — without it Crop's 'p' would be shorn at the baseline
+    mid-rise and the curtain would read as a bug. */
+.wordmarkMask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
 .wordmark {
   font-family: var(--f-display);
   font-weight: var(--w-display);
   line-height: 0.86;
   margin: 0;
+}
+
+/*  The heavy light pool is larger here than anywhere else — this is a
+    full panel, not a card. */
+.casa .artWrap {
+  --specular-size: 48rem;
 }
 
 /*  Casa holds the larger field, so it is set larger and tighter.
@@ -240,6 +257,38 @@
     calc(var(--seam-bottom) * 100%) 100%
   );
   pointer-events: none;
+}
+
+/*  The glint: a short bright segment that travels the seam once,
+    after the line has drawn itself — the first metal on the site
+    catching the light. The parent's clip confines it to the seam, so
+    the moving part is one transform on one strip and nothing else.
+    It plays once and is then inert, which is the threshold's rule. */
+.seamGlint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(255, 246, 232, 0.9) 50%,
+    transparent
+  );
+  transform: translate3d(0, -105%, 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .seamGlint {
+    animation: seam-glint 1600ms var(--ease-veil) 2100ms 1 both;
+  }
+
+  @keyframes seam-glint {
+    to {
+      transform: translate3d(0, 430%, 0);
+    }
+  }
 }
 
 /* ── Hover ───────────────────────────────────────────────────────
@@ -419,7 +468,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(237, 229, 216, 0.05);
+  background: rgba(255, 255, 255, 0.05);
   opacity: 0;
   transition: opacity 220ms var(--ease-ui, ease);
 }

@@ -49,8 +49,13 @@ function Specimen({ m, i }) {
  */
 export default function Materials() {
   return (
-    <div className={s.shell}>
-      <ul className={s.track}>
+    /*  data-scrub="drift": the whole band also drifts shallowly with
+        the page's scroll, so the row travels on two axes at two
+        rates — the marquee inside it, the page outside it — and the
+        section reads in layers. The global `marquee` class lets the
+        page transition pause the row while a navigation is running. */
+    <div className={s.shell} data-scrub="drift">
+      <ul className={`${s.track} marquee`}>
         {MATERIALS.map((m, i) => (
           <Specimen m={m} i={i} key={m.name} />
         ))}

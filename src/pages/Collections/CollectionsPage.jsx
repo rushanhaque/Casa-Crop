@@ -1,4 +1,4 @@
-import Collections from '../../components/Collections/Collections'
+import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Lines from '../../components/Lines/Lines'
 import Nav from '../../components/Nav/Nav'
@@ -6,41 +6,283 @@ import Progress from '../../components/Progress/Progress'
 import { useReveal } from '../../lib/useReveal'
 import s from './CollectionsPage.module.css'
 
+/*  DEMO DATA — the same fictional sheet the rest of the site quotes,
+    ordered and numbered to MATCH THE RANGE PAGES, so the numeral a
+    visitor walks past here is the numeral that greets them there.
+    (The homepage cards number Décor 03; the range book numbers it 04.
+    The book wins — a catalogue that disagrees with itself about its
+    own plate numbers is worse than either numbering.) */
+/*  Room numbering is architectural — Roman, cut into the wall. The
+    catalogue numbers on the plaques stay arabic; a museum does
+    exactly this (Room IV, cat. no. 04). */
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
+
+const EXHIBITS = [
+  {
+    slug: 'funeral',
+    index: '01',
+    name: 'Funeral',
+    meta: 'Cast · Spun',
+    lede: 'Memorial and cremation ware in cast brass and copper — urns, plaques and keepsakes, finished by hand to an antique standard.',
+    spec: [
+      ['Alloy', 'Cast brass / copper'],
+      ['Finish', 'Antique, hand-polished'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+  {
+    slug: 'lighting',
+    index: '02',
+    name: 'Lighting',
+    meta: 'Spun · Plated',
+    lede: 'Spun brass shades, bases and fittings, plated to a stated film thickness rather than to appearance alone.',
+    spec: [
+      ['Alloy', 'Spun brass, 1.2 mm'],
+      ['Finish', 'Nickel / PVD, 12 µm'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+  {
+    slug: 'kitchenware',
+    index: '03',
+    name: 'Kitchenware',
+    meta: 'Steel · Copper',
+    lede: 'Serveware and cookware in 304 steel and ETP copper, mirror-finished and food-safe.',
+    spec: [
+      ['Alloy', '304 steel / ETP copper'],
+      ['Finish', 'Mirror, food-safe'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+  {
+    slug: 'decor',
+    index: '04',
+    name: 'Décor',
+    meta: 'Cast · Wrought',
+    lede: 'Objects for the room — cast, wrought and waxed, in the antique register the house is known for.',
+    spec: [
+      ['Alloy', 'Gravity die cast brass'],
+      ['Finish', 'Antique, waxed'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+  {
+    slug: 'accessories',
+    index: '05',
+    name: 'Accessories',
+    meta: 'Brass · Zinc',
+    lede: 'The small hardware of a finished house — hooks, handles, stays and stands in brass and zinc alloy.',
+    spec: [
+      ['Alloy', 'Brass, zinc alloy'],
+      ['Finish', 'Plated, lacquered'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+  {
+    slug: 'furniture',
+    index: '06',
+    name: 'Furniture',
+    meta: 'Tube · Inlay',
+    lede: 'Frames and accent pieces in mild-steel tube with brass inlay, powder-coated to sixty microns.',
+    spec: [
+      ['Alloy', 'MS tube, brass inlay'],
+      ['Finish', 'Powder coat, 60 µm'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+  {
+    slug: 'bathroom',
+    index: '07',
+    name: 'Bathroom',
+    meta: 'Forged · Plated',
+    lede: 'Forged fittings in CuZn39Pb3, chrome or PVD finished, machined to mating-face tolerance.',
+    spec: [
+      ['Alloy', 'CuZn39Pb3, forged'],
+      ['Finish', 'Chrome / PVD'],
+      ['Minimum', '250 pcs / SKU'],
+    ],
+  },
+]
+
 /**
- * The collections index — the louvre grid given a whole page.
+ * The Collections page — the pattern book hung as an exhibition.
  *
- * The grid is the same component the homepage shows; a catalogue that
- * looked different from its shopfront would read as two sites.
+ * This page is deliberately NOT the homepage grid given a second
+ * outing. It is the one page on the site that changes ground beneath
+ * you: a dark entrance hall, then the corridor — pale gallery walls,
+ * the site's single polarity flip — where the seven programmes hang
+ * as exhibits and the page scrolls SIDEWAYS.
+ *
+ * THE CORRIDOR
+ * A tall section pins a viewport-height room and pans a horizontal
+ * track through it, scrubbed by the section's own named view
+ * timeline. Every instrument in every room — the engraved numerals,
+ * the raking light, the labels, the compass at the foot of the wall —
+ * subscribes to that ONE timeline through its own range slice, so
+ * the entire exhibition is conducted by the scrollbar and nothing
+ * else. No listeners, no libraries; walking backwards rewinds the
+ * gallery.
+ *
+ * Where scroll timelines are unsupported, or on narrow screens, or
+ * under reduced motion, the corridor lies down: the same rooms stack
+ * vertically and remain fully legible. The failure mode of the whole
+ * page is "a well-set catalogue".
  */
 export default function CollectionsPage() {
   useReveal()
 
   return (
     <>
+      <a className={s.skip} href="#content">
+        Skip to content
+      </a>
+
       <Nav current="Collections" />
       <Progress />
 
-      <main className={s.page}>
-        <section className={s.masthead} data-scrub="sink">
-          <Lines as="h1" className={s.title} lines={['Collections']} enter enterDelay={160} />
-          <p className={s.standfirst} data-enter="rise" style={{ '--enter-delay': '560ms' }}>
-            Seven programmes, tooled and held as running lines. Turn a card for its
-            specification; open it for the range.
+      <main className={s.page} id="content">
+        {/* ── The entrance hall ─────────────────────────────── */}
+        <header className={s.hall} aria-labelledby="collections-title">
+          <p className={s.hallKicker} data-enter="rise" style={{ '--enter-delay': '120ms' }}>
+            The pattern book — seven programmes
           </p>
+          <Lines
+            as="h1"
+            id="collections-title"
+            className={s.hallTitle}
+            lines={['Collections']}
+            enter
+            enterDelay={220}
+            split="chars"
+          />
+          <p className={s.hallStandfirst} data-enter="rise" style={{ '--enter-delay': '760ms' }}>
+            Seven running lines, tooled and held. Hung here as they are kept in the
+            works — one to a wall, with the sheet that governs each beside it.
+          </p>
+          <p className={s.hallCredit} data-enter="rise" style={{ '--enter-delay': '1000ms' }}>
+            Casa &amp; Crop — foundry collections, Moradabad
+          </p>
+
+          {/*  The walk hint. Horizontal, because the corridor is — and
+              it drains as its advice is taken. */}
+          <div className={s.hallHint} aria-hidden="true">
+            <span className={s.hallHintLine} />
+            <span className={s.hallHintLabel} data-enter="rise" style={{ '--enter-delay': '1400ms' }}>
+              Walk the corridor
+            </span>
+          </div>
+        </header>
+
+        {/* ── The corridor ──────────────────────────────────── */}
+        <section className={s.gallery} aria-label="The seven ranges, hung as exhibits">
+          <div className={s.pin}>
+            <ol className={s.track}>
+              {EXHIBITS.map((ex, i) => (
+                <li className={s.room} key={ex.slug} style={{ '--r': i }}>
+                  {/*  The numeral is the architecture of the room —
+                      incised into the wall behind the exhibit, and
+                      drifting a shade slower than the walk. */}
+                  <span className={s.roomGhost} aria-hidden="true">
+                    {ROMAN[i]}
+                  </span>
+
+                  {/*  Gallery lighting: one raking pass per room as it
+                      crosses the viewport. */}
+                  <span className={s.roomRake} aria-hidden="true" />
+
+                  <h2 className={s.roomTitle} id={`room-${ex.slug}`}>
+                    {ex.name}
+                  </h2>
+
+                  <a
+                    className={s.exhibit}
+                    href={`/range.html?r=${ex.slug}`}
+                    aria-labelledby={`room-${ex.slug}`}
+                  >
+                    {/*  The plinth. Photography lands in the well; until
+                        then the well is presented as a prepared mount,
+                        not a missing image. */}
+                    <span className={s.plinth}>
+                      <span className={s.plinthWell} />
+                      <span className={s.plinthLip} aria-hidden="true" />
+                    </span>
+                    <span className={s.cue}>
+                      <span className={s.cueLabel}>View the range</span>
+                      <span className={s.cueRule} aria-hidden="true" />
+                    </span>
+                  </a>
+
+                  {/*  The tombstone label — the museum's wall card,
+                      set in the house's apparatus register. */}
+                  <aside className={s.plaque} aria-label={`${ex.name} — specification`}>
+                    <span className={s.plaqueIndex}>
+                      № {ex.index} — {ex.meta}
+                    </span>
+                    <p className={s.plaqueLede}>{ex.lede}</p>
+                    <span className={s.plaqueNote}>
+                      Pieces at the works — photography forthcoming.
+                    </span>
+                    <dl className={s.plaqueSpec}>
+                      {ex.spec.map(([k, v]) => (
+                        <div className={s.plaqueRow} key={k}>
+                          <dt className={s.plaqueKey}>{k}</dt>
+                          <dd className={s.plaqueValue}>{v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </aside>
+
+                  {/*  Wayfinding, set on the wall edge the way a room
+                      number is. */}
+                  <span className={s.roomSign} aria-hidden="true">
+                    Room {ROMAN[i]} · Programme {ex.index}
+                  </span>
+                </li>
+              ))}
+            </ol>
+
+            {/*  The compass — the corridor's own instrument: a drawn
+                line filling with the walk, and the room numerals
+                brightening as their rooms arrive. Exists only while
+                the corridor is horizontal. */}
+            <div className={s.compass} aria-hidden="true">
+              <span className={s.compassLine}>
+                <i className={s.compassFill} />
+              </span>
+              <span className={s.compassIndex}>
+                {EXHIBITS.map((ex, i) => (
+                  <b className={s.compassNum} key={ex.slug} style={{ '--r': i }}>
+                    {ex.index}
+                  </b>
+                ))}
+              </span>
+            </div>
+          </div>
         </section>
 
-        <section className={s.gridWrap} aria-label="The seven ranges">
-          <Collections />
+        {/* ── The vault ─────────────────────────────────────── */}
+        <section className={s.vault} aria-labelledby="vault-title">
+          <Lines
+            as="h2"
+            id="vault-title"
+            className={s.vaultTitle}
+            lines={['Every range is', 'made to drawing.']}
+          />
+          <p className={s.vaultBody} data-reveal="rise" style={{ '--i': 2 }}>
+            Each programme above has been produced to a buyer's own specification —
+            minimums, alloys and lead times are stated per range, and the same figures
+            are quoted on the enquiry desk.
+          </p>
+          <a className={s.cta} href="/connect.html" data-pointer data-magnetic>
+            <span className={s.ctaLabel}>Open an enquiry</span>
+            <span className={s.ctaFill} aria-hidden="true" />
+            <span className={s.ctaRule} aria-hidden="true" />
+          </a>
         </section>
-
-        <p className={s.note} data-reveal="rise">
-          Every range is available to specification, and each has been produced to a
-          buyer's own drawing. Minimums, alloys and lead times are stated per range —
-          and the same figures are quoted on the enquiry desk.
-        </p>
       </main>
 
       <Footer />
+      <Cart />
     </>
   )
 }

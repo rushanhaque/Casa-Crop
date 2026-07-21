@@ -1,33 +1,52 @@
 /*  ─────────────────────────────────────────────────────────────
     TOKENS — single source of truth for the art direction
 
-    PRIMARY: shades of black. SECONDARY: shades of beige.
+    ONE GROUND: JET BLACK. FLAT.
 
-    Neither family is neutral. The blacks all carry a warm cast — red
-    runs a few points ahead of blue in every one — so they read as ink
-    and patinated metal rather than as switched-off screen. A
-    blue-black would fight the beige.
+    This palette has been through two wrong answers to get here.
 
-    The beiges are deliberately LOW-CHROMA. Beige is not pale gold:
-    gold gets its character from a wide spread between its channels,
-    beige from a narrow one. The accent here spans 56 points between
-    its highest and lowest channel where the gold it replaced spanned
-    104 — that halving is the whole difference between the two, and it
-    is what stops the scheme reading as a hotel logo.
+    First the blacks were warm — red a few points ahead of blue in
+    every step — on the reasoning that a warm black reads as ink and
+    patinated metal. It does. It also reads as OLD: warm near-blacks
+    are brown at the bottom of the ladder and mud at the top, and
+    brown is the single thing separating a lacquered surface from a
+    leathered one.
 
-    Pure #000000 appears nowhere. It is the clearest amateur tell in a
-    dark scheme: it has no relationship to any other colour, it flares
-    against light type on cheap panels, and no material is that
-    colour. The deepest value here is #0A0908.
+    Then the page alternated black grounds with pale ones, and the
+    pale ones were cooled from sand to porcelain in the hope that the
+    problem was their hue. It was not. The problem was that they were
+    there at all: a light band across a dark site reads as a sheet of
+    paper laid on a metal bench, and no amount of correcting its
+    colour makes paper look like metal.
 
-    TONES
-    The page alternates black and beige grounds. Rather than restyling
-    every component twice, a tone re-declares the same semantic tokens
-    on a scope — so anything built from --c-surface and --c-casa-ink
-    inverts on its own, and a component never needs to know which
-    ground it is standing on. Both tones are contrast-checked
-    independently; the beige one needs markedly darker apparatus ink
-    than a naive inversion would give it.
+    So there is now one ground and it is jet — neutral, a whisper of
+    blue, and FLAT. No alternation, no vignette, no grain. A vignette
+    is a gradient, and a gradient across a large field is the thing
+    that made the old grounds look washed and sandy; grain is a matte
+    texture, and matte is the opposite of the finish this house
+    sells. A polished black surface is even, and it earns its depth
+    from what is lit ON it rather than from anything painted INTO it.
+
+    The warmth has not left the palette. It has been concentrated
+    into the brass, which is the only thing here that should be warm.
+    A neutral ground under a warm metal is why the metal reads as
+    metal.
+
+    Shine therefore lives entirely in the SPECULAR tokens — --rim,
+    --sheen, --depth-highlight — which are hard, bright and
+    colourless, because a specular highlight is a reflection of the
+    light source and not a tint of the material. Every raised thing
+    on the site catches an edge; the ground behind it does not
+    compete.
+
+    Pure #000000 still appears nowhere. It is the clearest amateur
+    tell in a dark scheme: it has no relationship to any other
+    colour, it flares against light type on cheap panels, and no
+    material is that colour. The deepest value here is #060607.
+
+    THE ONE EXEMPTION
+    The footer keeps the original warm ground, pinned on its own
+    scope in Footer.module.css. It was signed off and it stays.
     ───────────────────────────────────────────────────────────── */
 
 :root {
@@ -35,40 +54,48 @@
      Six surfaces, not four, and the two that were missing are the
      ones that matter: a card tier and an addressed tier.
 
-     The old ladder put cards at #171512 on a #12100E plate — five RGB
-     points apart. Five points is not a surface, it is a rounding
-     error, and it is the single mechanical reason the page read as
-     flat. #211D17 is fifteen points clear and separates on light
-     alone, with no border needed to explain it.
+     An early ladder put cards five RGB points off their plate. Five
+     points is not a surface, it is a rounding error, and it was the
+     single mechanical reason the page read as flat. The card tier
+     here stands fourteen points clear of the plate and separates on
+     light alone, with no border needed to explain it.
 
-     The steps tighten as they lighten (+8, +8, +7, +7, +6), which is
-     how diffuse light actually falls off, and the warm spread widens
-     with lightness (2 → 18) because more light means more of the hue
-     shows. */
-  --s-0: #0a0908; /* the well — page ground, footer */
-  --s-1: #12100e; /* section plate */
-  --s-2: #1a1713; /* raised panel, media frame */
-  --s-3: #211d17; /* CARD AT REST — the tier that was missing */
-  --s-4: #282219; /* card addressed */
-  --s-5: #2e271c; /* pressed */
+     The steps tighten as they lighten (+6, +7, +7, +8, +8), which is
+     how diffuse light actually falls off, and the COOL spread widens
+     with lightness (1 → 9) because more light means more of the hue
+     shows — which on a jet ladder is what keeps the top of the scale
+     from going grey and dead. */
+  --s-0: #060607; /* the well — page ground */
+  --s-1: #0c0d0f; /* section plate */
+  --s-2: #131518; /* raised panel, media frame */
+  --s-3: #1a1d21; /* CARD AT REST — the tier that was missing */
+  --s-4: #22252a; /* card addressed */
+  --s-5: #2a2e33; /* pressed */
 
   --c-void: var(--s-0);
   --c-surface: var(--s-1);
   --c-surface-raised: var(--s-2);
   --c-casa-ground: var(--s-3);
-  --c-crop-ground: #0e0d0b;
+  --c-crop-ground: #08090a;
 
-  /* ── Secondary: the beiges ───────────────────────────────── */
-  /*  The pale end. Primary reading colour — 15.2:1 on the ground. */
-  --c-casa-ink: #ede5d8;
-  --c-crop-ink: #e2dacd;
+  /* ── Secondary: the pale end ─────────────────────────────── */
+  /*  Primary reading colour. Was a warm cream (#EDE5D8, twenty-one
+      points of spread) which put a sepia wash over every paragraph
+      on the site. Neutral now, with four points of warmth left in it
+      so it reads as plaster rather than as fluorescent tube —
+      16.6:1 on the ground, up from 15.2:1 because the ground went
+      deeper. */
+  --c-casa-ink: #eeedea;
+  --c-crop-ink: #dcdbd8;
 
   /*  The apparatus tier: captions, folio marks, marginalia. 6.9:1 on
       the ground, clearing the small-text floor with room. This is the
       tier where dark schemes quietly fail, because a value that looks
       subtle on a designer's monitor is unreadable on a phone in
-      daylight. */
-  --c-ink-muted: #a69b88;
+      daylight. Cooled to match the ladder and re-solved against the
+      new ground: 7.0:1, where the sandy #A69B88 it replaces measured
+      6.9:1. Same job, none of the tan. */
+  --c-ink-muted: #9a9b9e;
 
   /*  The accent. A warm sand — 9.2:1, so it can carry text and not
       only decoration. */
@@ -105,28 +132,31 @@
       gold fill was competing with the beige instead of landing on it. */
   --metal-dark: linear-gradient(
     145deg,
-    #4a443a 0%,
-    #5a5348 12%,
-    #2e2a24 32%,
-    #12100e 50%,
-    #241f19 68%,
-    #453f35 86%,
-    #0a0908 100%
+    #43464d 0%,
+    #52565e 12%,
+    #292c31 32%,
+    #0c0d0f 50%,
+    #1d2024 68%,
+    #3e4147 86%,
+    #060607 100%
   );
 
   /*  Crop-side keyline only, at hairline scale. */
-  --c-field: #8b8271;
+  --c-field: #83868b;
 
   /* ── Rules ───────────────────────────────────────────────── */
   /*  Lifted blacks rather than translucent white: a white at low alpha
       shifts with whatever sits behind it, where these hold. */
-  --c-rule: #2e2a24;
-  --c-rule-strong: #453f35;
+  --c-rule: #24272b;
+  --c-rule-strong: #383c42;
 
   --c-focus: #c9b191;
 
-  /*  The colour every shadow on the dark tone is made of. */
-  --sh: 30deg 24% 2%;
+  /*  The colour every shadow on the dark tone is made of. Swung from
+      30° to 220°: a warm shadow on a jet ground reads as a smear of
+      brown, where a cool one reads as absence of light, which is what
+      a shadow is. */
+  --sh: 220deg 18% 3%;
 
   /* ── Depth ───────────────────────────────────────────────────
      What gives the black sections their slight relief. Three cues,
@@ -140,8 +170,8 @@
 
      All four are static. Nothing here animates, so nothing here costs
      anything after the first paint. */
-  --depth-highlight: rgba(237, 229, 216, 0.07);
-  --depth-shade: rgba(0, 0, 0, 0.55);
+  --depth-highlight: rgba(255, 255, 255, 0.11);
+  --depth-shade: rgba(0, 0, 0, 0.6);
   --depth-cast: 0 24px 48px -32px rgba(0, 0, 0, 0.9);
   /*  A baked grain tile, not a live filter. An SVG turbulence filter
       re-runs its noise every frame and is one of the most expensive
@@ -226,7 +256,7 @@
 
   /* ── Crop's holding state ────────────────────────────────── */
   --crop-blur: 7px;
-  --c-crop-scrim: rgba(8, 7, 6, 0.5);
+  --c-crop-scrim: rgba(5, 5, 6, 0.5);
   --crop-bleed: 1.06;
 
   /* ── Measure ─────────────────────────────────────────────── */
@@ -258,7 +288,7 @@
      where it meets it. */
   /*  Shadows are never pure black here.
 
-      A shadow at rgba(0,0,0,·) laid on a #12100E ground has almost no
+      A shadow at rgba(0,0,0,·) laid on a #0C0D0F ground has almost no
       luminance left to give — it is already nearly the darkest thing
       on screen, so it reads as nothing. A shadow carrying the ground's
       own hue at a lower lightness actually separates.
@@ -291,17 +321,24 @@
       dimensional cue there is. */
   /*  Both of these were roughly three times too weak to register.
       A short strong falloff reads as light; a long weak one reads as
-      a gradient — that difference is the whole effect. */
-  --rim:
-    inset 0 1px 0 rgba(237, 229, 216, 0.2),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+      a gradient — that difference is the whole effect.
 
-  /*  A surface lit from above is brighter at its head. Very slight —
-      at this strength it is not read as a gradient, only as light. */
+      Brighter and NEUTRAL now the ground is jet. This is the single
+      line doing most of the work of "polished": a matte surface has
+      a soft, dim, warm edge, and a lacquered one has a hard, bright,
+      colourless one, because a specular highlight is a reflection of
+      the light source rather than a tint of the material. */
+  --rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+
+  /*  A surface lit from above is brighter at its head. Tightened from
+      28% to 20% and lifted: a short, bright falloff is a sheen on a
+      finish, a long faint one is a gradient on a box. */
   --sheen: linear-gradient(
     180deg,
-    rgba(237, 229, 216, 0.1) 0%,
-    rgba(237, 229, 216, 0) 28%
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0) 20%
   );
 
   /* ── The tilt ────────────────────────────────────────────────
@@ -328,62 +365,25 @@
 }
 
 /*  ─────────────────────────────────────────────────────────────
-    THE BEIGE TONE
+    THE PALE TONE IS GONE
 
-    Not an inversion. A naive flip — swapping the ink and the ground —
-    would leave the apparatus tier at 4.4:1 and the accent at 3.6:1,
-    both under the floor, because a mid value that reads as quiet
-    against black reads as washed-out against beige. Every value here
-    was solved against its own ground rather than derived from the
-    dark one.
+    There was a [data-tone='beige'] scope here that re-declared the
+    whole palette against a light ground, and it was carefully done:
+    every value solved against its own ground rather than flipped,
+    the apparatus tier dropped to clear 5.3:1, the rim inverted
+    because on a pale surface it is the top edge that falls into
+    shade.
+
+    None of that was the problem. The problem was that a pale band
+    across a black site reads as a sheet of paper laid on a metal
+    bench, and correcting the colour of the paper does not make it
+    metal. The site is one ground now.
+
+    The scope is deleted rather than emptied, so nothing can quietly
+    resolve against a tone that no longer exists. The elevation
+    ladder, the rim and the sheen all come from :root and are tuned
+    for jet.
     ───────────────────────────────────────────────────────────── */
-
-[data-tone='beige'] {
-  --c-surface: #e8e0d2;
-  --c-casa-ground: #efe9dd;
-  --c-surface-raised: #f3eee4;
-
-  --c-casa-ink: #191612; /* 13.8:1 */
-  --c-ink-muted: #625849; /* 5.3:1 — solved, not inverted */
-  --c-stamp: #6c5236; /* 5.5:1 — solved, not inverted */
-  --c-stamp-wash: #ded3be;
-  --c-foil: #8a6f4e;
-  --c-field: #6b6151;
-
-  --c-rule: #cfc5b2;
-  --c-rule-strong: #b8ac96;
-  --c-focus: #6c5236;
-
-  /*  A shadow on a light ground has to be far tighter and weaker, or
-      it reads as dirt rather than as depth. */
-
-  /*  The shadow hue for a light ground: warmer and far lighter, or a
-      long dark throw against pale beige reads as grime. */
-  --sh: 32deg 26% 12%;
-  --elev-1:
-    0 1px 2px -0.5px hsl(var(--sh) / 0.1),
-    1px 3px 6px -2px hsl(var(--sh) / 0.12);
-  --elev-2:
-    0 1px 2px -0.5px hsl(var(--sh) / 0.12),
-    2px 7px 12px -4px hsl(var(--sh) / 0.14),
-    5px 18px 30px -10px hsl(var(--sh) / 0.16);
-  --elev-3:
-    0 2px 4px -1px hsl(var(--sh) / 0.14),
-    3px 12px 20px -6px hsl(var(--sh) / 0.18),
-    9px 32px 52px -18px hsl(var(--sh) / 0.2);
-
-  /*  The rim inverts. On a pale surface the top edge is the one in
-      shade — light from above lands on the face, not the lip. */
-  --rim:
-    inset 0 1px 0 rgba(255, 252, 245, 0.75),
-    inset 0 -1px 0 hsl(var(--sh) / 0.14);
-
-  --sheen: linear-gradient(
-    180deg,
-    rgba(255, 252, 245, 0.6) 0%,
-    rgba(255, 252, 245, 0) 30%
-  );
-}
 
 /*  ─────────────────────────────────────────────────────────────
     TONE SURFACES

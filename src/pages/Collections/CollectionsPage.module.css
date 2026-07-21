@@ -1,44 +1,1088 @@
+/*  ─────────────────────────────────────────────────────────────
+    COLLECTIONS — the pattern book hung as an exhibition
+
+    The one page on the site that changes ground beneath you: a dark
+    entrance hall, then the corridor — the site's single polarity
+    flip to pale gallery walls — where the seven programmes hang as
+    exhibits and the page moves SIDEWAYS.
+
+    THE MECHANISM
+    The corridor is a tall section (100vh + --walk of scroll) whose
+    sticky child pins a viewport-height room. Inside it a horizontal
+    track pans by exactly its own overflow, scrubbed by the section's
+    NAMED view timeline (--gal). Every instrument — numerals, labels,
+    lighting, the compass — subscribes to that one timeline through
+    its own animation-range slice, so the whole exhibition is
+    conducted by the scrollbar. Walking backwards rewinds the gallery.
+
+    THE THREE POSTURES
+    · Horizontal: wide screens, scroll-timelines supported, motion
+      welcome. The full corridor.
+    · Vertical: everything else. The same rooms stack and remain
+      fully legible — the failure mode is "a well-set catalogue".
+    · Still: reduced motion. The vertical stack, nothing animates.
+
+    Compositor discipline holds throughout: the pan and every
+    instrument are transform/opacity only; the track is the single
+    promoted layer that matters and it is scrubbed, never ticking.
+    ───────────────────────────────────────────────────────────── */
+
 .page {
-  background-color: var(--c-surface);
-  background-image: var(--grain), var(--depth-vignette);
-  background-repeat: repeat, no-repeat;
-  background-size: var(--grain-size), cover;
+  background: var(--c-void);
   color: var(--c-casa-ink);
 }
 
-.masthead {
-  padding: clamp(5rem, 14vh, 10rem) var(--gutter) clamp(2rem, 5vh, 3.5rem);
-  max-width: 70rem;
+/* ── The entrance hall ───────────────────────────────────────── */
+
+.hall {
+  position: relative;
+  min-height: 92svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(6rem, 16vh, 11rem) var(--gutter) clamp(4rem, 10vh, 7rem);
+  background: var(--c-void);
 }
 
-.title {
+.hallKicker {
+  margin: 0 0 clamp(1rem, 2.4vh, 1.6rem);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-stamp);
+}
+
+.hallTitle {
+  margin: 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(3rem, 9vw, 8rem);
-  line-height: 0.94;
+  font-size: clamp(4rem, 13vw, 12rem);
+  line-height: 0.9;
   letter-spacing: var(--track-xl);
-  margin: 0;
 }
 
-.standfirst {
-  max-width: 40rem;
-  margin: clamp(1.4rem, 3vw, 2.2rem) 0 0;
+.hallStandfirst {
+  max-width: 42rem;
+  margin: clamp(1.6rem, 3.6vh, 2.6rem) 0 0;
   font-family: var(--f-text);
   font-size: clamp(1rem, 1.3vw, 1.15rem);
   line-height: 1.6;
   color: var(--c-ink-muted);
 }
 
-.gridWrap {
-  padding: 0 var(--gutter) clamp(3rem, 8vh, 5rem);
+/*  The credit line — the cheapest authenticity device a museum
+    owns: one small-caps line that reframes a manufacturer as an
+    institution. */
+.hallCredit {
+  margin: clamp(2.4rem, 6vh, 4rem) 0 0;
+  font-family: var(--f-text);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
 }
 
-.note {
-  max-width: 44rem;
-  margin: 0;
-  padding: 0 var(--gutter) clamp(5rem, 12vh, 8rem);
+/*  The walk hint — horizontal, because the corridor is. The line
+    draws itself after the hall has settled; the whole instrument
+    then drains sideways as its advice is taken. */
+.hallHint {
+  position: absolute;
+  right: var(--gutter);
+  bottom: clamp(1.4rem, 4vh, 2.6rem);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  pointer-events: none;
+}
+
+.hallHintLabel {
   font-family: var(--f-text);
-  font-size: 0.98rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.hallHintLine {
+  width: clamp(3rem, 6vw, 5.5rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c-stamp));
+  transform: scaleX(0);
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hallHintLine {
+    animation: hint-draw 900ms var(--ease-draw) 1600ms both;
+  }
+
+  @keyframes hint-draw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hallHintLine {
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: scroll(root block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hallHint {
+      animation: hint-walk linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 480px;
+    }
+
+    @keyframes hint-walk {
+      to {
+        opacity: 0;
+        transform: translateX(1.6rem);
+      }
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE CORRIDOR — base posture: vertical, works everywhere
+    ───────────────────────────────────────────────────────────── */
+
+/*  The corridor was hung on pale gallery walls — the site's one
+    polarity flip. The flip is gone: the walls are the same jet as
+    every other ground, and the exhibition is lit rather than
+    inverted. A black-walled gallery is the older and better idea
+    anyway; it is what a jeweller's vitrine hall looks like, and it
+    puts every object on the page against the same ground as the
+    metal it is cast from. */
+.gallery {
+  position: relative;
+  background: var(--c-void);
+  color: var(--c-casa-ink);
+}
+
+.track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.room {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.6rem, 4vh, 3rem);
+  padding: clamp(5rem, 12vh, 8rem) var(--gutter);
+  overflow: clip;
+}
+
+/*  A hairline between stacked rooms, faded at its ends — gone in the
+    corridor, where the floor datum does this job. */
+.room + .room {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--c-rule) 15%,
+    var(--c-rule) 85%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: top left;
+}
+
+/* ── The numeral — the architecture of the room ──────────────── */
+
+/*  INCISED, and the shading flips with the ground. Cut lettering
+    catches light on the edge that faces the lamp and falls dark on
+    the one that turns away — on a pale wall lit from above that puts
+    the shadow at the top of the cut, and on a black wall the eye
+    reads the opposite: a bright upper lip and a dark foot. So the
+    two shadows swap places rather than being merely dimmed.
+
+    Roman numerals: the register of a room number cut into an
+    institution's wall, and seven marks of usefully different widths.
+    The catalogue numbers stay arabic on the plaques — museums do
+    precisely this. */
+.roomGhost {
+  position: absolute;
+  left: -0.04em;
+  top: 2vh;
+  z-index: 0;
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: clamp(12rem, 32vw, 40rem);
+  line-height: 0.8;
+  letter-spacing: var(--track-xl);
+  /*  A step ABOVE the wall rather than below it — on black, a cut
+      that is darker than its ground disappears into it. */
+  color: color-mix(in srgb, var(--c-casa-ink) 7%, var(--c-void));
+  text-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.16),
+    0 2px 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Gallery lighting ────────────────────────────────────────────
+   On a black wall the pass is LIGHT again, not occlusion: a soft
+   band crossing the room as though something had moved under the
+   lamp. It was an inverted shadow while the walls were pale; the
+   shadow of a shadow reads as nothing on jet. */
+
+.roomRake {
+  position: absolute;
+  inset: -20% -30%;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 60%
+  );
+  transform: translate3d(-120%, 0, 0);
+}
+
+/* ── The exhibit ─────────────────────────────────────────────── */
+
+.roomTitle {
+  position: relative;
+  z-index: 3;
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  line-height: 0.9;
+  letter-spacing: var(--track-xl);
+  /*  Cast in brass now the wall is black. It was poured in iron for
+      the pale wall, and iron on jet fills the letterform with the
+      ground — the name simply vanished. Brass is also the honest
+      choice here: these are the range names, and the ranges are
+      what the house casts. */
+  background: var(--metal-brass);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .roomTitle {
+    background: none;
+    color: var(--c-casa-ink);
+  }
+}
+
+.exhibit {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: fit-content;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*  The plinth: a machined mount awaiting its casting. Double
+    enclosure — a dark metal shell around a deeper well — so the
+    reserved space reads as prepared rather than missing. */
+.plinth {
+  position: relative;
+  display: block;
+  width: min(76vw, 30rem);
+  aspect-ratio: 4 / 5;
+  padding: clamp(0.55rem, 1vw, 0.9rem);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #383c43 0%, #23262b 60%, #131518 100%);
+  box-shadow: var(--elev-2);
+  transition: transform 420ms var(--ease-settle);
+}
+
+/*  The deeper shadow lives on its own layer and is crossfaded in —
+    the house pattern for every shadow change. */
+.plinth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--elev-3);
+  opacity: 0;
+  transition: opacity 420ms var(--ease-settle);
+  pointer-events: none;
+}
+
+.plinthWell {
+  position: absolute;
+  inset: clamp(0.55rem, 1vw, 0.9rem);
+  border-radius: max(0px, calc(var(--radius-lg) - clamp(0.55rem, 1vw, 0.9rem)));
+  background:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 55%
+    ),
+    linear-gradient(180deg, #111316 0%, #090a0c 100%);
+  overflow: hidden;
+}
+
+/*  The glint the well takes when the exhibit is addressed. */
+.plinthWell::after {
+  content: '';
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(240, 217, 168, 0.1) 50%,
+    transparent 58%
+  );
+  transform: translate3d(-130%, 0, 0);
+  pointer-events: none;
+}
+
+/*  The lit lip of the mount. */
+.plinthLip {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.cue {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: clamp(1rem, 2.4vh, 1.6rem);
+}
+
+.cueLabel {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-stamp);
+}
+
+.cueRule {
+  height: 1px;
+  background: var(--c-stamp);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-micro) var(--ease-draw);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .exhibit:hover .plinth {
+    transform: translateY(-6px);
+  }
+
+  .exhibit:hover .plinth::before {
+    opacity: 1;
+  }
+
+  .exhibit:hover .cueRule {
+    transform: scaleX(1);
+  }
+
+  /*  Addressing the exhibit primes the page transition: the room's
+      title takes the name the range masthead answers to, so
+      committing sends the word itself through the document swap.
+      Pure CSS — no script holds this state. */
+  .room:has(.exhibit:hover) .roomTitle {
+    view-transition-name: range-title;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .exhibit:hover .plinthWell::after {
+      animation: well-glint 900ms var(--ease-veil) 120ms 1 both;
+    }
+
+    @keyframes well-glint {
+      to {
+        transform: translate3d(130%, 0, 0);
+      }
+    }
+  }
+}
+
+.exhibit:focus-visible .cueRule {
+  transform: scaleX(1);
+}
+
+.exhibit:active .plinth {
+  transform: translateY(-2px) scale(0.997);
+  transition-duration: 120ms;
+}
+
+/* ── The tombstone label ─────────────────────────────────────── */
+
+.plaque {
+  position: relative;
+  z-index: 2;
+  max-width: 24rem;
+  padding: clamp(1.1rem, 2vw, 1.6rem);
+  border-radius: var(--radius-sm);
+  background: var(--c-surface-raised);
+  box-shadow: var(--elev-1), var(--rim);
+}
+
+.plaqueIndex {
+  display: block;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-stamp);
+  /*  Struck into the card. The relief inverts with the ground, same
+      as the numerals: lit lip above, shadow below. */
+  text-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.14),
+    0 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.plaqueLede {
+  margin: 0.7rem 0 0.9rem;
+  font-family: var(--f-text);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--c-ink-muted);
+}
+
+/*  The 'on loan' line — museums have formal vocabulary for absent
+    objects, and this is it: the page's one serif moment, in the
+    curator's hand. */
+.plaqueNote {
+  display: block;
+  margin: 0.8rem 0 0;
+  font-family: var(--f-quote);
+  font-style: italic;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--c-ink-muted);
+}
+
+.plaqueSpec {
+  margin: 0;
+}
+
+.plaqueRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-top: var(--seam-width) solid var(--c-rule);
+}
+
+.plaqueKey {
+  font-family: var(--f-text);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.plaqueValue {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+/* ── Wayfinding ──────────────────────────────────────────────── */
+
+.roomSign {
+  display: none;
+  font-family: var(--f-text);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+/*  The compass exists only where the corridor is horizontal. */
+.compass {
+  display: none;
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE CORRIDOR — horizontal posture
+
+    Wide screens, scroll timelines supported, motion welcome.
+    ───────────────────────────────────────────────────────────── */
+
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .gallery {
+      /*  100svh pins the room; --walk is the distance the visitor
+          walks, measured in vw so hand and eye keep parity at every
+          aspect ratio — the track overflows by ~540vw and 600vw of
+          scroll spends it: fractionally under 1:1, which reads as
+          the mass of a heavy thing being walked past rather than a
+          carousel being yanked. svh, never vh or dvh: dvh would
+          resize the corridor's one big layer every time a phone's
+          URL bar moved, which is a forced re-raster mid-scroll. */
+      --walk: 600vw;
+      height: calc(100svh + var(--walk));
+      view-timeline: --gal block;
+    }
+
+    .pin {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      /*  clip, not hidden: hidden would create a programmatically
+          scrollable box, and the first keyboard focus into an
+          off-screen room would shove a scroll offset ON TOP of the
+          track's transform — a misalignment that survives until
+          reload. clip forbids all scrolling and clips the same. */
+      overflow: clip;
+    }
+
+    .track {
+      display: flex;
+      align-items: stretch;
+      gap: 3vw;
+      width: max-content;
+      height: 100%;
+      padding: 0 14vw 0 7vw;
+      animation: track-pan linear both;
+      animation-timeline: --gal;
+      animation-range: contain 0% contain 100%;
+    }
+
+    /*  The pan holds still for the first 4% — a threshold beat while
+        the eye settles after the pin latches — and for the last 8%,
+        so the sticky releases on a dead-still, resolved frame. Any
+        lateral motion at the unpin would read as a cut mid-shot.
+        The master pan is LINEAR by law: easing here would decouple
+        the hand from the eye. Curves belong to the instruments. */
+    @keyframes track-pan {
+      0%,
+      4% {
+        transform: translate3d(0, 0, 0);
+      }
+      92%,
+      100% {
+        transform: translate3d(calc(-100% + 100vw), 0, 0);
+      }
+    }
+
+    /*  The floor datum: one hairline running the length of the
+        corridor, passing BEHIND every plinth — the single line that
+        makes seven rooms read as one gallery. */
+    .track::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 21vh;
+      height: 1px;
+      z-index: 0;
+      background: var(--c-rule-strong);
+    }
+
+    .room {
+      position: relative;
+      flex: none;
+      /*  86vw, so 14vw of the next room is always guillotined by the
+          frame edge — the peek is load-bearing: a cropped numeral is
+          a stronger pull than any arrow, because it is unmistakably
+          unfinished. */
+      width: 86vw;
+      min-height: 0;
+      height: 100%;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) minmax(16rem, 24rem);
+      grid-template-areas: 'sign exhibit plaque';
+      align-items: center;
+      column-gap: clamp(2rem, 5vw, 5rem);
+      padding: 12vh 3vw 14vh;
+      /*  Bounds invalidation to the room and clips the light pass at
+          the room's own edge, so a pass never bleeds into the
+          neighbouring room. */
+      contain: layout paint;
+    }
+
+    /*  The terminal wall: the corridor is honestly over — no peek. */
+    .room:last-child {
+      width: 92vw;
+    }
+
+    .room + .room {
+      background-image: none;
+    }
+
+    /*  The accent pool: gallery practice lights the object five to
+        seven times brighter than the ambient wall. Painted once —
+        an elliptical wash behind the exhibit.
+
+        Far weaker on a black wall than it was on a pale one. The
+        ratio is the same; the arithmetic is not. Lifting a jet
+        ground by the same absolute amount that dented a porcelain
+        one produces a grey cloud hanging in the middle of the room,
+        which is the single most common way a dark "gallery" page
+        gives itself away. */
+    .room::before {
+      content: '';
+      position: absolute;
+      left: 18%;
+      top: 8%;
+      width: 64%;
+      height: 78%;
+      z-index: 0;
+      background: radial-gradient(
+        55% 62% at 50% 45%,
+        rgba(255, 252, 245, 0.055),
+        transparent 72%
+      );
+      pointer-events: none;
+    }
+
+    .roomGhost {
+      left: 6vw;
+      top: 4vh;
+      font-size: clamp(16rem, 30vw, 38rem);
+    }
+
+    .exhibit {
+      grid-area: exhibit;
+      justify-self: center;
+    }
+
+    /*  Sized so the mount's foot lands on the floor datum in every
+        room — the museum hang: one eye-line through the whole
+        building, and the numeral the only thing allowed to break it. */
+    .plinth {
+      width: min(30vw, 40vh, 26rem);
+    }
+
+    /*  ── Focus discipline ────────────────────────────────────
+        With the pin clipped, the browser cannot scroll a focused
+        off-screen room into view — so rooms far from the visible
+        neighbourhood are removed from the tab order entirely with a
+        DISCRETE visibility animation on the same timeline: hidden
+        content is unfocusable, and visibility flips at keyframe
+        boundaries with no per-frame cost. Windows are generous
+        (±­one room), written as literals per room — range arithmetic
+        cannot go negative. */
+    .room {
+      animation: room-vis linear both;
+      animation-timeline: --gal;
+    }
+
+    @keyframes room-vis {
+      0%,
+      100% {
+        visibility: hidden;
+      }
+      3%,
+      97% {
+        visibility: visible;
+      }
+    }
+
+    .room:nth-child(1) {
+      animation-range: entry 0% contain 26%;
+    }
+
+    .room:nth-child(2) {
+      animation-range: contain 0% contain 40%;
+    }
+
+    .room:nth-child(3) {
+      animation-range: contain 8% contain 54%;
+    }
+
+    .room:nth-child(4) {
+      animation-range: contain 22% contain 68%;
+    }
+
+    .room:nth-child(5) {
+      animation-range: contain 36% contain 82%;
+    }
+
+    .room:nth-child(6) {
+      animation-range: contain 50% contain 96%;
+    }
+
+    .room:nth-child(7) {
+      animation-range: contain 64% exit 100%;
+    }
+
+    /*  The title hangs over the mount's edge — type in front of the
+        object, the art-book composition. */
+    .roomTitle {
+      position: absolute;
+      z-index: 3;
+      left: clamp(2rem, 10vw, 12rem);
+      bottom: 20vh;
+      margin: 0;
+      font-size: clamp(4rem, 8.5vw, 10rem);
+      pointer-events: none;
+    }
+
+    .plaque {
+      grid-area: plaque;
+      justify-self: start;
+      align-self: center;
+    }
+
+    .roomSign {
+      display: block;
+      grid-area: sign;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      align-self: center;
+    }
+
+    /*  ── Instruments, conducted by --gal ─────────────────────
+        Each room owns a ~14.28% slice of the corridor timeline;
+        every effect keys its range off --r. animation-delay means
+        nothing to a scrubbed timeline — the RANGE is the schedule. */
+
+    .roomGhost {
+      animation: ghost-drift linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 12%) contain
+        calc(var(--r) * 12% + 42%);
+    }
+
+    @keyframes ghost-drift {
+      from {
+        transform: translate3d(5vw, 0, 0);
+      }
+      to {
+        transform: translate3d(-5vw, 0, 0);
+      }
+    }
+
+    .roomTitle {
+      animation: title-drift linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 12%) contain
+        calc(var(--r) * 12% + 42%);
+    }
+
+    @keyframes title-drift {
+      from {
+        transform: translate3d(2vw, 0, 0);
+      }
+      to {
+        transform: translate3d(-2vw, 0, 0);
+      }
+    }
+
+    .roomRake {
+      animation: rake-pass linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 12%) contain
+        calc(var(--r) * 12% + 40%);
+    }
+
+    @keyframes rake-pass {
+      from {
+        transform: translate3d(-120%, 0, 0);
+      }
+      to {
+        transform: translate3d(140%, 0, 0);
+      }
+    }
+
+    /*  The label fades up as its room arrives and holds — resolved
+        well before the room is centred, because a wall label being
+        read must never still be moving. */
+    .plaque {
+      animation: plaque-in linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 13%) contain
+        calc(var(--r) * 13% + 10%);
+    }
+
+    /*  Room one's label resolves during the APPROACH — while the
+        section is still scrolling into view — so the corridor pins
+        on an already-complete first composition. */
+    .room:first-child .plaque {
+      animation-range: entry 55% contain 5%;
+    }
+
+    @keyframes plaque-in {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 1.4rem, 0);
+      }
+    }
+
+    /*  ── The compass ─────────────────────────────────────── */
+
+    .compass {
+      position: absolute;
+      left: 50%;
+      bottom: 4.5vh;
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      width: min(36rem, 56vw);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .compassLine {
+      display: block;
+      height: 1px;
+      background: var(--c-rule-strong);
+    }
+
+    .compassFill {
+      display: block;
+      height: 100%;
+      background: var(--c-stamp);
+      transform: scaleX(0);
+      transform-origin: left center;
+      animation: compass-fill linear both;
+      animation-timeline: --gal;
+      animation-range: contain 0% contain 100%;
+    }
+
+    /*  Full at 92%, matching the pan's own terminal plateau. */
+    @keyframes compass-fill {
+      92%,
+      100% {
+        transform: scaleX(1);
+      }
+    }
+
+    .compassIndex {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .compassNum {
+      font-family: var(--f-text);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: var(--track-sm);
+      font-variant-numeric: tabular-nums;
+      color: var(--c-casa-ink);
+      opacity: 0.35;
+      animation: num-current linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 14.28%) contain
+        calc(var(--r) * 14.28% + 14.28%);
+    }
+
+    @keyframes num-current {
+      0%,
+      100% {
+        opacity: 0.35;
+      }
+      18%,
+      82% {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    Vertical posture, animated — narrow screens with timelines.
+    The rooms stack; each reveals on its own passage.
+    ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 63.99rem) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .room .plaque {
+      animation: v-plaque linear both;
+      animation-timeline: view();
+      animation-range: entry 12% entry 55%;
+    }
+
+    @keyframes v-plaque {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 1.4rem, 0);
+      }
+    }
+
+    .room .plinth {
+      animation: v-plinth linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 45%;
+    }
+
+    @keyframes v-plinth {
+      from {
+        opacity: 0;
+        transform: scale(1.03);
+      }
+    }
+
+    .roomGhost {
+      animation: v-ghost linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    @keyframes v-ghost {
+      from {
+        transform: translate3d(0, -2.5vh, 0);
+      }
+      to {
+        transform: translate3d(0, 2.5vh, 0);
+      }
+    }
+
+    .roomRake {
+      animation: v-rake linear both;
+      animation-timeline: view();
+      animation-range: entry 15% exit 85%;
+    }
+
+    @keyframes v-rake {
+      from {
+        transform: translate3d(-120%, 0, 0);
+      }
+      to {
+        transform: translate3d(140%, 0, 0);
+      }
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE VAULT — the close, back on the dark ground
+    ───────────────────────────────────────────────────────────── */
+
+.vault {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(6rem, 16vh, 12rem) var(--gutter) clamp(7rem, 18vh, 13rem);
+}
+
+.vault::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--c-void);
+  box-shadow: var(--rim);
+}
+
+.vaultTitle {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(2.4rem, 6.5vw, 5.5rem);
+  line-height: 0.96;
+  letter-spacing: var(--track-xl);
+}
+
+.vaultBody {
+  max-width: 40rem;
+  margin: clamp(1.6rem, 3.6vh, 2.4rem) 0 0;
+  font-family: var(--f-text);
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
   line-height: 1.6;
   color: var(--c-ink-muted);
+}
+
+.cta {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  margin-top: clamp(2.2rem, 5vh, 3.5rem);
+  padding: clamp(0.9rem, 1.8vw, 1.2rem) clamp(1.6rem, 3.5vw, 2.6rem);
+  border-radius: var(--radius);
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ctaLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.ctaFill {
+  position: absolute;
+  inset: -10%;
+  background: var(--c-casa-ink);
+  transform-origin: bottom left;
+  transform: translateY(110%) skewY(6deg);
+  transition: transform var(--dur-micro) var(--ease-veil);
+}
+
+.ctaRule {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 var(--seam-width) var(--c-rule-strong);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover .ctaFill {
+    transform: translateY(0) skewY(0);
+  }
+
+  .cta:hover .ctaLabel {
+    color: var(--c-surface);
+  }
+}
+
+.cta:focus-visible .ctaFill {
+  transform: none;
+}
+
+.cta:focus-visible .ctaLabel {
+  color: var(--c-surface);
+}
+
+.cta:active {
+  transform: translateY(1px) scale(0.99);
+  transition: transform 120ms var(--ease-ui);
+}
+
+/*  The skip link — present on every page, visible only to the
+    keyboard. Same apparatus as the Casa page's. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.9rem 1.4rem;
+  background: var(--c-casa-ink);
+  color: var(--c-surface);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip:focus {
+  left: 0;
 }

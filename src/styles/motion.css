@@ -89,6 +89,40 @@
       transform-origin: left center;
     }
 
+    /*  CHAR — display type assembling one glyph at a time as it
+        crosses the viewport. The stagger is encoded in the RANGE
+        arithmetic, not in delays: animation-delay is meaningless on a
+        scroll timeline, so shifting each glyph's range by --i IS the
+        stagger — and it makes the reveal scrubbable in both
+        directions, which a fired animation can never be. */
+    [data-reveal='char'] {
+      display: inline-block;
+      animation-name: rv-char;
+      animation-range: entry calc(6% + var(--i) * 2.2%) entry
+        calc(42% + var(--i) * 2.2%);
+    }
+
+    @keyframes rv-char {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 0.55em, 0);
+      }
+    }
+
+    /*  TILT — the letterpress line. The line pivots up from its left
+        edge as if being locked into a chase, clipped by its mask
+        while it turns. Two degrees: read as weight, not as spin. */
+    [data-reveal='tilt'] {
+      animation-name: rv-tilt;
+      transform-origin: 0% 100%;
+    }
+
+    @keyframes rv-tilt {
+      from {
+        transform: translate3d(0, 115%, 0) rotate(2.4deg);
+      }
+    }
+
     @keyframes rv-line {
       from {
         transform: translate3d(0, 110%, 0);
@@ -295,6 +329,71 @@
     to {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  /*  CHAR — the entrance form of the glyph-by-glyph assembly, for
+      wordmarks above the fold. Each glyph pivots up from its own
+      left foot inside the shared mask; the slight rotation settles
+      to nothing, so the word arrives set rather than animated. */
+  [data-enter='char'] {
+    display: inline-block;
+    transform-origin: 0% 100%;
+    animation-name: enter-char;
+    animation-duration: 1100ms;
+    animation-timing-function: var(--ease-rise);
+  }
+
+  @keyframes enter-char {
+    from {
+      transform: translate3d(0, 118%, 0) rotate(3.2deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE GLINT — light catching an edge
+
+    A short bright band that crosses a hairline or a rule once as it
+    passes through the viewport: the systemic version of the raking
+    light the cards already catch, at rule scale. Applied to thin
+    brass elements only — on anything larger it reads as a shine
+    effect rather than an edge catching the room's light.
+    ───────────────────────────────────────────────────────────── */
+
+[data-glint] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-glint]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 18%,
+    rgba(255, 246, 232, 0.85) 50%,
+    transparent 82%
+  );
+  transform: translate3d(-101%, 0, 0);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-glint]::after {
+      animation: glint-pass linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 90%;
+    }
+
+    @keyframes glint-pass {
+      to {
+        transform: translate3d(101%, 0, 0);
+      }
     }
   }
 }

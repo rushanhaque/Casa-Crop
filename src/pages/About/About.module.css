@@ -2,10 +2,7 @@
     three principles, one quote. Density falling as the page descends. */
 
 .page {
-  background-color: var(--c-surface);
-  background-image: var(--grain), var(--depth-vignette);
-  background-repeat: repeat, no-repeat;
-  background-size: var(--grain-size), cover;
+  background: var(--c-void);
   color: var(--c-casa-ink);
 }
 
@@ -106,11 +103,11 @@
   background:
     linear-gradient(
         180deg,
-        rgba(237, 229, 216, 0.08) 0%,
-        rgba(237, 229, 216, 0) 30%
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0) 30%
       )
       padding-box,
-    linear-gradient(180deg, #211d17 0%, #191613 100%) padding-box;
+    linear-gradient(180deg, #1c1f24 0%, #14161a 100%) padding-box;
   box-shadow: var(--elev-1), var(--rim);
   transition: transform var(--dur-ui) var(--ease-ui);
 }
@@ -129,9 +126,9 @@
   background: linear-gradient(
     105deg,
     transparent 44%,
-    rgba(237, 229, 216, 0.05) 49%,
-    rgba(237, 229, 216, 0.1) 51%,
-    rgba(237, 229, 216, 0.05) 53%,
+    rgba(255, 255, 255, 0.05) 49%,
+    rgba(255, 255, 255, 0.1) 51%,
+    rgba(255, 255, 255, 0.05) 53%,
     transparent 58%
   );
   transform: translate3d(-70%, 0, 0);
@@ -184,8 +181,50 @@
 /* ── Close ───────────────────────────────────────────────────── */
 
 .close {
+  position: relative;
   padding: clamp(4rem, 10vh, 7rem) var(--gutter) clamp(6rem, 14vh, 10rem);
   max-width: 60rem;
+}
+
+/*  The rose-engine plate. Strokes only, brass, barely there — an
+    engraver's flourish standing behind the house's one spoken line.
+    The section's passage turns it a few degrees each way; the SVG is
+    rasterised once and the rotation is compositor-only. */
+.rosette {
+  position: absolute;
+  right: calc(var(--gutter) * -0.5);
+  top: 50%;
+  width: clamp(16rem, 32vw, 26rem);
+  aspect-ratio: 1;
+  background: url('/guilloche.svg') center / contain no-repeat;
+  opacity: 0.14;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rosette {
+      animation: rosette-turn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+
+    @keyframes rosette-turn {
+      from {
+        transform: translateY(-50%) rotate(-8deg);
+      }
+      to {
+        transform: translateY(-50%) rotate(8deg);
+      }
+    }
+  }
+}
+
+@media (max-width: 48rem) {
+  .rosette {
+    display: none;
+  }
 }
 
 .quoteRule {
@@ -270,4 +309,25 @@
 
 .cta:focus-visible .ctaLabel {
   color: var(--c-void);
+}
+
+/*  The skip link — present on every page, visible only to the
+    keyboard. Same apparatus as the Casa page's. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.9rem 1.4rem;
+  background: var(--c-casa-ink);
+  color: var(--c-surface);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip:focus {
+  left: 0;
 }

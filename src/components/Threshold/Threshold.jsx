@@ -28,16 +28,33 @@ export default function Threshold() {
           JavaScript and the browser can transition between documents
           itself. */}
       <section className={`${s.panel} ${s.casa}`} aria-labelledby="casa-mark">
-        <div className={s.artWrap} data-enter="ground">
+        {/*  data-specular: the heavy light — a warm pool that trails
+            the pointer across the dark ground, injected and driven by
+            lib/specular.js on fine-pointer devices only. It lives on
+            the clipped panel, so the light honours the seam. */}
+        <div className={s.artWrap} data-enter="ground" data-specular>
           <div className={s.art} />
         </div>
         <a className={`${s.inner} ${s.entry}`} href="/casa.html">
-          <span className="mask">
-            <span className={s.wordmark} id="casa-mark" data-enter="line" style={{ '--enter-delay': '180ms' }}>
-              Casa
+          <span className={s.wordmarkMask}>
+            {/*  Glyph-by-glyph: each letter pivots up from its own
+                foot inside the shared mask. The label carries the
+                word; the glyphs are decoration. */}
+            <span className={s.wordmark} id="casa-mark" aria-label="Casa">
+              {Array.from('Casa').map((ch, i) => (
+                <span
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={i}
+                  aria-hidden="true"
+                  data-enter="char"
+                  style={{ '--enter-delay': `${180 + i * 46}ms` }}
+                >
+                  {ch}
+                </span>
+              ))}
             </span>
           </span>
-          <span className={s.legend} data-enter="rise" style={{ '--enter-delay': '400ms' }}>The House</span>
+          <span className={s.legend} data-enter="rise" style={{ '--enter-delay': '480ms' }}>The House</span>
         </a>
       </section>
 
@@ -49,18 +66,33 @@ export default function Threshold() {
           <div className={s.art} />
         </div>
         <div className={s.inner}>
-          <span className="mask">
-            <p className={s.wordmark} id="crop-mark" data-enter="line" style={{ '--enter-delay': '240ms' }}>
-              Crop
+          <span className={s.wordmarkMask}>
+            <p className={s.wordmark} id="crop-mark" aria-label="Crop">
+              {Array.from('Crop').map((ch, i) => (
+                <span
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={i}
+                  aria-hidden="true"
+                  data-enter="char"
+                  style={{ '--enter-delay': `${300 + i * 46}ms` }}
+                >
+                  {ch}
+                </span>
+              ))}
             </p>
           </span>
-          <p className={s.legend} data-enter="rise" style={{ '--enter-delay': '460ms' }}>The Land</p>
-          <span className={s.coming} data-enter="rise" style={{ '--enter-delay': '660ms' }}>Coming Soon</span>
+          <p className={s.legend} data-enter="rise" style={{ '--enter-delay': '540ms' }}>The Land</p>
+          <span className={s.coming} data-enter="rise" style={{ '--enter-delay': '700ms' }}>Coming Soon</span>
         </div>
       </section>
 
-      {/* Drawn last so the hairline sits above both grounds. */}
-      <div className={s.rule} aria-hidden="true" data-enter="draw" style={{ '--enter-delay': '500ms' }} />
+      {/* Drawn last so the hairline sits above both grounds. The inner
+          span is the glint — a short bright segment that travels the
+          seam once after the line has drawn itself, the first metal on
+          the site catching the light. */}
+      <div className={s.rule} aria-hidden="true" data-enter="draw" style={{ '--enter-delay': '500ms' }}>
+        <span className={s.seamGlint} />
+      </div>
     </div>
   )
 }

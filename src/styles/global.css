@@ -62,6 +62,70 @@
   color: var(--c-surface);
 }
 
+/*  ─────────────────────────────────────────────────────────────
+    SCROLLBAR — the site's own apparatus, not the browser's
+
+    A reading instrument in the site's materials: near-black channel,
+    lifted-black thumb, brass under the hand. Styled once here so
+    every page carries the same rail.
+    ───────────────────────────────────────────────────────────── */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-rule-strong) var(--s-0);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--s-0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--c-rule-strong);
+  border-radius: 6px;
+  /*  The border is the channel showing round the thumb — it thins the
+      bar without thinning the hit area. */
+  border: 3px solid var(--s-0);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-stamp);
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    HEAVY LIGHT — the pool a [data-specular] panel carries
+
+    Injected by lib/specular.js. Painted once; only ever transformed.
+    The alpha is low enough that the pool reads as light falling on
+    the surface, never as a spotlight drawn over it.
+    ───────────────────────────────────────────────────────────── */
+
+.specular {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--specular-size, 36rem);
+  height: var(--specular-size, 36rem);
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(240, 217, 168, 0.085),
+    rgba(240, 217, 168, 0.03) 45%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 700ms var(--ease-settle);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.specular.is-lit {
+  opacity: 1;
+}
+
 /*  Visible only to screen readers — used for the page's true <h1>,
     since the wordmarks are set as decorative display type. */
 .sr-only {
@@ -114,14 +178,24 @@
       navigation, on a layer that exists only during the transition,
       which is a very different bargain from clipping per-frame in
       steady state. */
+  /*  The outgoing page does not merely wait to be covered — it
+      settles back and dims as the new page sweeps over it, the same
+      recession every dimmed sibling on the site performs. Transform
+      and opacity only, so the departure costs what a hover costs. */
   ::view-transition-old(root) {
-    animation: none;
+    animation: vt-recede 640ms var(--ease-veil) both;
   }
 
   ::view-transition-new(root) {
     animation: vt-wipe 640ms var(--ease-veil) both;
   }
 
+  @keyframes vt-recede {
+    to {
+      opacity: 0.55;
+      transform: scale(0.982);
+    }
+  }
 
   @keyframes vt-wipe {
     from {
@@ -131,4 +205,40 @@
       clip-path: polygon(0 0, 120% 0, 100% 100%, 0 100%);
     }
   }
+
+  /*  DIRECTION. Going deeper into the site sweeps left-to-right; the
+      browser's back button sweeps right-to-left. The type is set by a
+      four-line pagereveal handler in each document's head reading
+      navigation.activation — the grammar itself costs nothing, it
+      only chooses which precomputed animation runs. A visitor cannot
+      name what this does; they only feel that the site knows where
+      they are. */
+  html:active-view-transition-type(back)::view-transition-new(root) {
+    animation-name: vt-wipe-back;
+  }
+
+  @keyframes vt-wipe-back {
+    from {
+      clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+    }
+    to {
+      clip-path: polygon(-20% 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
+}
+
+/*  The stage itself. For the duration of a navigation the backdrop
+    behind the moving snapshots is the site's deepest black — so even
+    if a snapshot briefly uncovers ground, the visitor sees the well,
+    never a white flash. Literal rather than var(): this must hold
+    even if the token layer has not resolved. */
+::view-transition {
+  background: #060607;
+}
+
+/*  While any transition runs the live page goes quiet: the materials
+    row stops travelling — which also frees the compositor at the
+    exact moment the transition needs it. */
+html:active-view-transition .marquee {
+  animation-play-state: paused;
 }

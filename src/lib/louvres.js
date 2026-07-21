@@ -52,15 +52,26 @@ export function initLouvres(root = document) {
       }
     }
 
+    /*  Hover PRIMES the page transition. The addressed card's title
+        takes the view-transition-name the range page's masthead also
+        carries — so if the visitor commits, the caption they were
+        reading travels across the document swap and becomes the
+        headline. Named at hover rather than statically: seven cards
+        all named would each be lifted out of the page wipe; naming
+        only the one under consideration keeps the departure clean. */
+    const vtTitle = card.querySelector('[data-vt-title]')
+
     const open = (event) => {
       if (still.matches) return
       cascadeFrom(event?.clientX, STEP_IN)
       card.setAttribute('data-turned', '')
+      vtTitle?.style.setProperty('view-transition-name', 'range-title')
     }
 
     const close = (event) => {
       cascadeFrom(event?.clientX, STEP_OUT)
       card.removeAttribute('data-turned')
+      vtTitle?.style.removeProperty('view-transition-name')
     }
 
     /*  Focus opens it too, so the reverse is reachable without a

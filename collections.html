@@ -13,7 +13,12 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Collections — Casa and Crop" />
     <meta property="og:description" content="The seven ranges, from funeral ware to bathroom fittings." />
-    <meta name="theme-color" content="#12100E" />
+    <meta name="theme-color" content="#0C0D0F" />
+    <meta property="og:image" content="https://casaandcrop.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://casaandcrop.com/og.png" />
     <link
       rel="preload"
       as="font"
@@ -21,6 +26,31 @@
       href="/fonts/schibsted-grotesk-latin.woff2"
       crossorigin
     />
+    <!-- The likely next documents are prerendered on hover, so a click
+         starts the page transition on the next frame - and the incoming
+         snapshot is of a finished page, which is what lets named
+         elements morph across documents. Chrome-only; elsewhere this
+         block is inert text. -->
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "where": { "href_matches": "/*" }, "eagerness": "moderate" }
+        ]
+      }
+    </script>
+
+    <!-- Classifies each arrival for the transition grammar: the
+         browser's back button sweeps the page in from the other side. -->
+    <script>
+      addEventListener('pagereveal', (e) => {
+        if (!e.viewTransition || !self.navigation || !navigation.activation) return
+        const { navigationType, entry, from } = navigation.activation
+        const back =
+          navigationType === 'traverse' && from && entry.index < from.index
+        e.viewTransition.types.clear()
+        e.viewTransition.types.add(back ? 'back' : 'forward')
+      })
+    </script>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>

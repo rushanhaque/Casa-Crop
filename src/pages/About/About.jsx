@@ -1,3 +1,4 @@
+import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Lines from '../../components/Lines/Lines'
 import Nav from '../../components/Nav/Nav'
@@ -35,10 +36,14 @@ export default function About() {
 
   return (
     <>
+      <a className={s.skip} href="#content">
+        Skip to content
+      </a>
+
       <Nav current="About Us" />
       <Progress />
 
-      <main className={s.page}>
+      <main className={s.page} id="content">
         <section className={s.masthead} data-scrub="sink">
           <Lines
             as="h1"
@@ -46,6 +51,7 @@ export default function About() {
             lines={['The house that', 'ships the house.']}
             enter
             enterDelay={160}
+            split="chars"
           />
           <p className={s.standfirst} data-enter="rise" style={{ '--enter-delay': '620ms' }}>
             Casa and Crop is a manufacturer and exporter of home metalware, working in
@@ -80,18 +86,33 @@ export default function About() {
         </section>
 
         <section className={s.close}>
+          {/*  The engraving. A rose-engine guilloche plate — the
+              pattern a banknote or a watch dial is cut with — turned
+              a few degrees by the section's own passage, like a plate
+              on a lathe being inched round by hand. Generated once at
+              build time as strokes; the browser rasterises it once
+              and only ever rotates the cached raster. */}
+          <div className={s.rosette} aria-hidden="true" />
+
           {/*  The one serif moment per page — the pull-quote register the
               display face was retired into. */}
           {/*  The rule is set before the words — the page draws the
-              line, then the voice speaks over it. */}
-          <span className={s.quoteRule} aria-hidden="true" data-reveal="draw" />
-          <blockquote className={s.quote} data-reveal="rise" style={{ '--i': 1 }}>
-            <p>
-              “We quote the tolerance, not the adjective.”
-            </p>
+              line, then the voice speaks over it, and the drawn line
+              takes one catch-light as it passes mid-viewport. */}
+          <span className={s.quoteRule} aria-hidden="true" data-reveal="draw" data-glint />
+          <blockquote className={s.quote}>
+            {/*  Letterpress: each line pivots up from its left edge as
+                if being locked into a chase — scrubbed, so backing up
+                the page unsets the type again. */}
+            <Lines
+              as="p"
+              lines={['“We quote the tolerance,', 'not the adjective.”']}
+              variant="tilt"
+              startIndex={1}
+            />
           </blockquote>
 
-          <a className={s.cta} href="/connect.html">
+          <a className={s.cta} href="/connect.html" data-pointer data-magnetic>
             <span className={s.ctaLabel}>Start an enquiry</span>
             <span className={s.ctaFill} aria-hidden="true" />
             <span className={s.ctaRule} aria-hidden="true" />
@@ -100,6 +121,7 @@ export default function About() {
       </main>
 
       <Footer />
+      <Cart />
     </>
   )
 }

@@ -16,22 +16,30 @@
 .shell {
   position: relative;
   margin-top: clamp(3rem, 8vh, 6rem);
+  /*  FULL BLEED. The row sat inside the section's gutter, which left
+      a margin of ground at each end and made an endless row look
+      like a component with padding — the two things it must never
+      look like are "a widget" and "finished". Pulled out by exactly
+      the gutter it is nested in, so it reaches the viewport edge and
+      no further: the swatches are cut by the screen, which is the
+      only edge that should be cutting them. */
+  margin-inline: calc(var(--gutter) * -1);
   overflow: hidden;
   /*  Room above the specimens for the hover growth, which would
       otherwise be clipped by this very overflow. */
   padding-top: 1.75rem;
   padding-bottom: 0.5rem;
 
-  /*  The row runs off both edges rather than stopping at a hard cut,
-      so it reads as continuing rather than as ending — which is the
-      point of an endless row. Static, painted once. */
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 clamp(2rem, 6vw, 6rem),
-    #000 calc(100% - clamp(2rem, 6vw, 6rem)),
-    transparent 100%
-  );
+  /*  The row is CUT at the edges, not faded into them.
+
+      A gradient mask used to dissolve the outermost 96px so the row
+      "ran off" both sides — but a specimen fading into the ground is
+      a specimen that has lost its edge, and at swatch scale that
+      dissolve reads as an image out of focus rather than as a row
+      continuing. A hard clip says the same thing more plainly: a
+      material sliced by the frame is obviously carrying on past it,
+      and every swatch on screen keeps its full density and its
+      machined edge. The overflow above does the clipping. */
 }
 
 .track {
@@ -80,17 +88,17 @@
   background: var(--swatch);
   background-image: var(--sheen);
   border-radius: var(--radius);
-  /*  A solid held against a surface, so it takes the same elevation as
-      everything else, plus a keyline that separates a pale material
-      from a pale ground. */
-  /*  The keyline stays, but at a whisper. It is functional rather
-      than decorative: a pale ceramic or resin swatch on a beige ground
-      is only a few points apart, and with no edge at all it dissolves
-      into the section. At this strength it separates without reading
-      as a border. */
-  box-shadow:
-    var(--elev-2),
-    inset 0 0 0 1px rgba(46, 36, 24, 0.07);
+  /*  A solid held against a surface, so it takes the same elevation
+      as everything else.
+
+      The keyline used to be a faint DARK inset, there because a pale
+      ceramic or resin swatch on a beige ground was only a few points
+      off it and dissolved without an edge. On jet the swatches
+      separate on their own, and a dark line inside them does nothing
+      but soften the corner — so the edge is the site's lit lip
+      instead, which is what every other raised thing here now
+      carries. */
+  box-shadow: var(--elev-2), var(--rim);
   /*  Grows from its own base — anchored, the way a sample held against
       a bench would be, rather than swelling from its middle. */
   transform-origin: center bottom;
@@ -124,6 +132,28 @@
   transition: opacity var(--dur-ui) var(--ease-ui);
 }
 
+/*  The catch-light a handled sample takes: one narrow band crosses
+    the stock's face when it is addressed. Painted once, moved by
+    transform, clipped by the swatch's own radius. */
+.swatch {
+  position: relative;
+  overflow: hidden;
+}
+
+.swatch::after {
+  content: '';
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.26) 50%,
+    transparent 58%
+  );
+  transform: translate3d(-120%, 0, 0);
+  pointer-events: none;
+}
+
 /* ── Address ─────────────────────────────────────────────────────
    The row is already paused by the time any of this is visible, so
    the specimen is never growing and travelling at once. */
@@ -131,6 +161,18 @@
 @media (hover: hover) and (pointer: fine) {
   .alloy:hover .swatch {
     transform: scaleY(1.06);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .alloy:hover .swatch::after {
+      animation: swatch-glint 750ms var(--ease-veil) 1 both;
+    }
+
+    @keyframes swatch-glint {
+      to {
+        transform: translate3d(120%, 0, 0);
+      }
+    }
   }
 
   /*  SIBLING RESPONSE — handling one specimen sets the others back, so

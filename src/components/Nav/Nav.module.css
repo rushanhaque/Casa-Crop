@@ -26,9 +26,7 @@
   position: absolute;
   inset: 0;
   background-color: var(--s-1);
-  background-image: var(--grain);
-  background-repeat: repeat;
-  background-size: var(--grain-size);
+
   box-shadow: 0 8px 24px -12px hsl(var(--sh) / 0.6);
   opacity: 0;
   pointer-events: none;
@@ -79,13 +77,26 @@
   transition: transform var(--dur-ui) var(--ease-ui);
 }
 
-/*  The ampersand is the one brass character — the seam of the name. */
+/*  The ampersand is the one brass character — the seam of the name.
+    Its gradient is oversized so that addressing the mark slides the
+    light across the glyph: one character catching the room, which is
+    all the letterhead needs to do. The repaint area is a single
+    glyph — measured in tens of pixels. */
 .markAmp {
   padding: 0 0.14em;
   background: var(--metal-brass);
+  background-size: 250% 100%;
+  background-position: 30% 0;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  transition: background-position 700ms var(--ease-settle);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mark:hover .markAmp {
+    background-position: 70% 0;
+  }
 }
 
 @supports not ((background-clip: text) or (-webkit-background-clip: text)) {
@@ -329,9 +340,7 @@
   align-items: center;
   padding: 5.5rem var(--gutter) var(--gutter);
   background-color: var(--s-1);
-  background-image: var(--grain), var(--depth-vignette);
-  background-repeat: repeat, no-repeat;
-  background-size: var(--grain-size), cover;
+
   opacity: 0;
   transform: translate3d(0, -1.25rem, 0);
   visibility: hidden;

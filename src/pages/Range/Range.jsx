@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react'
+import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Lines from '../../components/Lines/Lines'
 import Nav from '../../components/Nav/Nav'
 import Progress from '../../components/Progress/Progress'
+import { addItem } from '../../lib/cart'
 import { useReveal } from '../../lib/useReveal'
 import s from './Range.module.css'
 
@@ -112,10 +115,14 @@ export default function Range() {
 
   return (
     <>
+      <a className={s.skip} href="#content">
+        Skip to content
+      </a>
+
       <Nav current="Collections" />
       <Progress />
 
-      <main className={s.page}>
+      <main className={s.page} id="content">
         <section className={s.masthead}>
           {/*  The range number, set enormous and ghosted behind the
               name — the pattern-book plate number as architecture. */}
@@ -146,48 +153,81 @@ export default function Range() {
           ) : null}
         </section>
 
-        <section className={s.specBar} aria-label="Specification">
-          {range.spec.map(([k, v], i) => (
-            <div className={s.specCell} key={k} data-reveal="rise" style={{ '--i': i }}>
-              <span className={s.specKey}>{k}</span>
-              <span className={s.specValue}>{v}</span>
-            </div>
-          ))}
-        </section>
-
         <section className={s.plates} aria-label="Catalogue">
           {Array.from({ length: PLATE_COUNT }, (_, i) => (
-            <article className={s.plate} key={i} data-reveal="rise" style={{ '--i': i % 4 }}>
-              <span className={s.plateGhost} aria-hidden="true" data-scrub="float">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <div className={s.plateWell}>
-                {/*  The reserved image slot. Aspect is fixed so the
-                    grid cannot shift when photography lands. */}
-                <div className={s.plateArt} />
-                {/*  The pour: molten brass rises from the foot of the
-                    well on hover, its surface line carrying the same
-                    tilt as every edge on the site, with the enquiry
-                    cue riding the meniscus. The footer pours letters;
-                    the plates pour their wells — one foundry gesture,
-                    two scales. */}
-                <span className={s.platePour} aria-hidden="true">
-                  <span className={s.pourCue}>Enquire this piece</span>
-                </span>
-              </div>
-              <div className={s.plateFoot}>
-                <span className={s.plateSku}>
-                  CC-{activeSlug.slice(0, 3).toUpperCase()}-{String(i + 1).padStart(3, '0')}
-                </span>
-                <span className={s.plateState}>Awaiting catalogue</span>
-              </div>
-            </article>
+            <Plate
+              key={i}
+              i={i}
+              range={range}
+              sku={`CC-${activeSlug.slice(0, 3).toUpperCase()}-${String(i + 1).padStart(3, '0')}`}
+            />
           ))}
         </section>
-
       </main>
 
       <Footer />
+      <Cart />
     </>
+  )
+}
+
+/**
+ * One catalogue plate.
+ *
+ * A component of its own only because of the acknowledgement: the
+ * button has to say it heard you, and that is a piece of state that
+ * belongs to this plate and no other.
+ */
+function Plate({ i, range, sku }) {
+  const [added, setAdded] = useState(false)
+
+  useEffect(() => {
+    if (!added) return undefined
+    const t = setTimeout(() => setAdded(false), 1600)
+    return () => clearTimeout(t)
+  }, [added])
+
+  const onAdd = () => {
+    addItem({
+      sku,
+      name: range.name,
+      range: range.meta,
+      /*  The alloy and finish travel with the line, so the enquiry
+          the buyer sends carries the specification they were looking
+          at rather than a bare code. */
+      spec: range.spec
+        .filter(([k]) => k === 'Alloy' || k === 'Finish')
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(' · '),
+    })
+    setAdded(true)
+  }
+
+  return (
+    <article className={s.plate} data-reveal="rise" style={{ '--i': i % 4 }}>
+      <span className={s.plateGhost} aria-hidden="true" data-scrub="float">
+        {String(i + 1).padStart(2, '0')}
+      </span>
+      <div className={s.plateWell}>
+        {/*  The reserved image slot. Aspect is fixed so the grid
+            cannot shift when photography lands. */}
+        <div className={s.plateArt} />
+
+        {/*  The pour, held back to a sill. It used to flood half the
+            well — a whole face of brass to carry three words, which
+            buried the piece under its own call to action. Now it
+            rises exactly as far as the line of type needs, and the
+            tilted meniscus still reads because a shallow pour is
+            where a tilt is most visible. */}
+        <button className={s.add} type="button" onClick={onAdd} data-added={added ? '' : undefined}>
+          <span className={s.addFill} aria-hidden="true" />
+          <span className={s.addLabel}>{added ? 'Added to cart' : 'Add to cart'}</span>
+        </button>
+      </div>
+      <div className={s.plateFoot}>
+        <span className={s.plateSku}>{sku}</span>
+        <span className={s.plateState}>Awaiting catalogue</span>
+      </div>
+    </article>
   )
 }

@@ -3,10 +3,7 @@
     catalogue plates are designed to look finished while empty. */
 
 .page {
-  background-color: var(--c-surface);
-  background-image: var(--grain), var(--depth-vignette);
-  background-repeat: repeat, no-repeat;
-  background-size: var(--grain-size), cover;
+  background: var(--c-void);
   color: var(--c-casa-ink);
 }
 
@@ -29,7 +26,7 @@
   font-size: clamp(12rem, 34vw, 30rem);
   line-height: 0.8;
   letter-spacing: var(--track-xl);
-  color: rgba(237, 229, 216, 0.045);
+  color: rgba(255, 255, 255, 0.045);
   pointer-events: none;
   user-select: none;
 }
@@ -37,7 +34,7 @@
 @supports (-webkit-text-stroke: 1px #000) {
   .ghost {
     color: transparent;
-    -webkit-text-stroke: 1.5px rgba(237, 229, 216, 0.08);
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.08);
   }
 }
 
@@ -70,6 +67,12 @@
   line-height: 0.94;
   letter-spacing: var(--track-xl);
   margin: 0;
+  /*  Answers the caption of whichever collection card was addressed
+      on the previous page: with the destination prerendered, the name
+      the visitor clicked travels the document swap and lands here as
+      the headline. Where view transitions are unsupported this line
+      is inert. */
+  view-transition-name: range-title;
 }
 
 .lede {
@@ -89,37 +92,15 @@
   color: var(--c-stamp);
 }
 
-/* ── Spec bar ────────────────────────────────────────────────── */
+/*  THE SPECIFICATION BAR IS GONE.
 
-.specBar {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-  gap: clamp(1rem, 3vw, 2.5rem);
-  padding: clamp(1.5rem, 4vh, 2.5rem) var(--gutter);
-  border-top: 1px solid var(--c-rule);
-  border-bottom: 1px solid var(--c-rule);
-}
-
-.specCell {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.specKey {
-  font-family: var(--f-text);
-  font-size: var(--t-1);
-  font-weight: 500;
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--c-ink-muted);
-}
-
-.specValue {
-  font-family: var(--f-display);
-  font-weight: var(--w-display);
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
-  letter-spacing: var(--track-md);
-}
+    It ran Alloy / Finish / Minimum / Lead time across the page in
+    display type, directly beneath a lede that had already said what
+    the range was made of. Two statements of the same four facts,
+    one immediately after the other, and the louder of the two was
+    the one a buyer had not asked for yet. The figures still travel:
+    they ride each piece into the shortlist, so the enquiry that
+    leaves carries the alloy and the finish with it. */
 
 /* ── The plates ──────────────────────────────────────────────── */
 
@@ -140,11 +121,11 @@
   background:
     linear-gradient(
         180deg,
-        rgba(237, 229, 216, 0.08) 0%,
-        rgba(237, 229, 216, 0) 30%
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0) 30%
       )
       padding-box,
-    linear-gradient(180deg, #211d17 0%, #191613 100%) padding-box;
+    linear-gradient(180deg, #1c1f24 0%, #14161a 100%) padding-box;
   box-shadow: var(--elev-1), var(--rim);
   /*  Transform only. The deeper hover shadow is a pre-painted layer
       crossfaded below — transitioning box-shadow itself interpolates
@@ -177,9 +158,9 @@
   background: linear-gradient(
     105deg,
     transparent 44%,
-    rgba(237, 229, 216, 0.05) 49%,
-    rgba(237, 229, 216, 0.11) 51%,
-    rgba(237, 229, 216, 0.05) 53%,
+    rgba(255, 255, 255, 0.05) 49%,
+    rgba(255, 255, 255, 0.11) 51%,
+    rgba(255, 255, 255, 0.05) 53%,
     transparent 58%
   );
   transform: translate3d(-70%, 0, 0);
@@ -216,7 +197,7 @@
   font-weight: var(--w-display);
   font-size: 5.5rem;
   line-height: 1;
-  color: rgba(237, 229, 216, 0.05);
+  color: rgba(255, 255, 255, 0.05);
   pointer-events: none;
   user-select: none;
 }
@@ -268,53 +249,75 @@
   color: var(--c-ink-muted);
 }
 
-/* ── The pour ────────────────────────────────────────────────────
-   Molten brass rising from the foot of the well. The surface line is
-   the site's tilt, cut as a static clip on the layer's own top edge —
-   the layer then simply translates, so the moving part is transform
-   only and the molten surface arrives already tilted. */
+/* ── The sill ────────────────────────────────────────────────────
+   Molten brass rising from the foot of the well — held to a sill.
 
-.platePour {
+   It used to flood 46% of the plate: a whole face of brass carrying
+   three words, which buried the piece under its own call to action
+   at exactly the moment the visitor was looking at it. It now rises
+   only as far as one line of type needs, and the tilted meniscus
+   reads BETTER for it — a shallow pour is where a slope is most
+   legible, because there is nothing but the slope to look at.
+
+   The surface line is the site's tilt, cut as a static clip on the
+   layer's own top edge; the layer then simply translates, so the
+   moving part is transform only and the brass arrives already
+   tilted. */
+
+.plateWell {
+  position: relative;
+}
+
+.add {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 46%;
+  /*  Just enough for the line: the label's cap-height plus its own
+      breathing room, and the tilt's rise on top. */
+  height: 2.5rem;
   display: flex;
   align-items: flex-end;
-  padding: 0 0.9rem 0.8rem;
-  background: var(--metal-brass);
-  clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 100%);
-  transform: translate3d(0, 103%, 0);
-  transition: transform 480ms var(--ease-veil);
-  pointer-events: none;
+  justify-content: center;
+  padding-bottom: 0.62rem;
+  /*  The sill is the button. A separate hit area inside a decorative
+      pour would mean the thing that looks pressable and the thing
+      that is pressable are different shapes. */
+  transform: translate3d(0, 101%, 0);
+  transition: transform 420ms var(--ease-veil);
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
 }
 
-.pourCue {
+.addFill {
+  position: absolute;
+  inset: 0;
+  background: var(--metal-brass);
+  clip-path: polygon(0 22%, 100% 0, 100% 100%, 0 100%);
+}
+
+.addLabel {
+  position: relative;
+  z-index: 1;
   font-family: var(--f-text);
   font-size: var(--t-1);
   font-weight: 500;
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--c-void);
-  opacity: 0;
-  transform: translate3d(0, 0.4rem, 0);
-  transition:
-    opacity var(--dur-ui) var(--ease-ui) 180ms,
-    transform var(--dur-ui) var(--ease-ui) 180ms;
+  white-space: nowrap;
 }
 
-.plateWell {
-  position: relative;
+/*  The acknowledgement. The sill stays up for a beat after the
+    press, so the plate says it heard you rather than snapping shut
+    the instant the pointer leaves. */
+.add[data-added] {
+  transform: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .plate:hover .platePour {
-    transform: none;
-  }
-
-  .plate:hover .pourCue {
-    opacity: 1;
+  .plate:hover .add,
+  .add:focus-visible {
     transform: none;
   }
 
@@ -325,13 +328,51 @@
   }
 }
 
+.add:active .addLabel {
+  transform: translateY(1px);
+}
+
+/*  No hover on a touchscreen, so the sill simply sits on the well —
+    a shortlist you cannot reach is worse than a sill you did not
+    ask for. */
+@media (hover: none) {
+  .add {
+    transform: none;
+  }
+}
+
 .plate:active {
   transform: translate3d(0, -2px, 0) scale(0.995);
   transition-duration: 120ms;
 }
 
+/*  Reduced motion keeps the sill, loses the rise: it simply sits on
+    the well, because a control that is only reachable through an
+    animation is not reachable. */
 @media (prefers-reduced-motion: reduce) {
-  .platePour {
+  .add {
+    transform: none;
     transition: none;
   }
+}
+
+/*  The skip link — present on every page, visible only to the
+    keyboard. Same apparatus as the Casa page's. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.9rem 1.4rem;
+  background: var(--c-casa-ink);
+  color: var(--c-surface);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip:focus {
+  left: 0;
 }
