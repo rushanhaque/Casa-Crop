@@ -4,154 +4,11 @@ import {
   getItems,
   mailHref,
   removeItem,
-  setQty,
   subscribe,
   whatsappHref,
 } from '../../lib/cart'
+import Corde from '../Corde/Corde'
 import s from './Cart.module.css'
-
-/**
- * THE STRING — one per shortlist line.
- *
- * The rule beneath each entry is a real string: pull it and let go
- * and it rings at its own pitch, higher as you go down the list. It
- * is the one piece of canvas on the site, and it earns its place by
- * being honest about cost — the loop runs only while a string is
- * actually ringing and stops itself the moment the amplitude falls
- * under a fiftieth, so a settled shortlist costs nothing at all.
- *
- * Borrowed, with thanks, from the Cordes index — the pluckable list.
- */
-function Corde({ index }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const cnv = ref.current
-    if (!cnv) return undefined
-
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const ctx = cnv.getContext('2d')
-    let w = 0
-    let h = 0
-    let dpr = 1
-    let raf = 0
-    let px = 0
-    let pull = 0
-
-    const size = () => {
-      const box = cnv.getBoundingClientRect()
-      if (box.width === 0) return
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
-      w = box.width
-      h = box.height
-      cnv.width = Math.round(w * dpr)
-      cnv.height = Math.round(h * dpr)
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      draw(null)
-    }
-
-    /*  A half-sine along the whole span, swollen where the finger
-        is: the string is pinned at both ends and pulled at one
-        point, which is what makes the shape read as tension rather
-        than as a wave drawn on a box. */
-    const shape = (x, at) =>
-      Math.sin((Math.PI * x) / w) *
-      (0.35 + 0.65 * Math.exp(-((x - at) ** 2) / (2 * (w * 0.2) ** 2)))
-
-    function draw(disp) {
-      if (w === 0) return
-      ctx.clearRect(0, 0, w, h)
-      ctx.strokeStyle = 'rgba(201, 177, 145, 0.75)'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      for (let i = 0; i <= 30; i++) {
-        const x = (w * i) / 30
-        const y = h * 0.5 + (disp ? disp(x) : 0)
-        if (i === 0) ctx.moveTo(x, y)
-        else ctx.lineTo(x, y)
-      }
-      ctx.stroke()
-    }
-
-    /*  Damped ring. Pitch rises with position in the list, so a
-        shortlist read top to bottom is a rising scale. */
-    function ring(amp, at) {
-      if (still.matches) {
-        draw(null)
-        return
-      }
-      const freq = 3.2 + index * 0.45
-      const t0 = performance.now()
-      cancelAnimationFrame(raf)
-      const tick = (now) => {
-        const t = (now - t0) / 1000
-        const decay = Math.exp(-t * 2.6)
-        if (decay < 0.02) {
-          draw(null)
-          raf = 0
-          return
-        }
-        const a = amp * decay
-        draw((x) => shape(x, at) * a * Math.cos(2 * Math.PI * freq * t))
-        raf = requestAnimationFrame(tick)
-      }
-      raf = requestAnimationFrame(tick)
-    }
-
-    const onDown = (e) => {
-      cnv.setPointerCapture?.(e.pointerId)
-      const box = cnv.getBoundingClientRect()
-      px = e.clientX - box.left
-      pull = 0
-      cancelAnimationFrame(raf)
-      raf = 0
-    }
-
-    const onMove = (e) => {
-      if (!cnv.hasPointerCapture?.(e.pointerId)) return
-      const box = cnv.getBoundingClientRect()
-      px = e.clientX - box.left
-      /*  Clamped, or a determined drag turns the hairline into a
-          tent pole. */
-      pull = Math.max(-16, Math.min(16, e.clientY - box.top - h * 0.5))
-      draw((x) => shape(x, px) * pull)
-    }
-
-    const onUp = (e) => {
-      if (!cnv.hasPointerCapture?.(e.pointerId)) return
-      cnv.releasePointerCapture?.(e.pointerId)
-      if (Math.abs(pull) < 0.5) return
-      ring(pull, px)
-      pull = 0
-    }
-
-    size()
-    /*  A line arriving in the list announces itself. */
-    ring(9, w * 0.5)
-
-    const ro = new ResizeObserver(size)
-    ro.observe(cnv)
-    cnv.addEventListener('pointerdown', onDown)
-    cnv.addEventListener('pointermove', onMove)
-    cnv.addEventListener('pointerup', onUp)
-    cnv.addEventListener('pointercancel', onUp)
-
-    return () => {
-      cancelAnimationFrame(raf)
-      ro.disconnect()
-      cnv.removeEventListener('pointerdown', onDown)
-      cnv.removeEventListener('pointermove', onMove)
-      cnv.removeEventListener('pointerup', onUp)
-      cnv.removeEventListener('pointercancel', onUp)
-    }
-  }, [index])
-
-  return (
-    <span className={s.string} aria-hidden="true">
-      <canvas ref={ref} />
-    </span>
-  )
-}
 
 /**
  * The shortlist — a drawer of marked pieces, and the two ways to
@@ -165,6 +22,7 @@ export default function Cart() {
   const [items, setItems] = useState(getItems)
   const [open, setOpen] = useState(false)
   const paneRef = useRef(null)
+  const fabRef = useRef(null)
 
   useEffect(() => subscribe(setItems), [])
 
@@ -179,48 +37,83 @@ export default function Cart() {
   useEffect(() => {
     if (!open) return undefined
     const onKey = (e) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        setOpen(false)
+        return
+      }
+      /*  Trap Tab inside the drawer while it is open — role=dialog +
+          aria-modal promises the background is inert, so keyboard focus
+          must not walk out into the page behind the scrim. */
+      if (e.key !== 'Tab') return
+      const pane = paneRef.current
+      if (!pane) return
+      const f = pane.querySelectorAll('a[href], button:not([disabled])')
+      if (f.length === 0) return
+      const first = f[0]
+      const last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+
+    /*  Lock the background the iOS-robust way — overflow:hidden alone
+        is ignored by Safari's touch scrolling, so the page rubber-
+        bands behind the drawer. Pin it with position:fixed and put the
+        scroll back on close. */
+    const scrollY = window.scrollY
+    const body = document.body
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.width = '100%'
+    body.style.overflow = 'hidden'
+
     document.addEventListener('keydown', onKey)
     /*  Move the reading position into the drawer, or a keyboard
         visitor opens it and then tabs through the page behind. */
     paneRef.current?.focus()
     return () => {
-      document.body.style.overflow = prev
+      body.style.position = prev.position
+      body.style.top = prev.top
+      body.style.width = prev.width
+      body.style.overflow = prev.overflow
+      window.scrollTo(0, scrollY)
       document.removeEventListener('keydown', onKey)
+      /*  Hand focus back to the case that opened the drawer. */
+      fabRef.current?.focus()
     }
   }, [open])
 
   return (
     <>
-      {/*  The case. Not a supermarket trolley — this house ships
-          crates, and a crate is what a buyer is actually filling. */}
+      {/*  The case — a plain, recognisable shopping-cart mark. An
+          earlier crate glyph was too cryptic to read as "your
+          shortlist" at a glance; this is the one place on the site
+          where legibility earns its keep over metaphor. */}
       <button
         className={s.fab}
         type="button"
+        ref={fabRef}
         data-shown={n > 0 ? '' : undefined}
         onClick={() => setOpen(true)}
         aria-label={`Open the shortlist — ${n} ${n === 1 ? 'piece' : 'pieces'}`}
         aria-expanded={open}
+        aria-haspopup="dialog"
         tabIndex={n > 0 ? 0 : -1}
       >
-        <svg className={s.fabMark} viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M3 7.5 12 12l9-4.5M12 12v9"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinejoin="round"
-          />
+        <svg className={s.fabMark} viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
         </svg>
         <span className={s.fabCount}>{n}</span>
       </button>
@@ -241,6 +134,8 @@ export default function Cart() {
         className={s.pane}
         data-open={open ? '' : undefined}
         inert={!open}
+        role="dialog"
+        aria-modal="true"
         aria-label="The shortlist"
         tabIndex={-1}
         ref={paneRef}
@@ -276,26 +171,6 @@ export default function Cart() {
 
                 <span className={s.meta}>{it.range}</span>
 
-                <span className={s.qty}>
-                  <button
-                    className={s.step}
-                    type="button"
-                    onClick={() => setQty(it.sku, it.qty - 1)}
-                    aria-label={`Fewer of ${it.sku}`}
-                  >
-                    −
-                  </button>
-                  <span className={s.qtyValue}>{String(it.qty).padStart(2, '0')}</span>
-                  <button
-                    className={s.step}
-                    type="button"
-                    onClick={() => setQty(it.sku, it.qty + 1)}
-                    aria-label={`More of ${it.sku}`}
-                  >
-                    +
-                  </button>
-                </span>
-
                 <button
                   className={s.strike}
                   type="button"
@@ -306,7 +181,7 @@ export default function Cart() {
                 </button>
               </div>
 
-              <Corde index={i} />
+              <Corde index={i} className={s.string} />
             </li>
           ))}
         </ol>

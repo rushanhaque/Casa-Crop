@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import Cart from '../../components/Cart/Cart'
 import Collections from '../../components/Collections/Collections'
 import Figure from '../../components/Figure/Figure'
@@ -18,6 +19,215 @@ import s from './Casa.module.css'
     Fabricated capacities, certifications or trade figures on an
     export site are not a design detail; they are a claim.
     ───────────────────────────────────────────────────────────── */
+
+/*  The path a piece travels, set as a Cordes index — an index strung
+    like an instrument. The rule beneath each station is a real
+    string; the `gesture` rides beside the name in italic, the `tag`
+    is the verb the station turns on. */
+const JOURNEY = [
+  { n: '01', label: 'Enquiry', gesture: 'the drawing arrives', tag: 'Enquire' },
+  { n: '02', label: 'Design', gesture: 'your name on the title block', tag: 'Draw' },
+  { n: '03', label: 'Sample', gesture: 'the first article', tag: 'Prove' },
+  { n: '04', label: 'Forge', gesture: 'one boundary wall', tag: 'Cast' },
+  { n: '05', label: 'Finish', gesture: 'measured, not described', tag: 'Finish' },
+  { n: '06', label: 'Delivery', gesture: 'the report travels with it', tag: 'Ship' },
+]
+
+/**
+ * One station of the Cordes index — a pluckable line, ported faithfully
+ * from the maison-quinte Cordes collection.
+ *
+ * The rule beneath each station is a real string, and THE WORDS RIDE THE
+ * WAVE: while a string rings, the text bobs a quarter of the string's own
+ * centre displacement, then settles as it stills. The strings STRUM
+ * THEMSELVES in a rising sequence as the section arrives — a scale
+ * climbing the list — and afterwards sleep, the loop running only while a
+ * line is actually moving.
+ *
+ * A fine pointer PULLS the line (drag away from it, release, and it rings
+ * with the amplitude you gave it); a touch TAPS the row to pluck it.
+ */
+function Station({ step, index }) {
+  const rowRef = useRef(null)
+  const infoRef = useRef(null)
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const cnv = canvasRef.current
+    const info = infoRef.current
+    const row = rowRef.current
+    if (!cnv || !info || !row) return undefined
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const coarse = window.matchMedia('(hover: none), (pointer: coarse)')
+    const ctx = cnv.getContext('2d')
+    const st = { w: 0, h: 0, dpr: 1, mode: 'idle', px: 0, pull: 0, A: 0, raf: 0, timer: 0 }
+
+    const restY = () => st.h * 0.5
+
+    /*  A half-sine pinned at both ends, swollen where the finger is —
+        tension, not a wave drawn on a box. */
+    const shape = (x, px, w) =>
+      Math.sin((Math.PI * x) / w) *
+      (0.35 + 0.65 * Math.exp(-((x - px) ** 2) / (2 * (w * 0.2) ** 2)))
+
+    function draw(dispFn) {
+      const { w, h } = st
+      if (!w) return
+      ctx.clearRect(0, 0, w, h)
+      /*  Brass, where the reference is silver — the one warm thing on
+          the page, poured at line scale. */
+      ctx.strokeStyle = 'rgba(201, 177, 145, 0.75)'
+      ctx.lineWidth = 1.3 * st.dpr
+      ctx.beginPath()
+      for (let i = 0; i <= 30; i += 1) {
+        const x = (w * i) / 30
+        const y = restY() + (dispFn ? dispFn(x) : 0)
+        if (i === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      }
+      ctx.stroke()
+    }
+
+    /*  Damped ring. Pitch rises with position in the list; the info
+        rides the wave at a quarter amplitude, then returns to rest. */
+    function ring() {
+      const { w, px, A } = st
+      const fv = 3 + index * 0.45
+      const t0 = performance.now()
+      cancelAnimationFrame(st.raf)
+      st.mode = 'ring'
+      const vib = (now) => {
+        const t = (now - t0) / 1000
+        const amp = A * Math.exp(-3.4 * t)
+        if (Math.abs(amp) < 0.5) {
+          st.mode = 'idle'
+          draw(null)
+          info.style.transform = ''
+          return
+        }
+        const dispFn = (x) => amp * Math.cos(2 * Math.PI * fv * t) * shape(x, px, w)
+        draw(dispFn)
+        info.style.transform = `translateY(${((dispFn(w * 0.5) / st.dpr) * 0.25).toFixed(2)}px)`
+        st.raf = requestAnimationFrame(vib)
+      }
+      st.raf = requestAnimationFrame(vib)
+    }
+
+    /*  A pluck at a fixed point — the touch tap and the arrival strum. */
+    const pluck = (a, at) => {
+      if (reduced.matches) return
+      st.px = st.w * at
+      st.A = a * st.dpr
+      ring()
+    }
+
+    const size = () => {
+      const r = cnv.getBoundingClientRect()
+      if (!r.width) return
+      st.dpr = Math.min(window.devicePixelRatio || 1, 2)
+      st.w = cnv.width = Math.round(r.width * st.dpr)
+      st.h = cnv.height = Math.round(r.height * st.dpr)
+      draw(null)
+    }
+    size()
+    const ro = new ResizeObserver(size)
+    ro.observe(cnv)
+
+    /*  Fine pointer: drag the line and release. */
+    const onMove = (e) => {
+      const r = cnv.getBoundingClientRect()
+      st.px = (e.clientX - r.left) * st.dpr
+      st.pull = Math.max(
+        -16 * st.dpr,
+        Math.min(16 * st.dpr, (e.clientY - r.top) * st.dpr - restY()),
+      )
+      if (st.mode !== 'drag') {
+        cancelAnimationFrame(st.raf)
+        st.mode = 'drag'
+      }
+      draw(
+        (x) =>
+          st.pull *
+          Math.exp(-((x - st.px) ** 2) / (2 * (st.w * 0.16) ** 2)) *
+          Math.sin((Math.PI * x) / st.w) *
+          1.1,
+      )
+    }
+    const onLeave = () => {
+      if (st.mode === 'drag' && Math.abs(st.pull) > 2.5 * st.dpr) {
+        st.A = st.pull
+        if (reduced.matches) {
+          st.mode = 'idle'
+          draw(null)
+        } else ring()
+      } else {
+        st.mode = 'idle'
+        draw(null)
+      }
+    }
+    /*  Touch: a tap anywhere on the row plucks it. */
+    const onTap = () => pluck(12, 0.35)
+
+    if (coarse.matches) {
+      row.addEventListener('click', onTap)
+    } else {
+      cnv.addEventListener('pointermove', onMove, { passive: true })
+      cnv.addEventListener('pointerleave', onLeave)
+    }
+
+    /*  The arrival strum: each string sounds itself as the row enters
+        view, staggered down the list so the section rings in as a
+        rising scale. IntersectionObserver, so it plays on every
+        browser — including those without scroll-driven CSS. */
+    let io = null
+    if (!reduced.matches && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const en of entries) {
+            if (!en.isIntersecting) continue
+            st.timer = setTimeout(() => pluck(11, 0.25 + index * 0.12), 250 + index * 160)
+            io.unobserve(en.target)
+          }
+        },
+        { threshold: 0.4 },
+      )
+      io.observe(row)
+    }
+
+    return () => {
+      cancelAnimationFrame(st.raf)
+      clearTimeout(st.timer)
+      ro.disconnect()
+      io?.disconnect()
+      row.removeEventListener('click', onTap)
+      cnv.removeEventListener('pointermove', onMove)
+      cnv.removeEventListener('pointerleave', onLeave)
+    }
+  }, [index])
+
+  return (
+    <li
+      className={s.station}
+      ref={rowRef}
+      /*  Woven arrival — stations slide in from alternating edges. The
+          section clips, so the off-position never reaches the page. */
+      data-reveal={index % 2 === 0 ? 'slide-right' : 'slide-left'}
+      style={{ '--i': index }}
+    >
+      <div className={s.stationInfo} ref={infoRef}>
+        <span className={s.stationNum} aria-hidden="true">{step.n}</span>
+        <h3 className={s.stationName}>
+          {step.label} <i>{step.gesture}</i>
+        </h3>
+        <span className={s.stationTag} aria-hidden="true">{step.tag}</span>
+      </div>
+      <span className={s.stationString} aria-hidden="true">
+        <canvas ref={canvasRef} />
+      </span>
+    </li>
+  )
+}
 
 /*  Capability figures, not a chronicle. Every value is a PLACEHOLDER
     in the right shape — a fabricated headcount or capacity on an
@@ -81,7 +291,8 @@ export default function Casa() {
             ['02', 'Materials', '#materials', s.railItem2],
             ['03', 'Signature', '#signature', s.railItem3],
             ['04', 'Heritage', '#heritage', s.railItem4],
-            ['05', 'The house', '#house', s.railItem5],
+            ['05', 'Process', '#journey', s.railItem6],
+            ['06', 'The house', '#house', s.railItem5],
           ].map(([index, label, href, cls]) => (
             <a className={`${s.railItem} ${cls}`} href={href} key={index}>
               <span className={s.railTick} aria-hidden="true" />
@@ -139,8 +350,8 @@ export default function Casa() {
         <section className={s.collections} id="ranges" aria-labelledby="ranges-title">
           <header className={s.head}>
             <Lines as="h2" className={s.sectionTitle} id="ranges-title" lines={['Collections']} split="chars" />
-            <p className={s.standfirst} data-reveal="rise" style={{ '--i': 1 }}>
-              Seven programmes, tooled and held as running lines — turn a card for
+            <p className={s.standfirst} data-reveal="blur-in" style={{ '--i': 1 }}>
+              Six programmes, tooled and held as running lines — turn a card for
               its specification.
             </p>
           </header>
@@ -150,7 +361,7 @@ export default function Casa() {
 
         {/* ── 3. Materials ───────────────────────────────────── */}
         <section className={s.materials} id="materials" aria-labelledby="materials-title">
-          <header className={s.head}>
+          <header className={s.head} data-reveal="slide-up">
             <Lines
               as="h2"
               className={s.sectionTitle}
@@ -165,12 +376,12 @@ export default function Casa() {
 
         {/* ── 4. Signature ───────────────────────────────────── */}
         <section className={s.signature} id="signature" aria-labelledby="signature-title">
-          <header className={s.head}>
+          <header className={s.head} data-reveal="flip-in">
             <Lines
               as="h2"
               className={s.sectionTitle}
               id="signature-title"
-              lines={['The Ferro 14', 'lever set']}
+              lines={['The Ferro 14 lever set']}
               split="chars"
             />
           </header>
@@ -238,6 +449,29 @@ export default function Casa() {
           </dl>
         </section>
 
+        {/* ── Journey — the pluckable index ───────────────────── */}
+        <section 
+          className={s.journey} 
+          id="journey" 
+          aria-labelledby="journey-title"
+          style={{ '--reveal-start': '2%', '--reveal-end': '25%', '--reveal-delay': '0ms' }}
+        >
+          <header className={s.journeyHead}>
+            <span className={s.journeyEye} data-reveal="rise" style={{ '--i': 0 }}>Process</span>
+            <Lines as="h2" className={s.sectionTitle} id="journey-title" lines={['The path a piece travels.']} split="chars" />
+            <p className={s.journeyLede} data-reveal="rise" style={{ '--i': 1 }}>
+              Every commission passes through the same six stations — no shortcuts, no
+              exceptions. The rule beneath each is a real string; pull it, and it rings.
+            </p>
+          </header>
+
+          <ol className={s.cordeList}>
+            {JOURNEY.map((step, i) => (
+              <Station step={step} index={i} key={step.n} />
+            ))}
+          </ol>
+        </section>
+
         {/* ── 6. About ───────────────────────────────────────── */}
         <section className={s.about} id="house" aria-labelledby="about-title">
           <Lines
@@ -261,7 +495,7 @@ export default function Casa() {
             </p>
           </div>
 
-          <a className={s.cta} href="/connect.html" data-pointer data-magnetic>
+          <a className={s.cta} href="/connect.html" data-pointer data-magnetic data-reveal="rise" style={{ '--i': 5 }}>
             <span className={s.ctaLabel}>Request a sample set</span>
             <span className={s.ctaFill} aria-hidden="true" />
             {/*  The catch-light: once the fill has risen, a narrow band

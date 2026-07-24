@@ -15,7 +15,7 @@
 
 .shell {
   position: relative;
-  margin-top: clamp(3rem, 8vh, 6rem);
+  margin-top: clamp(4rem, 9vh, 7rem);
   /*  FULL BLEED. The row sat inside the section's gutter, which left
       a margin of ground at each end and made an endless row look
       like a component with padding — the two things it must never
@@ -69,6 +69,17 @@
 
 /*  Stop whenever someone is reading. A specification that slides out
     from under a sentence is worse than no specification. */
+.shell:hover,
+.shell:focus-within {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.shell:hover::-webkit-scrollbar,
+.shell:focus-within::-webkit-scrollbar {
+  display: none;
+}
+
 .shell:hover .track,
 .shell:focus-within .track {
   animation-play-state: paused;
@@ -105,6 +116,49 @@
   transition:
     transform var(--dur-ui) var(--ease-ui),
     opacity var(--dur-ui) var(--ease-ui);
+}
+
+.swatchLink {
+  display: block;
+  position: relative;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*  A chip, not bare text. The swatches span #5C5A57 (iron) to
+    #DDD5C6 (ceramic), so a single fixed ink colour laid straight on
+    the material was legible on half of them and invisible on the
+    rest. Brass on a near-void plate holds its contrast against every
+    swatch, and reads as a stamped label rather than a caption. */
+.consultCta {
+  position: absolute;
+  bottom: 0.7rem;
+  left: 0.7rem;
+  right: 0.7rem;
+  padding: 0.45rem 0.5rem;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  background: rgba(6, 6, 7, 0.82);
+  box-shadow: var(--rim);
+  color: var(--c-stamp);
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(0.4rem);
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform var(--dur-ui) var(--ease-ui);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .alloy:hover .consultCta {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .body {
@@ -188,20 +242,86 @@
   }
 }
 
-/* ── Reduced motion ──────────────────────────────────────────────
-   Nothing drifts. The row becomes an ordinary scroller instead, so
-   every material is still reachable — stopping the animation without
-   restoring scrolling would leave the last few permanently offscreen. */
+/* ── Static on touch: a swiped row, not a running one ────────────
+   On phones and touch tablets the marquee is replaced by an ordinary
+   horizontal scroll the thumb drives — the row holds still and the
+   visitor swipes it. The duplicate "echo" set exists only to give an
+   infinite loop somewhere to travel; with no loop it is a confusing
+   verbatim repeat, so it is dropped. The consult chip is shown at
+   rest, because a swatch with no visible affordance reads as
+   decoration rather than a way in. */
 
-@media (prefers-reduced-motion: reduce) {
+@media (hover: none), (max-width: 48rem) {
   .track {
     animation: none;
+    /*  A gutter of runway at each end so the first and last specimens
+        are not jammed against the screen edge under the thumb. */
+    padding-inline: var(--gutter);
+    scroll-snap-type: none;
   }
 
   .shell {
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    /*  Clean swipe — the cut swatches at each edge already say the row
+        continues, so no rail is needed under the thumb. */
+    scrollbar-width: none;
+  }
+
+  .shell::-webkit-scrollbar {
+    display: none;
+  }
+
+  .echo {
+    display: none;
+  }
+
+  .alloy {
+    scroll-snap-align: start;
+  }
+
+  .consultCta {
+    opacity: 1;
+    transform: none;
+  }
+
+  /*  A tap dips the specimen — the compositor-only stand-in for the
+      hover growth a touch device never sees. */
+  .swatchLink:active .swatch {
+    transform: scaleY(0.98);
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────
+   Nothing drifts. The row becomes an ordinary scroller instead, so
+   every material is still reachable — stopping the animation without
+   restoring scrolling would leave the last few permanently offscreen.
+   The echo set is dropped here too, or a reduced-motion visitor
+   scrolls past ten materials and then meets the same ten again. */
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+    padding-inline: var(--gutter);
+  }
+
+  .shell {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
     scrollbar-width: thin;
     scrollbar-color: var(--c-rule-strong) transparent;
+  }
+
+  .echo {
+    display: none;
+  }
+
+  .alloy {
+    scroll-snap-align: start;
   }
 
   .swatch {

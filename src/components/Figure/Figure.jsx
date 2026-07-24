@@ -32,6 +32,7 @@ export default function Figure({
   webp,
   className = '',
   reveal = 'settle',
+  objectPosition = '50% 50%',
   children,
   ...rest
 }) {
@@ -56,6 +57,9 @@ export default function Figure({
             srcSet={srcSet}
             sizes={sizes}
             alt={alt}
+            /*  Pins the crop point so a hard cover-crop on a narrow
+                phone does not slice the subject out of frame. */
+            style={{ objectPosition }}
             data-reveal={reveal || undefined}
             /*  The hero image is the Largest Contentful Paint element,
                 so it must not be lazy and must be fetched ahead of

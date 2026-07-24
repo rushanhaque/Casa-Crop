@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="view-transition" content="same-origin" />
 
     <title>Connect — Casa and Crop</title>
     <meta
@@ -20,16 +21,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://casaandcrop.com/og.png" />
 
-    <!-- Marks that scripting is available, before the first paint.
-         Every hidden-until-revealed rule is scoped to .js, so if this
-         line never runs the page renders fully visible instead of
-         blank. Inline and in <head> deliberately: loaded as a separate
-         file it would arrive after paint and the revealed content
-         would flash before hiding itself. -->
-    <script>
-      document.documentElement.classList.add('js')
-    </script>
-      <link
+    <link
       rel="preload"
       as="font"
       type="font/woff2"

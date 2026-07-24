@@ -22,7 +22,7 @@
       subscribe to sections it does not contain. The whole apparatus
       is a style-time lookup: no observer, no listener, no script. */
   timeline-scope: --casa-act-1, --casa-act-2, --casa-act-3,
-    --casa-act-4, --casa-act-5;
+    --casa-act-4, --casa-act-5, --casa-act-6;
 }
 
 /* ── The chapter rail ────────────────────────────────────────────
@@ -78,6 +78,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*  A keyboard user tabbing the chapter rail must see where they are —
+    currentColor works under the difference blend the rail rides. */
+.railItem:focus-visible {
+  opacity: 1;
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
 @supports (timeline-scope: --a) {
   @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
     .rail {
@@ -116,6 +125,11 @@
     .railItem5,
     .railItem5 .railTick {
       animation-timeline: --casa-act-5;
+    }
+
+    .railItem6,
+    .railItem6 .railTick {
+      animation-timeline: --casa-act-6;
     }
 
     /*  Bright while the chapter holds the viewport, dim on either
@@ -378,20 +392,18 @@
   view-timeline: --casa-act-5 block;
 }
 
+.journey {
+  view-timeline: --casa-act-6 block;
+}
+
 .collections,
 .materials,
 .signature,
 .heritage,
+.journey,
 .about {
   position: relative;
-  /*  Contains the plate's negative z-index so it sits behind this
-      section's content but above the page beneath. */
   isolation: isolate;
-  /*  No wedge allowance anywhere in the body of the page. The tilt is
-      now a single event at the very end of the document, so no section
-      reserves space for an angle and none is pulled up over its
-      neighbour — every boundary here is square and every section owns
-      exactly its own box. */
   padding: clamp(6rem, 15vh, 13rem) var(--gutter);
   scroll-margin-top: 2rem;
 }
@@ -410,6 +422,7 @@
 .materials::before,
 .signature::before,
 .heritage::before,
+.journey::before,
 .about::before {
   content: '';
   position: absolute;
@@ -437,7 +450,11 @@
    and a lamp panning over another lamp reads as weather. */
 
 .signature,
+.journey,
 .about {
+  /*  clip (not hidden) so the section contains its own light pan and,
+      on the journey, the horizontal slide-in of its stations — without
+      ever becoming a scroll container. */
   overflow: clip;
 }
 
@@ -548,7 +565,7 @@
   /*  Larger than the editorial register called for. Modern luxury
       states things at scale; archival restraint whispers them, and
       whispering is what made this page forgettable. */
-  font-size: clamp(2.6rem, 7.5vw, 6.5rem);
+  font-size: clamp(2.1rem, 5.2vw, 4.4rem);
   line-height: 0.94;
   letter-spacing: var(--track-xl);
   margin: 0;
@@ -557,7 +574,7 @@
 
 .standfirst {
   max-width: 34rem;
-  margin-top: clamp(1.2rem, 2.4vw, 2rem);
+  margin-top: clamp(1.6rem, 3vw, 2.6rem);
   font-family: var(--f-text);
   font-size: clamp(0.95rem, 1.25vw, 1.1rem);
   line-height: 1.55;
@@ -587,7 +604,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
   align-items: end;
-  gap: clamp(1rem, 3vw, 3rem);
+  gap: clamp(1.5rem, 3.5vw, 3.5rem);
   max-width: none;
 }
 
@@ -621,6 +638,10 @@
     are smallest. */
 .heritage {
   min-height: 100dvh;
+  /*  Content pushed to the extremes: the heading holds the top of the
+      chapter and the figures settle to the foot, so the whole viewport
+      becomes the measure between the house's name and its numbers. */
+  justify-content: space-between;
 }
 
 @supports not (height: 100dvh) {
@@ -640,7 +661,7 @@
   z-index: 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(9rem, 26vw, 24rem);
+  font-size: clamp(6rem, 17vw, 15rem);
   line-height: 0.8;
   letter-spacing: var(--track-xl);
   color: rgba(255, 255, 255, 0.04);
@@ -704,8 +725,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
   align-items: end;
-  gap: clamp(2rem, 6vw, 5rem);
-  margin-top: clamp(3rem, 8vh, 6rem);
+  gap: clamp(2.5rem, 7vw, 6rem);
+  margin-top: clamp(4rem, 9vh, 7rem);
 }
 
 /*  The frame clips; the object drifts inside it. Without the clip the
@@ -797,8 +818,12 @@
 .standing {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  margin: clamp(3rem, 8vh, 5rem) 0 0;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  /*  No top margin — the section is space-between now, so the viewport
+      itself is the gap between the heading and these figures. A minimum
+      breathing room is kept for the short-screen case where the two
+      would otherwise meet. */
+  margin: clamp(2rem, 5vh, 3rem) 0 0;
 }
 
 .stat {
@@ -820,7 +845,7 @@
   margin: 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-size: clamp(2.3rem, 4.6vw, 3.9rem);
   line-height: 0.92;
   letter-spacing: var(--track-lg);
   /*  Tabular figures so the digits do not jostle as the number ticks
@@ -873,7 +898,7 @@
 .statement {
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(2rem, 6.4vw, 5.5rem);
+  font-size: clamp(1.8rem, 4.6vw, 4.2rem);
   line-height: 0.98;
   letter-spacing: var(--track-xl);
   margin: 0;
@@ -883,9 +908,9 @@
 .aboutBody {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  gap: clamp(1.5rem, 4vw, 3.5rem);
+  gap: clamp(2rem, 5vw, 4.5rem);
   max-width: 62rem;
-  margin-top: clamp(2.5rem, 6vh, 4.5rem);
+  margin-top: clamp(3.2rem, 7vh, 5.5rem);
   margin-left: auto;
   font-family: var(--f-text);
   font-size: clamp(0.95rem, 1.2vw, 1.05rem);
@@ -903,7 +928,7 @@
   position: relative;
   display: inline-block;
   overflow: hidden;
-  margin-top: clamp(2.5rem, 6vh, 4rem);
+  margin-top: clamp(3.2rem, 7vh, 5rem);
   padding: clamp(0.9rem, 1.8vw, 1.2rem) clamp(1.4rem, 3vw, 2.2rem);
   color: inherit;
   text-decoration: none;
@@ -991,6 +1016,144 @@
   color: var(--c-surface);
 }
 
+/* ── Journey — the pluckable index ─────────────────────────────
+   The path a piece travels, set as a Cordes list: a hairline-topped
+   run of stations, each a name with its gesture in italic beside it,
+   its verb pushed to the margin, and a real string for a rule. The
+   string is the one canvas on the page; it rings when a line arrives
+   and when it is pulled, and sleeps otherwise. */
+
+.journeyHead {
+  /*  Wide enough to hold "The path a piece travels." on ONE line at
+      every width the title's clamp reaches before a phone forces a
+      natural wrap. */
+  max-width: 60rem;
+  margin-bottom: clamp(2.5rem, 6vh, 4.5rem);
+}
+
+.journeyEye {
+  display: block;
+  margin-bottom: 1rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-stamp);
+}
+
+.journeyLede {
+  max-width: 44rem;
+  margin: clamp(1.4rem, 2.5vw, 2rem) 0 0;
+  font-family: var(--f-text);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.55;
+  color: var(--c-ink-muted);
+}
+
+.cordeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 62rem;
+  /*  The list opens on a hairline — the index's own top rule, the
+      first of the strings drawn straight rather than plucked. */
+  border-top: var(--seam-width) solid var(--c-rule);
+}
+
+/*  The row holds the string across its foot; the info block above it
+    is the part that RIDES THE WAVE, so it is a separate element the
+    canvas physics can bob without moving the string it is drawing. */
+.station {
+  position: relative;
+  padding: clamp(1.6rem, 3.2vh, 2.4rem) 0.2rem clamp(2.6rem, 4.5vh, 3.4rem);
+}
+
+/*  A three-column baseline grid — number, name, verb — with the body
+    dropped beneath the name. */
+.stationInfo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: clamp(1rem, 3vw, 2.4rem);
+}
+
+.stationNum {
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-stamp);
+}
+
+.stationName {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: clamp(1.5rem, 3.2vw, 2.5rem);
+  line-height: 1.02;
+  letter-spacing: var(--track-md);
+}
+
+/*  The gesture rides beside the name in the one italic serif the page
+    allows — the Cordes signature, the material set against the piece. */
+.stationName i {
+  font-family: var(--f-quote);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.9rem, 1.35vw, 1.1rem);
+  letter-spacing: 0;
+  color: var(--c-ink-muted);
+  margin-left: 0.8rem;
+}
+
+.stationTag {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+  white-space: nowrap;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+
+/*  The string — a real pluckable rule laid across the foot of the
+    station. pan-y so a vertical swipe still scrolls the page; the
+    pluck arrives as a tap. */
+.stationString {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40px;
+  cursor: ns-resize;
+  touch-action: pan-y;
+}
+
+.stationString canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /*  Addressing a station warms its verb to brass — the row reports
+      which station is being read. */
+  .station:hover .stationTag {
+    color: var(--c-stamp);
+  }
+}
+
 /* ── Small screens ───────────────────────────────────────────── */
 
 @media (max-width: 64rem) {
@@ -1020,6 +1183,67 @@
 
   .aboutBody {
     margin-left: 0;
+  }
+
+  /*  Once the vitrine stacks, the object sits ABOVE its notes, so the
+      annotation leaders — which point left, into the column gap where
+      the object used to be — now aim at empty gutter and get clipped
+      by the section's overflow. A leader with no subject beside it is
+      not an annotation, so it is withdrawn. */
+  .leader {
+    display: none;
+  }
+
+  /*  The plate ghost is anchored to the wide two-column vitrine; on a
+      narrow stacked column its architectural scale collides with the
+      content instead of sitting behind a wide object. Bring it down to
+      a size that still reads as tooling in the smaller field. */
+  .vitrineGhost {
+    font-size: clamp(4rem, 26vw, 8rem);
+  }
+}
+
+/*  The verb echo is the first thing to yield when the row runs out of
+    width — number, name and body carry the station on their own. */
+@media (max-width: 40rem) {
+  .stationTag {
+    display: none;
+  }
+
+  .stationInfo {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}
+
+/*  A press state for touch, where the fill sweep and label inversion
+    are otherwise locked to a hover the device never has — the primary
+    conversion control must feel alive under a thumb. */
+@media (hover: none) {
+  .cta:active .ctaFill {
+    transform: translateY(0) skewY(0);
+  }
+
+  .cta:active .ctaLabel {
+    color: var(--c-surface);
+  }
+}
+
+/*  THE HERO OVERSCALE IS A PARALLAX ALLOWANCE, NOT A CROP.
+
+    .heroArt holds scale(1.14) so its parallax travel never exposes an
+    edge. Where no scroll-driven CSS runs, that travel is the JS
+    understudy's job — and where THAT is not running either (reduced
+    motion, or no observer) the zoom would be pure loss: the composed
+    LCP frame shown cropped 14% to hide motion that never happens. So
+    reset it to the composed framing, and let the JS path re-assert the
+    allowance it actually uses. */
+@supports not (animation-timeline: view()) {
+  .heroArt {
+    transform: none;
+  }
+
+  html.motion-js .heroArt {
+    transform: scale(1.14);
   }
 }
 

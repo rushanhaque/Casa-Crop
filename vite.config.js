@@ -35,6 +35,7 @@ export default defineConfig({
         about: resolve(import.meta.dirname, 'about.html'),
         collections: resolve(import.meta.dirname, 'collections.html'),
         range: resolve(import.meta.dirname, 'range.html'),
+        product: resolve(import.meta.dirname, 'product.html'),
       },
     },
 

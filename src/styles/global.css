@@ -152,10 +152,6 @@ html {
   outline-offset: 3px;
 }
 
-::selection {
-  background: var(--c-stamp-wash);
-}
-
 /*  ─────────────────────────────────────────────────────────────
     CROSS-DOCUMENT TRANSITION
 

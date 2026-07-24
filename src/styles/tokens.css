@@ -260,7 +260,7 @@
   --crop-bleed: 1.06;
 
   /* ── Measure ─────────────────────────────────────────────── */
-  --gutter: clamp(1.25rem, 3.2vw, 3.5rem);
+  --gutter: clamp(1.5rem, 4vw, 5rem);
 
   /*  A radius scale, because 3px was invisible.
 

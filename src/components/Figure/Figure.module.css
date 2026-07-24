@@ -8,7 +8,10 @@
   overflow: hidden;
   background: var(--c-casa-ground);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
+  /*  The same three-layer shadow and lit lip every raised surface on
+      the site carries — `--shadow-card` never existed, so until now
+      each figure sat flat on the ground with no elevation at all. */
+  box-shadow: var(--elev-2), var(--rim);
 }
 
 .img {
@@ -31,7 +34,11 @@
 .figure[data-empty]::after {
   content: '';
   position: absolute;
-  inset: var(--gutter);
+  /*  Inset by a share of the BOX, not the viewport gutter. `--gutter`
+      is viewport-relative (up to 5rem), which on a thumbnail collapses
+      the marker to nothing or inverts it; a percentage keeps the
+      reserved-space frame proportional to whatever size the figure is. */
+  inset: clamp(0.75rem, 6%, 1.5rem);
   border: var(--seam-width) solid var(--c-rule);
   pointer-events: none;
 }

@@ -1,10 +1,10 @@
 import s from './Footer.module.css'
 
 const NAV = [
-  { label: 'Home', href: '/casa.html' },
+  { label: 'Home', href: '/' },
   { label: 'Collections', href: '/collections.html' },
   { label: 'About Us', href: '/about.html' },
-  { label: 'Connect', href: '/connect.html' },
+  { label: 'Contact', href: '/connect.html' },
   { label: 'The Threshold', href: '/' },
 ]
 
@@ -15,7 +15,6 @@ const RANGES = [
   ['Décor', 'decor'],
   ['Accessories', 'accessories'],
   ['Furniture', 'furniture'],
-  ['Bathroom', 'bathroom'],
 ]
 
 /*  The brand line, split for the pour. The space is preserved as a
@@ -51,61 +50,85 @@ export default function Footer() {
           rather than by polarity: its plate is the deepest black on
           the site, so the document closes into the well, and the
           milled hairline on its tilted edge is what marks the join. */}
+      {/*  Three bays, deliberately unequal — a nav list, a catalogue,
+          and a place do not want the same measure. The two link
+          columns are folio-numbered (01…), which turns a link stack
+          into an index; the office is set as a record, not a
+          paragraph. Each line reveals in reading order down its own
+          column rather than the whole bay arriving as one slab. */}
       <div className={s.grid}>
-        <nav className={s.col} aria-label="Site" data-reveal="rise" style={{ '--i': 0 }}>
-          <span className={s.key}>Site</span>
+        <nav className={s.col} aria-label="Site">
+          <span className={s.key} data-reveal="rise" style={{ '--i': 0 }}>
+            Site
+          </span>
           <ul className={s.list}>
-            {NAV.map((item) => (
-              <li key={item.label}>
-                <a className={s.link} href={item.href}>
+            {NAV.map((item, i) => (
+              <li key={item.label} data-reveal="rise" style={{ '--i': i + 1 }}>
+                <a className={s.navLink} href={item.href}>
                   <span className={s.linkLabel}>{item.label}</span>
-                  <span className={s.linkRule} aria-hidden="true" />
                 </a>
               </li>
             ))}
           </ul>
         </nav>
 
-        <nav className={s.col} aria-label="Ranges" data-reveal="rise" style={{ '--i': 1 }}>
-          <span className={s.key}>Ranges</span>
+        <nav className={s.col} aria-label="Ranges">
+          <span className={s.key} data-reveal="rise" style={{ '--i': 0 }}>
+            Ranges
+          </span>
           <ul className={s.list}>
-            {RANGES.map(([label, slug]) => (
-              <li key={slug}>
-                <a className={s.link} href={`/range.html?r=${slug}`}>
+            {RANGES.map(([label, slug], i) => (
+              <li key={slug} data-reveal="rise" style={{ '--i': i + 1 }}>
+                <a className={s.navLink} href={`/range.html?r=${slug}`}>
                   <span className={s.linkLabel}>{label}</span>
-                  <span className={s.linkRule} aria-hidden="true" />
                 </a>
               </li>
             ))}
           </ul>
         </nav>
 
-        <div className={s.col} data-reveal="rise" style={{ '--i': 2 }}>
-          <span className={s.key}>Works &amp; Export Office</span>
-          <p className={s.address}>
-            14 Peetal Nagri, Civil Lines
-            <br />
-            Moradabad, Uttar Pradesh 244001
-          </p>
-          <ul className={s.list}>
-            <li>
-              <a className={s.link} href="mailto:export@casaandcrop.com">
-                <span className={s.linkLabel}>export@casaandcrop.com</span>
-                <span className={s.linkRule} aria-hidden="true" />
-              </a>
-            </li>
-            <li>
-              <a className={s.link} href="tel:+915912458890">
-                <span className={s.linkLabel}>+91 591 245 8890</span>
-                <span className={s.linkRule} aria-hidden="true" />
-              </a>
-            </li>
-          </ul>
+        <div className={s.col}>
+          <span className={s.key} data-reveal="rise" style={{ '--i': 0 }}>
+            Export Office
+          </span>
+
+          {/*  A stacked datum, not a sentence: tight leading, the
+              human locality line lifted to full ink, the postcode set
+              in tabular figures like a stamped number. */}
+          <address className={s.address} data-reveal="rise" style={{ '--i': 1 }}>
+            <span className={s.addrStreet}>14 Peetal Nagri, Civil Lines</span>
+            <span className={s.addrCity}>Moradabad, Uttar Pradesh</span>
+            <span className={s.addrCode}>244001</span>
+          </address>
+
+          {/*  Contact set as a ledger: a sand key, then the machined
+              value. Only these two links carry the outbound glyph and
+              the underline — the reference lines above do not. */}
+          <dl className={s.contact}>
+            <div className={s.contactRow} data-reveal="rise" style={{ '--i': 2 }}>
+              <dt className={s.contactKind}>Email</dt>
+              <dd className={s.contactVal}>
+                <a className={s.contactLink} href="mailto:export@casaandcrop.com">
+                  <span className={s.linkLabel}>export@casaandcrop.com</span>
+                  <span className={s.linkRule} aria-hidden="true" />
+                </a>
+              </dd>
+            </div>
+            <div className={s.contactRow} data-reveal="rise" style={{ '--i': 3 }}>
+              <dt className={s.contactKind}>Tel</dt>
+              <dd className={s.contactVal}>
+                <a className={s.contactLink} href="tel:+915912458890">
+                  <span className={s.linkLabel}>+91 591 245 8890</span>
+                  <span className={s.linkRule} aria-hidden="true" />
+                </a>
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
 
       {/* ── The pour ─────────────────────────────────────────── */}
-      <a className={s.brand} href="/" aria-label="Casa and Crop — home">
+      <a className={s.brand} href="/" aria-label="Casa and Crop — home" data-reveal="zoom">
         <span className={s.srOnly}>{BRAND}</span>
         <span className={s.brandLine} aria-hidden="true">
           {BRAND.split('').map((ch, i) => (

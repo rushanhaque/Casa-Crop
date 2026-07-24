@@ -7,14 +7,26 @@
 }
 
 .masthead {
-  padding: clamp(5rem, 14vh, 10rem) var(--gutter) clamp(3rem, 8vh, 6rem);
+  padding: clamp(6rem, 16vh, 12rem) var(--gutter) clamp(4rem, 10vh, 7rem);
   max-width: 70rem;
+}
+
+.sectionKey {
+  display: block;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-stamp);
 }
 
 .title {
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(2.8rem, 8.5vw, 7.5rem);
+  font-size: clamp(2.3rem, 6vw, 5.25rem);
   line-height: 0.96;
   letter-spacing: var(--track-xl);
   margin: 0;
@@ -22,7 +34,7 @@
 
 .standfirst {
   max-width: 44rem;
-  margin: clamp(1.6rem, 3.5vw, 2.6rem) 0 0;
+  margin: clamp(2rem, 4vw, 3.2rem) 0 0;
   font-family: var(--f-text);
   font-size: clamp(1rem, 1.35vw, 1.2rem);
   line-height: 1.6;
@@ -32,17 +44,33 @@
 /* ── Figures ─────────────────────────────────────────────────── */
 
 .figures {
-  padding: clamp(2rem, 6vh, 4rem) var(--gutter);
+  padding: clamp(3rem, 8vh, 5.5rem) var(--gutter);
 }
 
 .figureRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-  gap: clamp(1.5rem, 4vw, 3rem);
+  gap: clamp(2rem, 4.6vw, 3.8rem);
   margin: 0;
 }
 
+/*  DOM order is term-then-description for the screen reader (label,
+    value, then the sub-caption as a second description); flex `order`
+    lifts the numeral back to the top for the eye. */
+/*  Mid-band (tablet / large phone landscape): auto-fit would drop a
+    lonely full-width card here — 3+1. Pin the figures to a balanced
+    2×2 so nothing is left orphaned. (The matching principles rule
+    lives after that grid's own declaration, below, so it wins the
+    cascade.) */
+@media (min-width: 30rem) and (max-width: 60rem) {
+  .figureRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .figure {
+  display: flex;
+  flex-direction: column;
   padding-top: 1.1rem;
   background:
     linear-gradient(
@@ -56,10 +84,11 @@
 }
 
 .figureValue {
+  order: -1;
   margin: 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(2.6rem, 5.5vw, 4.6rem);
+  font-size: clamp(2.15rem, 4.2vw, 3.5rem);
   line-height: 0.92;
   letter-spacing: var(--track-lg);
   font-variant-numeric: tabular-nums lining-nums;
@@ -86,19 +115,38 @@
   color: var(--c-ink-muted);
 }
 
+.figureSub {
+  margin: 0.4rem 0 0;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  line-height: 1.45;
+  color: var(--c-ink-muted);
+  opacity: 0.6;
+}
+
 /* ── Principles ──────────────────────────────────────────────── */
 
 .principles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  gap: clamp(2rem, 5vw, 4rem);
-  padding: clamp(4rem, 10vh, 7rem) var(--gutter);
+  gap: clamp(2.6rem, 6vw, 5rem);
+  padding: clamp(5rem, 12vh, 9rem) var(--gutter);
+}
+
+/*  Mid-band: auto-fit would sit the three principles as 2+1 and
+    orphan the last. Three is prime, so a single full-measure column
+    is the only non-orphaning count at this width — and it lets each
+    principle read as a full card rather than a squeezed pair. */
+@media (min-width: 30rem) and (max-width: 60rem) {
+  .principles {
+    grid-template-columns: 1fr;
+  }
 }
 
 .principle {
   position: relative;
   overflow: hidden;
-  padding: clamp(1.4rem, 2.5vw, 2.2rem);
+  padding: clamp(1.8rem, 3vw, 2.6rem);
   border-radius: var(--radius);
   background:
     linear-gradient(
@@ -165,7 +213,7 @@
   margin: 0.7rem 0 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  font-size: clamp(1.15rem, 1.65vw, 1.45rem);
   line-height: 1.1;
   letter-spacing: var(--track-md);
 }
@@ -182,7 +230,8 @@
 
 .close {
   position: relative;
-  padding: clamp(4rem, 10vh, 7rem) var(--gutter) clamp(6rem, 14vh, 10rem);
+  isolation: isolate;
+  padding: clamp(5rem, 12vh, 9rem) var(--gutter) clamp(7rem, 16vh, 12rem);
   max-width: 60rem;
 }
 
@@ -221,9 +270,21 @@
   }
 }
 
+/*  Phones: the guilloche stays — a signature flourish shouldn't be
+    deleted on the small screen. It is re-centred behind the spoken
+    line, dropped to a whisper, and held still (the turn was never
+    supported here anyway). Centred and inside the measure, it cannot
+    reach a viewport edge, so it raises no horizontal scroll. */
 @media (max-width: 48rem) {
   .rosette {
-    display: none;
+    right: auto;
+    left: 50%;
+    top: 44%;
+    z-index: -1;
+    width: clamp(11rem, 46vw, 15rem);
+    opacity: 0.09;
+    transform: translate(-50%, -50%);
+    animation: none;
   }
 }
 
@@ -245,7 +306,7 @@
   margin: 0;
   font-family: var(--f-quote);
   font-style: italic;
-  font-size: clamp(1.6rem, 3.6vw, 3rem);
+  font-size: clamp(1.45rem, 2.9vw, 2.4rem);
   line-height: 1.25;
   color: var(--c-casa-ink);
 }
@@ -254,8 +315,8 @@
   position: relative;
   display: inline-block;
   overflow: hidden;
-  margin-top: clamp(2rem, 5vh, 3.5rem);
-  padding: clamp(0.9rem, 1.8vw, 1.2rem) clamp(1.6rem, 3.5vw, 2.6rem);
+  margin-top: clamp(2.6rem, 6vh, 4.2rem);
+  padding: clamp(1.1rem, 1.8vw, 1.2rem) clamp(1.6rem, 3.5vw, 2.6rem);
   border-radius: var(--radius);
   color: inherit;
   text-decoration: none;
@@ -309,6 +370,30 @@
 
 .cta:focus-visible .ctaLabel {
   color: var(--c-void);
+}
+
+/*  Touch: no hover to raise the fill, so drive it from :active — the
+    label inverts against the ink the moment a finger lands. */
+@media (hover: none) {
+  .cta:active .ctaFill {
+    transform: none;
+  }
+
+  .cta:active .ctaLabel {
+    color: var(--c-void);
+  }
+}
+
+/*  On phones the enquiry CTA is the page's one primary action: give it
+    the full measure, centre it, and hold a comfortable 44px hit area. */
+@media (max-width: 40rem) {
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+  }
 }
 
 /*  The skip link — present on every page, visible only to the

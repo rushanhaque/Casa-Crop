@@ -70,8 +70,8 @@
   /*  The foot is generous because the mark is now the last thing on
       the page. With the colophon beneath it a tight bottom margin
       read as spacing; without one it would read as a crop. */
-  padding: calc(clamp(4rem, 10vh, 7rem) + var(--tilt)) var(--gutter)
-    clamp(3.5rem, 8vh, 6rem);
+  padding: calc(clamp(2rem, 5vh, 3.5rem) + var(--tilt)) var(--gutter)
+    clamp(1.5rem, 4vh, 2.8rem);
   margin-top: calc(var(--tilt) * -1);
   overflow: hidden;
 }
@@ -133,86 +133,375 @@
   clip-path: polygon(0 0, 100% var(--tilt), 100% 100%, 0 100%);
 }
 
+/* ── The three bays ──────────────────────────────────────────────
+   Not equal auto-fit — that is the single loudest template tell. The
+   two link lists take a tight measure; the office, which holds a
+   whole address and the site's longest line, takes half again as
+   much. The bays are ruled apart by a hairline that hangs from just
+   below the keys, so the block reads as a ledger rather than three
+   pasted widgets. */
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: clamp(2rem, 5vw, 4rem);
-  padding-bottom: clamp(3.5rem, 9vh, 6.5rem);
+  grid-template-columns:
+    minmax(0, 0.82fr)
+    minmax(0, 0.92fr)
+    minmax(0, 1.5fr);
+  column-gap: clamp(2.5rem, 5vw, 5rem);
+  row-gap: 0;
+  padding-bottom: clamp(1.8rem, 5vh, 3.5rem);
+  /*  All three keys lock to one top baseline; the block ranges left
+      and rags right, never justified. */
+  align-items: start;
 }
 
 .col {
+  position: relative;
   min-width: 0;
+}
+
+/*  The ledger rule between bays — flat 1px in lifted black (never
+    translucent white, which would shift over the grain tile), sitting
+    in the middle of the gap and inset top and bottom so it belongs to
+    the columns rather than boxing them. */
+@media (min-width: 46rem) {
+  .col + .col::before {
+    content: '';
+    position: absolute;
+    left: calc(clamp(2.5rem, 5vw, 5rem) / -2);
+    top: 0.3rem;
+    bottom: 0.5rem;
+    width: 1px;
+    background: var(--c-rule);
+  }
 }
 
 .key {
   display: block;
   font-family: var(--f-text);
-  font-size: var(--t-1);
+  /*  A margin note, not a heading: smaller than the links it governs
+      and demoted to the sand tier, so hierarchy is carried by value,
+      not by shouting the label. */
+  font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: var(--track-caps);
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--c-ink-muted);
-  margin-bottom: 1.1rem;
+  /*  Sits exactly one link-line above its list — the eyebrow reads as
+      the line that was skipped rather than an arbitrary margin. */
+  margin-bottom: 0.9rem;
 }
 
-.address {
-  margin: 0 0 1rem;
-  font-family: var(--f-text);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--c-casa-ink);
-}
+/* ── The indexed link lists ─────────────────────────────────────── */
 
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.45rem;
+  /*  Row-gap far tighter than the column-gap between bays (≈1:5), so
+      a column binds into one list while the bays stay distinct. */
+  row-gap: 0.35rem;
+  /*  Restarts at 01 in each list — the number means position within
+      this catalogue, not a running total across the footer. */
+  counter-reset: folio;
 }
 
-.link {
+.navLink {
   position: relative;
   display: inline-block;
-  color: inherit;
+  /*  A left rail the folio numeral hangs in, and a taller-than-ink hit
+      area so the target is generous without any visual change. */
+  padding: 0.25rem 0 0.25rem 2.2rem;
+  color: var(--c-casa-ink);
   text-decoration: none;
   font-family: var(--f-text);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--t-body);
+  line-height: 1.25;
+  letter-spacing: -0.006em;
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform var(--dur-ui) var(--ease-ui);
+}
+
+/*  The folio: a brass catalogue number, faint at rest and resolving
+    to full on hover — the list has an index before you touch it, and
+    the index is the hover's tell. Tabular figures so 01 and 07 share
+    a left edge. */
+.navLink::before {
+  counter-increment: folio;
+  content: counter(folio, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.42rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--c-stamp);
+  opacity: 0.34;
+  transition: opacity var(--dur-ui) var(--ease-ui);
 }
 
 .linkLabel {
-  display: block;
+  display: inline-block;
+  transition: transform var(--dur-ui) var(--ease-ui);
 }
 
+/*  List-focus: addressing one link pulls the whole column into focus —
+    the target goes full ink and steps a hair right as its siblings
+    recede, so the list reads as one instrument, not five buttons.
+    Opacity for the dim (never `color`), so nothing touches the paint
+    path. */
+@media (hover: hover) and (pointer: fine) {
+  .list:hover .navLink {
+    opacity: 0.5;
+  }
+
+  .list .navLink:hover {
+    opacity: 1;
+  }
+
+  .navLink:hover::before {
+    opacity: 1;
+  }
+
+  .navLink:hover .linkLabel {
+    transform: translateX(0.2rem);
+  }
+}
+
+.navLink:focus-visible {
+  opacity: 1;
+}
+
+.navLink:focus-visible::before {
+  opacity: 1;
+}
+
+.navLink:focus-visible .linkLabel {
+  transform: translateX(0.2rem);
+}
+
+.navLink:active {
+  transform: translateY(1px);
+}
+
+/* ── The office: a letterhead and a ledger ──────────────────────── */
+
+/*  The postal lines are set as a stacked record, not a paragraph:
+    tight leading, the human locality line lifted to full ink while
+    the street and postcode recede, and the postcode stamped in
+    tabular figures. */
+.address {
+  display: grid;
+  row-gap: 0.12rem;
+  margin: 0 0 1rem;
+  max-width: 24ch;
+  font-family: var(--f-text);
+  font-style: normal;
+  font-size: var(--t-body);
+  line-height: 1.4;
+  color: var(--c-ink-muted);
+}
+
+.addrCity {
+  color: var(--c-casa-ink);
+}
+
+.addrCode {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.contact {
+  margin: 0;
+  display: grid;
+  row-gap: 0.9rem;
+}
+
+/*  Each contact reads as a ledger row — a sand key in a fixed column,
+    then the machined value — so the two rows rhyme with the numbered
+    lists in the bays beside them. */
+.contactRow {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  column-gap: 0.6rem;
+  align-items: baseline;
+}
+
+.contactKind {
+  font-family: var(--f-text);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.contactVal {
+  margin: 0;
+  min-width: 0;
+}
+
+.contactLink {
+  position: relative;
+  display: inline-block;
+  color: var(--c-casa-ink);
+  text-decoration: none;
+  font-family: var(--f-text);
+  font-size: var(--t-body);
+  line-height: 1.3;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+/*  The phone is machined data: tabular figures with a hair of extra
+    tracking so the groups read as evenly-milled rather than a
+    wobbling proportional string. An email is never tracked. */
+.contactLink[href^='tel:'] .linkLabel {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/*  The underline passes THROUGH rather than undoing itself: it draws
+    in from the left on hover and, because it rests on a right origin,
+    collapses rightward on leave — one continuous gesture. The only
+    moving brass rule in the block. */
 .linkRule {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -0.1em;
+  bottom: -0.14em;
   height: 1px;
   background: var(--c-stamp);
   transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform var(--dur-ui) var(--ease-draw);
+  transform-origin: right center;
+  transition: transform 180ms var(--ease-draw);
+}
+
+/*  The outbound glyph — the tasteful "this leaves the page" cue,
+    earned only by the genuinely outbound contact links. A text
+    character at the text's own size, tucked down-and-left at rest,
+    its slot reserved so the label never reflows. */
+.contactLink::after {
+  display: inline-block;
+  margin-left: 0.4em;
+  color: var(--c-ink-muted);
+  opacity: 0;
+  transform: translate3d(-0.2em, 0.18em, 0);
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform var(--dur-ui) var(--ease-ui);
+}
+
+.contactLink[href^='mailto:']::after {
+  content: '\2197';
+}
+
+.contactLink[href^='tel:']::after {
+  content: '\2192';
+  transform: translate3d(-0.2em, 0, 0);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .link:hover .linkRule {
+  .contactLink:hover .linkRule {
+    transform-origin: left center;
     transform: scaleX(1);
+    transition-duration: var(--dur-ui);
+  }
+
+  .contactLink:hover::after {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
-.link:focus-visible .linkRule {
+.contactLink:focus-visible .linkRule {
+  transform-origin: left center;
   transform: scaleX(1);
 }
 
-.link:active {
+.contactLink:focus-visible::after {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.contactLink:active {
   transform: translateY(1px);
 }
 
-.link {
-  transition: transform var(--dur-ui) var(--ease-ui);
+/* ── Small screens — a compact, minimal footer ───────────────────
+   Site and Ranges sit side by side as two tight indices; the office
+   spans beneath them. Everything is set smaller and closer, and the
+   pour is brought down in scale, so the close is a small sign-off
+   rather than a full second page. */
+
+@media (max-width: 45.99rem) {
+  .footer {
+    padding: calc(clamp(1.5rem, 4vh, 2.5rem) + var(--tilt)) var(--gutter)
+      clamp(1rem, 3vh, 1.8rem);
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(1rem, 5vw, 2rem);
+    row-gap: clamp(1.4rem, 5vw, 2rem);
+    padding-bottom: clamp(1.4rem, 5vw, 2.2rem);
+  }
+
+  /*  The office is the widest bay; it spans the full measure beneath
+      the two link indices, ruled off by a hairline. */
+  .col:nth-child(3) {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--c-rule);
+    padding-top: clamp(1.2rem, 4vw, 1.8rem);
+  }
+
+  .key {
+    margin-bottom: 0.7rem;
+  }
+
+  .list {
+    row-gap: 0.25rem;
+  }
+
+  .navLink {
+    padding: 0.15rem 0 0.15rem 1.7rem;
+    font-size: 0.9rem;
+  }
+
+  .navLink::before {
+    top: 0.32rem;
+  }
+
+  .address {
+    margin-bottom: 0.9rem;
+  }
+
+  .contact {
+    row-gap: 0.6rem;
+  }
+
+  /*  The pour, brought down to a sign-off — still the mark the page
+      closes on, no longer a viewport-scaled headline. */
+  .brandLine {
+    font-size: clamp(2rem, 13vw, 3.6rem);
+  }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────
+   The folio still resolves to full so the number is legible, but
+   nothing travels. */
+
+@media (prefers-reduced-motion: reduce) {
+  .navLink::before {
+    opacity: 0.7;
+  }
+
+  .navLink .linkLabel,
+  .contactLink .linkRule,
+  .contactLink::after {
+    transition: none;
+  }
 }
 
 .brand:active .brandLine {

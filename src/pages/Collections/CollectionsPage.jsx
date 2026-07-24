@@ -15,7 +15,7 @@ import s from './CollectionsPage.module.css'
 /*  Room numbering is architectural — Roman, cut into the wall. The
     catalogue numbers on the plaques stay arabic; a museum does
     exactly this (Room IV, cat. no. 04). */
-const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI']
 
 const EXHIBITS = [
   {
@@ -90,18 +90,6 @@ const EXHIBITS = [
       ['Minimum', '250 pcs / SKU'],
     ],
   },
-  {
-    slug: 'bathroom',
-    index: '07',
-    name: 'Bathroom',
-    meta: 'Forged · Plated',
-    lede: 'Forged fittings in CuZn39Pb3, chrome or PVD finished, machined to mating-face tolerance.',
-    spec: [
-      ['Alloy', 'CuZn39Pb3, forged'],
-      ['Finish', 'Chrome / PVD'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
-  },
 ]
 
 /**
@@ -144,7 +132,7 @@ export default function CollectionsPage() {
         {/* ── The entrance hall ─────────────────────────────── */}
         <header className={s.hall} aria-labelledby="collections-title">
           <p className={s.hallKicker} data-enter="rise" style={{ '--enter-delay': '120ms' }}>
-            The pattern book — seven programmes
+            The pattern book — six programmes
           </p>
           <Lines
             as="h1"
@@ -156,7 +144,7 @@ export default function CollectionsPage() {
             split="chars"
           />
           <p className={s.hallStandfirst} data-enter="rise" style={{ '--enter-delay': '760ms' }}>
-            Seven running lines, tooled and held. Hung here as they are kept in the
+            Six running lines, tooled and held. Hung here as they are kept in the
             works — one to a wall, with the sheet that governs each beside it.
           </p>
           <p className={s.hallCredit} data-enter="rise" style={{ '--enter-delay': '1000ms' }}>
@@ -170,11 +158,20 @@ export default function CollectionsPage() {
             <span className={s.hallHintLabel} data-enter="rise" style={{ '--enter-delay': '1400ms' }}>
               Walk the corridor
             </span>
+            {/*  Narrow screens lay the corridor down and scroll it
+                vertically, so the cue must point down, not along. */}
+            <span
+              className={s.hallHintLabelDown}
+              data-enter="rise"
+              style={{ '--enter-delay': '1400ms' }}
+            >
+              Walk down the corridor
+            </span>
           </div>
         </header>
 
         {/* ── The corridor ──────────────────────────────────── */}
-        <section className={s.gallery} aria-label="The seven ranges, hung as exhibits">
+        <section className={s.gallery} aria-label="The six ranges, hung as exhibits">
           <div className={s.pin}>
             <ol className={s.track}>
               {EXHIBITS.map((ex, i) => (
@@ -190,7 +187,12 @@ export default function CollectionsPage() {
                       crosses the viewport. */}
                   <span className={s.roomRake} aria-hidden="true" />
 
-                  <h2 className={s.roomTitle} id={`room-${ex.slug}`}>
+                  <h2
+                    className={s.roomTitle}
+                    id={`room-${ex.slug}`}
+                    data-reveal="slide-down"
+                    style={{ '--i': 0 }}
+                  >
                     {ex.name}
                   </h2>
 
@@ -202,15 +204,27 @@ export default function CollectionsPage() {
                     {/*  The plinth. Photography lands in the well; until
                         then the well is presented as a prepared mount,
                         not a missing image. */}
-                    <span className={s.plinth}>
+                    <span className={s.plinth} data-reveal="blur-in" style={{ '--i': 1 }}>
                       <span className={s.plinthWell} />
                       <span className={s.plinthLip} aria-hidden="true" />
+                    </span>
+                    {/*  On touch there is no hover lift, glint or
+                        view-transition prime, so the mount reads as an
+                        empty box. A persistent quiet caption names the
+                        destination and marks the plinth as an entrance. */}
+                    <span className={s.exhibitCue} aria-hidden="true">
+                      View range →
                     </span>
                   </a>
 
                   {/*  The tombstone label — the museum's wall card,
                       set in the house's apparatus register. */}
-                  <aside className={s.plaque} aria-label={`${ex.name} — specification`}>
+                  <aside
+                    className={s.plaque}
+                    aria-label={`${ex.name} — specification`}
+                    data-reveal="slide-up"
+                    style={{ '--i': 2 }}
+                  >
                     <span className={s.plaqueIndex}>
                       № {ex.index} — {ex.meta}
                     </span>
@@ -263,7 +277,7 @@ export default function CollectionsPage() {
             minimums, alloys and lead times are stated per range, and the same figures
             are quoted on the enquiry desk.
           </p>
-          <a className={s.cta} href="/connect.html" data-pointer data-magnetic>
+          <a className={s.cta} href="/connect.html" data-pointer data-magnetic data-reveal="rise" style={{ '--i': 3 }}>
             <span className={s.ctaLabel}>Open an enquiry</span>
             <span className={s.ctaFill} aria-hidden="true" />
             <span className={s.ctaRule} aria-hidden="true" />

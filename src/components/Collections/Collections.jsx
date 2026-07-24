@@ -23,71 +23,45 @@ const ITEMS = [
     index: '01',
     title: 'Funeral',
     meta: 'Cast · Spun',
-    spec: [
-      ['Alloy', 'Cast brass / copper'],
-      ['Finish', 'Antique, hand-polished'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
+    subcategories: ['Urns', 'Caskets', 'Memorials', 'Keepsakes'],
+    imageBeforeHover: '/covers/FuneralSketch.png',
+    imageAfterHover: '/covers/Funeral.png',
   },
   {
     index: '02',
     title: 'Lighting',
     meta: 'Spun · Plated',
-    spec: [
-      ['Alloy', 'Spun brass, 1.2 mm'],
-      ['Finish', 'Nickel / PVD, 12 µm'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
+    subcategories: ['Pendants', 'Chandeliers', 'Sconces', 'Table Lamps'],
+    imageBeforeHover: '/covers/LightingSketch.png',
+    imageAfterHover: '/covers/Lighting.png',
   },
   {
     index: '03',
     title: 'Décor',
     meta: 'Cast · Wrought',
-    spec: [
-      ['Alloy', 'Gravity die cast brass'],
-      ['Finish', 'Antique, waxed'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
+    subcategories: ['Vases', 'Sculptures', 'Trays', 'Bookends'],
+    imageBeforeHover: '/covers/DecorSketch.png',
+    imageAfterHover: '/covers/Decor.png',
   },
   {
     index: '04',
     title: 'Kitchenware',
     meta: 'Steel · Copper',
-    spec: [
-      ['Alloy', '304 steel / ETP copper'],
-      ['Finish', 'Mirror, food-safe'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
+    subcategories: ['Cookware', 'Utensils', 'Serveware', 'Cutlery'],
+    imageBeforeHover: '/covers/KitchenWareSketch.jpg',
+    imageAfterHover: '/covers/KitchenWare.jpg',
   },
   {
     index: '05',
     title: 'Accessories',
     meta: 'Brass · Zinc',
-    spec: [
-      ['Alloy', 'Brass, zinc alloy'],
-      ['Finish', 'Plated, lacquered'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
+    subcategories: ['Hooks', 'Handles', 'Knobs', 'Hinges'],
   },
   {
     index: '06',
     title: 'Furniture',
     meta: 'Tube · Inlay',
-    spec: [
-      ['Alloy', 'MS tube, brass inlay'],
-      ['Finish', 'Powder coat, 60 µm'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
-  },
-  {
-    index: '07',
-    title: 'Bathroom',
-    meta: 'Forged · Plated',
-    spec: [
-      ['Alloy', 'CuZn39Pb3, forged'],
-      ['Finish', 'Chrome / PVD'],
-      ['Minimum', '250 pcs / SKU'],
-    ],
+    subcategories: ['Tables', 'Seating', 'Shelving', 'Mirrors'],
   },
 ]
 
@@ -113,7 +87,7 @@ export default function Collections() {
   return (
     <ul className={s.grid}>
       {ITEMS.map((item, ci) => (
-        <li className={s.cell} key={item.index} data-cell={ci + 1} style={{ '--i': ci % 4 }}>
+        <li className={s.cell} key={item.index} data-cell={ci + 1} data-reveal="zoom" style={{ '--i': ci % 4 }}>
           <a
             className={s.card}
             href={`/range.html?r=${item.title.toLowerCase().replace(/[^a-z]/g, '')}`}
@@ -125,27 +99,28 @@ export default function Collections() {
                 <span className={s.slat} key={i} data-slat style={{ '--i': i }}>
                   <span className={s.faceFront}>
                     <span className={s.panel}>
-                      {/*  Keeps the .image class the per-card tints are
-                          set against, so those go on working. */}
-                      <span className={s.image} />
-                      {/*  The pattern-book numeral on the face itself,
-                          ghosted — inside the panel, so the slats
-                          window one numeral rather than five. */}
+                      <span 
+                        className={s.image} 
+                        style={item.imageBeforeHover ? { backgroundImage: `url(${item.imageBeforeHover})` } : undefined}
+                      />
                       <span className={s.cardGhost}>{item.index}</span>
                     </span>
                   </span>
 
                   <span className={s.faceBack}>
                     <span className={s.panel}>
+                      <span 
+                        className={s.imageSketch} 
+                        style={item.imageAfterHover ? { backgroundImage: `url(${item.imageAfterHover})` } : undefined}
+                      />
                       <span className={s.papers}>
                         <span className={s.papersIndex}>{item.index}</span>
                         <span className={s.papersName}>{item.title}</span>
                         <span className={s.papersMeta}>{item.meta}</span>
                         <span className={s.papersList}>
-                          {item.spec.map(([k, v]) => (
-                            <span className={s.papersRow} key={k}>
-                              <span className={s.papersKey}>{k}</span>
-                              <span className={s.papersValue}>{v}</span>
+                          {item.subcategories.map((sub) => (
+                            <span className={s.papersRow} key={sub}>
+                              <span className={s.papersValue}>{sub}</span>
                             </span>
                           ))}
                         </span>
@@ -175,10 +150,9 @@ export default function Collections() {
 
             {/*  The accessible and touch-visible copy of the reverse. */}
             <span className={s.specPlain}>
-              {item.spec.map(([k, v]) => (
-                <span className={s.specRow} key={k}>
-                  <span className={s.specKey}>{k}</span>
-                  <span className={s.specValue}>{v}</span>
+              {item.subcategories.map((sub) => (
+                <span className={s.specRow} key={sub}>
+                  <span className={s.specValue}>{sub}</span>
                 </span>
               ))}
             </span>

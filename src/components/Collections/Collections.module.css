@@ -37,7 +37,7 @@
   grid-template-columns: repeat(12, 1fr);
   gap: clamp(1rem, 2vw, 2rem);
   list-style: none;
-  margin: clamp(3rem, 6vh, 5rem) 0 0;
+  margin: clamp(4rem, 8vh, 6.5rem) 0 0;
   padding: 0;
 }
 
@@ -80,49 +80,16 @@
   }
 }
 
-/*  THE LIFTED SHADOW.
+/*  (Lifted shadow removed) */
 
-    box-shadow cannot be animated cheaply — interpolating a blur
-    repaints the element on every frame. So the deeper shadow lives on
-    its own layer behind the card and is CROSS-FADED in, which is pure
-    opacity and stays on the compositor. It sits on the cell rather
-    than the card because the card clips its own overflow and would
-    swallow it. */
-.cell::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: var(--radius);
-  box-shadow: var(--elev-3);
-  opacity: 0;
-  transition: opacity var(--dur-micro) var(--ease-settle);
-  pointer-events: none;
-}
-
-.cell:hover::after,
-.cell:focus-within::after {
-  opacity: 1;
-}
-
-/*  Row 1 — three cards, four columns each.
-
-    The wider measure goes at the top now, so the section opens on
-    three generous cards and then steps down to a finer four. Opening
-    wide and tightening reads as a considered sequence; opening narrow
-    and widening reads as a row that ran out of items. */
+/*  Two rows of three cards — four columns each. */
 .cell[data-cell='1'],
 .cell[data-cell='2'],
-.cell[data-cell='3'] {
-  grid-column: span 4;
-}
-
-/*  Row 2 — four cards, three columns each. */
+.cell[data-cell='3'],
 .cell[data-cell='4'],
 .cell[data-cell='5'],
-.cell[data-cell='6'],
-.cell[data-cell='7'] {
-  grid-column: span 3;
+.cell[data-cell='6'] {
+  grid-column: span 4;
 }
 
 /*  Four across needs a wide field. Two is the honest intermediate —
@@ -147,7 +114,9 @@
   .cell[data-cell] {
     grid-column: 1 / -1;
     height: auto;
-    min-height: clamp(18rem, 32vh, 24rem);
+    /*  15% shorter than the previous clamp(18rem, 32vh, 24rem) — a
+        tighter card on the phone. */
+    min-height: clamp(15.3rem, 27vh, 20.4rem);
   }
 }
 
@@ -240,20 +209,7 @@
   transition: opacity var(--dur-micro) var(--ease-settle);
 }
 
-.card::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 5;
-  height: var(--seam-width);
-  background: var(--c-foil);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform var(--dur-veil) var(--ease-draw);
-  pointer-events: none;
-}
+/* .card::after removed per user request to not show any line on hover */
 
 /* ── The sweep ───────────────────────────────────────────────────
    A band of light crossing the face when the card is addressed.
@@ -377,10 +333,23 @@
 /*  Keeps the class the per-card tints are set against, so those go on
     working until photography arrives. */
 .image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   background-size: cover;
   background-position: center;
+}
+
+.imageSketch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(2px);
+  opacity: 0.4;
 }
 
 /*  THE PIVOT.
@@ -428,7 +397,7 @@
   top: -0.16em;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(6rem, 12vw, 11rem);
+  font-size: clamp(4rem, 8vw, 7rem);
   line-height: 1;
   letter-spacing: var(--track-xl);
   color: rgba(255, 255, 255, 0.05);
@@ -465,7 +434,7 @@
 
 .papersName {
   font-family: var(--f-display);
-  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
   line-height: 1.05;
   letter-spacing: -0.014em;
   margin-top: 0.25rem;
@@ -489,7 +458,6 @@
   display: grid;
   gap: 0.1rem;
   padding-top: 0.4rem;
-  border-top: var(--seam-width) solid var(--c-rule);
 }
 
 .papersKey {
@@ -539,7 +507,7 @@
   margin: 0;
   font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  font-size: clamp(1.2rem, 1.9vw, 1.7rem);
   line-height: 1.05;
   letter-spacing: -0.012em;
   color: var(--c-casa-ink);
@@ -592,17 +560,7 @@
    ───────────────────────────────────────────────────────────── */
 
 @media (hover: hover) and (pointer: fine) {
-  /*  THE LIFT.
-
-      Selector specificity is load-bearing here. The card is a reveal
-      target, and the revealed state sets transform:none at a
-      specificity of three — so a plain .card:hover, at two, would be
-      silently overruled and the card would never move. Qualifying
-      through .grid and .cell raises this to four. */
-  .grid .cell:hover .card,
-  .grid .cell:focus-within .card {
-    transform: translate3d(0, 0, 26px);
-  }
+  /*  (THE LIFT transform removed) */
 
   .card {
     transition:
@@ -613,11 +571,6 @@
   .card:hover::before,
   .card:focus-visible::before {
     opacity: 1;
-  }
-
-  .card:hover::after,
-  .card:focus-visible::after {
-    transform: scaleX(1);
   }
 
   /*  The caption recedes as the slats turn — the reverse carries the
@@ -635,17 +588,10 @@
     transition-duration: 120ms;
   }
 
-  /*  SIBLING RESPONSE — addressing one range sets the other four back,
-      so the grid reports which thing is being considered rather than
-      merely that a card is hoverable. */
-  /*  Raised from 0.42, which was punishing. There is also a
-      structural reason to keep this above the floor: opacity below 1
-      group-flattens a subtree, so a dimmed sibling collapses its own
-      preserve-3d and its slats stop being three-dimensional while a
-      neighbour is addressed. */
+  /*  SIBLING RESPONSE — Disabled per user request so other sections do not darken when one is hovered.
   .grid:has(.card:hover) .cell:not(:hover) .card {
     opacity: 0.62;
-  }
+  } */
 }
 
 /* ── Touch ───────────────────────────────────────────────────────
@@ -661,7 +607,18 @@
   .louvres {
     position: relative;
     flex: 0 0 auto;
-    height: 58%;
+    /*  A definite box, not a percentage of an indefinite parent. Below
+        40rem the cell becomes height:auto, so the card is auto too, and
+        58% of an indefinite height resolves to nothing — collapsing the
+        louvre area (whose slats are all absolutely positioned) to zero.
+        An aspect ratio sizes the mount from its own width, with a floor,
+        so the image area can never vanish. */
+    height: auto;
+    /*  Flattened from 3/2 to 7/4 and the floor cut proportionally, so
+        the image area — the card's main height driver on touch — is
+        ~15% shorter. */
+    aspect-ratio: 7 / 4;
+    min-height: 10.2rem;
   }
 
   .info {
@@ -688,7 +645,6 @@
     justify-content: space-between;
     gap: 1rem;
     padding-top: 0.35rem;
-    border-top: var(--seam-width) solid var(--c-rule);
   }
 
   .specKey {

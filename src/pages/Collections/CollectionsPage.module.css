@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(6rem, 16vh, 11rem) var(--gutter) clamp(4rem, 10vh, 7rem);
+  padding: clamp(7rem, 18vh, 13rem) var(--gutter) clamp(5rem, 12vh, 8rem);
   background: var(--c-void);
 }
 
@@ -58,7 +58,7 @@
   margin: 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(4rem, 13vw, 12rem);
+  font-size: clamp(2.9rem, 8.5vw, 7.5rem);
   line-height: 0.9;
   letter-spacing: var(--track-xl);
 }
@@ -99,6 +99,18 @@
 }
 
 .hallHintLabel {
+  font-family: var(--f-text);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+/*  The down-scroll caption — for the stacked (narrow) corridor only.
+    Hidden until the mobile posture reveals it. */
+.hallHintLabelDown {
+  display: none;
   font-family: var(--f-text);
   font-size: 0.62rem;
   font-weight: 500;
@@ -183,7 +195,7 @@
       hang, a heavier head than foot. */
   justify-content: flex-start;
   padding-top: clamp(9rem, 22vh, 15rem);
-  gap: clamp(1.6rem, 4vh, 3rem);
+  gap: clamp(2.2rem, 5vh, 3.8rem);
   padding-inline: var(--gutter);
   padding-bottom: clamp(5rem, 12vh, 8rem);
   overflow: clip;
@@ -219,12 +231,12 @@
     precisely this. */
 .roomGhost {
   position: absolute;
-  left: -0.04em;
-  top: 2vh;
+  left: -0.1em;
+  top: 6vh;
   z-index: 0;
   font-family: var(--f-display);
   font-weight: 500;
-  font-size: clamp(12rem, 32vw, 40rem);
+  font-size: clamp(5rem, 14vw, 16rem);
   line-height: 0.8;
   letter-spacing: var(--track-xl);
   /*  A step ABOVE the wall rather than below it — on black, a cut
@@ -265,8 +277,10 @@
   margin: 0;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(3rem, 8vw, 7.5rem);
+  font-size: clamp(2.4rem, 5.6vw, 4.75rem);
   line-height: 0.9;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
   letter-spacing: var(--track-xl);
   /*  Cast in brass now the wall is black. It was poured in iron for
       the pale wall, and iron on jet fills the letterform with the
@@ -302,7 +316,12 @@
 .plinth {
   position: relative;
   display: block;
-  width: min(76vw, 30rem);
+  /*  Height-capped as well as width-capped. At 4:5 an uncapped
+      min(82vw, 36rem) resolves to ~720px tall on a landscape phone —
+      taller than the room it sits in. The 52svh term caps the WIDTH by
+      the viewport's short axis, so the mount can never exceed ~65svh
+      tall; on a portrait phone 82vw is smaller and still wins. */
+  width: min(82vw, 36rem, 52svh);
   aspect-ratio: 4 / 5;
   padding: clamp(0.55rem, 1vw, 0.9rem);
   border-radius: var(--radius-lg);
@@ -403,6 +422,28 @@
   transition-duration: 120ms;
 }
 
+/*  The destination cue. On a fine pointer the lift, glint and view-
+    transition prime already say "this is a way in", so the caption is
+    withheld; on a coarse pointer none of those exist, so a quiet line
+    in the stamp register names the range and marks the plinth as an
+    entrance rather than a blank mount. */
+.exhibitCue {
+  display: none;
+}
+
+@media (hover: none) {
+  .exhibitCue {
+    display: block;
+    margin-top: 0.9rem;
+    font-family: var(--f-text);
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--c-stamp);
+  }
+}
+
 /* ── The tombstone label ─────────────────────────────────────── */
 
 .plaque {
@@ -483,6 +524,101 @@
 /*  The compass exists only where the corridor is horizontal. */
 .compass {
   display: none;
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    THE STACKED CORRIDOR — narrow screens
+
+    The corridor lies down. Seven viewport-tall rooms would demand
+    seven screens of mostly empty wall, so the rooms are shortened to
+    breathe on their own content, and a faint continuity rule runs the
+    length of the stack so the seven still read as one gallery. The
+    hall hint, which points along the horizontal corridor, is turned to
+    point DOWN — the axis this posture actually scrolls.
+    ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 63.99rem) {
+  /*  The continuity rule: a single hairline down the stack. Each room
+      paints its own full-height segment at the same inset, so stacked
+      they meet edge-to-edge as one unbroken line — a gallery skirting
+      that ties the rooms together the way the horizontal floor datum
+      does in the corridor. */
+  .room::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--gutter) * 0.5);
+    width: 1px;
+    z-index: 0;
+    background: var(--c-rule);
+    pointer-events: none;
+  }
+
+  /*  The hall hint, reoriented. The line becomes vertical and draws
+      DOWNWARD; the sideways label is swapped for the down-scroll one. */
+  .hallHint {
+    right: auto;
+    left: var(--gutter);
+    bottom: max(clamp(1.4rem, 4vh, 2.6rem), env(safe-area-inset-bottom));
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .hallHintLabel {
+    display: none;
+  }
+
+  .hallHintLabelDown {
+    display: block;
+  }
+
+  .hallHintLine {
+    width: 1px;
+    height: clamp(2.2rem, 6vh, 3.4rem);
+    background: linear-gradient(180deg, var(--c-stamp), transparent);
+    transform-origin: top center;
+    transform: scaleY(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hallHintLine {
+      animation: hint-draw-v 900ms var(--ease-draw) 1600ms both;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hallHintLine {
+      transform: none;
+    }
+  }
+
+  /*  And it drains DOWN as the page is scrolled, where scroll timelines
+      exist. Where they do not, the hint simply scrolls out with the
+      hall header — it is no longer a stuck, wrong-axis cue. */
+  @supports (animation-timeline: scroll(root block)) {
+    @media (prefers-reduced-motion: no-preference) {
+      .hallHint {
+        animation: hint-walk-v linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0px 420px;
+      }
+    }
+  }
+}
+
+@keyframes hint-draw-v {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes hint-walk-v {
+  to {
+    opacity: 0;
+    transform: translateY(1.4rem);
+  }
 }
 
 /*  ─────────────────────────────────────────────────────────────
@@ -626,21 +762,34 @@
     }
 
     .roomGhost {
-      left: 6vw;
-      top: 4vh;
-      font-size: clamp(16rem, 30vw, 38rem);
+      left: 2vw;
+      top: 16vh;
+      font-size: clamp(6.5rem, 12vw, 16rem);
     }
 
+    /*  The mount is SEATED ON THE FLOOR now it is larger: dropped to
+        the foot of its cell, then lifted onto the floor datum so the
+        enlarged plinth stands on the gallery floor line instead of
+        sinking through it. The lift is a TRANSFORM, not a margin: the
+        tall plinth nearly fills its grid cell, and a margin large
+        enough to reach the datum gets overflow-clamped by the grid,
+        where a translate moves it exactly. The cell foot is at 92vh
+        (room padding-bottom 8vh) and the datum at 79vh, so the lift
+        is exactly 13vh — resolution-independent, both being
+        viewport-relative. */
     .exhibit {
       grid-area: exhibit;
       justify-self: center;
+      align-self: end;
+      transform: translateY(-13vh);
     }
 
-    /*  Sized so the mount's foot lands on the floor datum in every
-        room — the museum hang: one eye-line through the whole
-        building, and the numeral the only thing allowed to break it. */
+    /*  Bigger than before — the card now carries the room, and the
+        numeral behind it has been cut right back. Capped on the short
+        axis (50vh → ≈62vh tall at 4:5) so the mount always clears the
+        top padding and seats cleanly on the datum. */
     .plinth {
-      width: min(30vw, 40vh, 26rem);
+      width: min(42vw, 50vh, 34rem);
     }
 
     /*  ── Focus discipline ────────────────────────────────────
@@ -704,7 +853,7 @@
       left: clamp(2rem, 10vw, 12rem);
       bottom: 20vh;
       margin: 0;
-      font-size: clamp(4rem, 8.5vw, 10rem);
+      font-size: clamp(2.8rem, 6vw, 6.5rem);
       pointer-events: none;
     }
 
@@ -735,7 +884,13 @@
       }
     }
 
-    .roomTitle {
+    /*  The corridor conducts its own instruments on --gal. The title
+        and plaque now also carry data-reveal (for the stacked posture
+        and the JS understudy), so these bespoke rules are given a
+        higher-specificity selector to deterministically win over the
+        generic [data-reveal] scroll reveal here — the horizontal
+        corridor must never be driven by a plain view() timeline. */
+    .room .roomTitle {
       animation: title-drift linear both;
       animation-timeline: --gal;
       animation-range: contain calc(var(--r) * 12%) contain
@@ -770,11 +925,18 @@
     /*  The label fades up as its room arrives and holds — resolved
         well before the room is centred, because a wall label being
         read must never still be moving. */
-    .plaque {
+    .room .plaque {
       animation: plaque-in linear both;
       animation-timeline: --gal;
       animation-range: contain calc(var(--r) * 13%) contain
         calc(var(--r) * 13% + 10%);
+    }
+
+    /*  The plinth carries data-reveal for the stacked posture but owns
+        no corridor instrument here; cancel the generic reveal so it
+        cannot misfire against the pinned, horizontally-panned track. */
+    .plinth[data-reveal] {
+      animation: none;
     }
 
     /*  Room one's label resolves during the APPROACH — while the
@@ -864,38 +1026,18 @@
 }
 
 /*  ─────────────────────────────────────────────────────────────
-    Vertical posture, animated — narrow screens with timelines.
-    The rooms stack; each reveals on its own passage.
+    Vertical posture, animated — narrow screens WITHOUT timelines.
+    The rooms stack; each reveals on its own passage. This only
+    fires on browsers that support view() but NOT the full corridor
+    (e.g. narrow screens on iOS Safari ≥26 before the corridor
+    block below overrides it). In practice the corridor block
+    takes over for all supporting browsers on narrow screens, so
+    these are the graceful-degradation scrubs for the stacked
+    fallback when scroll timelines are absent.
     ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 63.99rem) and (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .room .plaque {
-      animation: v-plaque linear both;
-      animation-timeline: view();
-      animation-range: entry 12% entry 55%;
-    }
-
-    @keyframes v-plaque {
-      from {
-        opacity: 0;
-        transform: translate3d(0, 1.4rem, 0);
-      }
-    }
-
-    .room .plinth {
-      animation: v-plinth linear both;
-      animation-timeline: view();
-      animation-range: entry 5% entry 45%;
-    }
-
-    @keyframes v-plinth {
-      from {
-        opacity: 0;
-        transform: scale(1.03);
-      }
-    }
-
     .roomGhost {
       animation: v-ghost linear both;
       animation-timeline: view();
@@ -929,13 +1071,199 @@
 }
 
 /*  ─────────────────────────────────────────────────────────────
+    THE CORRIDOR — mobile: same scroll-jack as desktop
+
+    Scrolling DOWN pans the corridor SIDEWAYS, exactly as on a
+    wide screen. The mechanism is identical — a tall sticky section
+    with a named view-timeline driving a horizontal track pan —
+    the rooms just lose the plaque and gain a centred, stacked
+    layout so the plinth fills the phone screen. Falls back to the
+    vertical stack above when scroll timelines are absent (iOS
+    Safari < 26).
+    ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 63.99rem) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .gallery {
+      --walk: 600vw;
+      height: calc(100svh + var(--walk));
+      view-timeline: --gal block;
+    }
+
+    .pin {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: clip;
+    }
+
+    .track {
+      display: flex;
+      align-items: stretch;
+      gap: 2vw;
+      width: max-content;
+      height: 100%;
+      padding: 0 8vw 0 4vw;
+      /*  Cancel any swipe-rail overrides from the base narrow block. */
+      overflow-x: visible;
+      scroll-snap-type: none;
+      -webkit-overflow-scrolling: unset;
+      scrollbar-width: auto;
+      animation: track-pan linear both;
+      animation-timeline: --gal;
+      animation-range: contain 0% contain 100%;
+    }
+
+    .track::-webkit-scrollbar {
+      display: revert;
+    }
+
+    /*  No floor datum on mobile — the plinth sits centred in the room
+        rather than on a gallery skirting line. */
+    .track::before {
+      display: none;
+    }
+
+    .room {
+      position: relative;
+      flex: none;
+      width: 88vw;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10svh 4vw;
+      gap: clamp(1.2rem, 3svh, 2rem);
+      contain: layout paint;
+      /*  Cancel the vertical-fallback continuity rule. */
+      background-image: none;
+    }
+
+    .room:last-child {
+      width: 94vw;
+    }
+
+    .room + .room {
+      background-image: none;
+    }
+
+    /*  Cancel the stacked-layout continuity hairline — rooms sit
+        side-by-side here, not in a stack. */
+    .room::after {
+      display: none;
+    }
+
+    /*  Title: a regular flex item above the plinth, centred. The
+        desktop makes it position:absolute; reset that here. */
+    .room .roomTitle {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      margin: 0;
+      text-align: center;
+      font-size: clamp(2rem, 7vw, 3rem);
+      pointer-events: none;
+      animation: title-drift linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 12%) contain
+        calc(var(--r) * 12% + 42%);
+    }
+
+    /*  Plinth: fills the room width, 4:5 ratio keeps the mount
+        portrait and centred. No floor-datum lift on mobile. */
+    .exhibit {
+      transform: none;
+      justify-self: unset;
+      align-self: unset;
+    }
+
+    .plinth {
+      width: min(72vw, 54svh);
+    }
+
+    /*  Plaque hidden — the spec card takes up too much vertical space
+        in a portrait room and the range name + plinth read cleanly
+        without it on a phone. */
+    .plaque {
+      display: none;
+    }
+
+    /*  Cancel the data-reveal on the plinth — the corridor conducts it. */
+    .plinth[data-reveal] {
+      animation: none;
+    }
+
+    /*  Compass is a desktop-corridor instrument; no room on mobile. */
+    .compass {
+      display: none;
+    }
+
+    /*  Focus discipline — rooms far from the visible neighbourhood
+        are removed from the tab order (same ranges as desktop). */
+    .room {
+      animation: room-vis linear both;
+      animation-timeline: --gal;
+    }
+
+    .room:nth-child(1) {
+      animation-range: entry 0% contain 26%;
+    }
+
+    .room:nth-child(2) {
+      animation-range: contain 0% contain 40%;
+    }
+
+    .room:nth-child(3) {
+      animation-range: contain 8% contain 54%;
+    }
+
+    .room:nth-child(4) {
+      animation-range: contain 22% contain 68%;
+    }
+
+    .room:nth-child(5) {
+      animation-range: contain 36% contain 82%;
+    }
+
+    .room:nth-child(6) {
+      animation-range: contain 50% contain 96%;
+    }
+
+    .room:nth-child(7) {
+      animation-range: contain 64% exit 100%;
+    }
+
+    /*  Corridor instruments — ghost drifts, light rakes, override the
+        stacked view() scrubs declared in the block above. */
+    .roomGhost {
+      left: 3vw;
+      top: 3vh;
+      font-size: clamp(4.5rem, 11vw, 12rem);
+      animation: ghost-drift linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 12%) contain
+        calc(var(--r) * 12% + 42%);
+    }
+
+    .roomRake {
+      animation: rake-pass linear both;
+      animation-timeline: --gal;
+      animation-range: contain calc(var(--r) * 12%) contain
+        calc(var(--r) * 12% + 40%);
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
     THE VAULT — the close, back on the dark ground
     ───────────────────────────────────────────────────────────── */
 
 .vault {
   position: relative;
   isolation: isolate;
-  padding: clamp(6rem, 16vh, 12rem) var(--gutter) clamp(7rem, 18vh, 13rem);
+  padding: clamp(7rem, 18vh, 14rem) var(--gutter) clamp(8rem, 20vh, 15rem);
 }
 
 .vault::before {
@@ -952,7 +1280,7 @@
   max-width: 16ch;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(2.4rem, 6.5vw, 5.5rem);
+  font-size: clamp(2rem, 4.8vw, 4.25rem);
   line-height: 0.96;
   letter-spacing: var(--track-xl);
 }

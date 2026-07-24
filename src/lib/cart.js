@@ -26,6 +26,13 @@ const KEY = 'casa-and-crop:shortlist'
     length of their visit rather than a broken page. */
 function read() {
   try {
+    if (typeof performance !== 'undefined') {
+      const nav = performance.getEntriesByType("navigation")[0]
+      if (nav && nav.type === 'reload') {
+        window.localStorage.removeItem(KEY)
+        return []
+      }
+    }
     const raw = window.localStorage.getItem(KEY)
     const parsed = raw ? JSON.parse(raw) : []
     return Array.isArray(parsed) ? parsed : []
@@ -67,12 +74,12 @@ export function countItems(list = items) {
  * @param {{sku: string, name: string, range: string, spec: string}} piece
  */
 export function addItem(piece) {
-  const found = items.find((it) => it.sku === piece.sku)
-  if (found) {
-    found.qty += 1
-  } else {
-    items.push({ ...piece, qty: 1 })
-  }
+  /*  Idempotent. The shortlist is a SET of marked pieces now that the
+      per-row quantity stepper is gone — marking a SKU already on the
+      list is a no-op, not a silent ×2 the buyer cannot see or undo.
+      Quantity per SKU is settled in the enquiry, not counted here. */
+  if (items.some((it) => it.sku === piece.sku)) return
+  items.push({ ...piece, qty: 1 })
   emit()
 }
 

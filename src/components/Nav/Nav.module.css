@@ -15,6 +15,14 @@
   z-index: 60;
 }
 
+/*  While the full-screen menu is open the whole letterhead is lifted
+    above the reading rail (z-index 70) and the shortlist case (z 70),
+    so the open panel owns the screen and the brass rail does not draw
+    a line across the top of it. */
+.nav[data-open] {
+  z-index: 90;
+}
+
 /*  The plate. Grain, ground and a cast shadow arrive together as one
     opacity — the shadow never animates on its own, it rides a layer
     crossfade, which is the house pattern for every "shadow change" on
@@ -58,10 +66,20 @@
 
 .inner {
   position: relative;
+  /*  Above the panel (z-index 1 on small screens) so the toggle stays
+      on top when the menu is open — otherwise the opaque panel paints
+      over the Close control and a touch visitor, with no Escape key,
+      cannot dismiss the menu at all. */
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: clamp(1.2rem, 3vw, 3rem);
-  padding: clamp(0.9rem, 1.8vh, 1.3rem) var(--gutter);
+  /*  Clears the notch and the rounded landscape corners — the letter-
+      head must never sit under the status bar or run into the bezel. */
+  padding: max(clamp(0.9rem, 1.8vh, 1.3rem), env(safe-area-inset-top))
+    max(var(--gutter), env(safe-area-inset-right))
+    clamp(0.9rem, 1.8vh, 1.3rem)
+    max(var(--gutter), env(safe-area-inset-left));
 }
 
 /* ── The mark ────────────────────────────────────────────────── */
@@ -198,86 +216,14 @@
   transform: translateY(1px);
 }
 
-/*  The current page carries a brass node — a set stamp, not a rule. */
+/*  The current page glows instead of carrying a node. */
 .node {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--c-specular);
-  opacity: 0;
-  transform: scale(0.5);
-  transition:
-    opacity var(--dur-ui) var(--ease-ui),
-    transform var(--dur-ui) var(--ease-ui);
+  display: none;
 }
 
-.link[aria-current='page'] .node {
-  opacity: 1;
-  transform: none;
-}
-
-/* ── The Connect action ──────────────────────────────────────── */
-
-.cta {
-  position: relative;
-  overflow: hidden;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius-pill);
-  box-shadow: inset 0 0 0 1px var(--c-rule-strong);
-  color: var(--c-casa-ink);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  font-family: var(--f-text);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: var(--track-sm);
-  transition: transform var(--dur-ui) var(--ease-ui);
-}
-
-.ctaLabel {
-  position: relative;
-  z-index: 1;
-  transition: color var(--dur-ui) var(--ease-ui);
-}
-
-.ctaFill {
-  position: absolute;
-  inset: 0;
-  background: var(--metal-brass);
-  transform: translate3d(0, 101%, 0);
-  transition: transform 340ms var(--ease-veil);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .cta:hover .ctaFill,
-  .cta[aria-current='page'] .ctaFill {
-    transform: none;
-  }
-
-  .cta:hover .ctaLabel,
-  .cta[aria-current='page'] .ctaLabel {
-    color: var(--c-void);
-  }
-}
-
-.cta[aria-current='page'] .ctaFill {
-  transform: none;
-}
-
-.cta[aria-current='page'] .ctaLabel {
-  color: var(--c-void);
-}
-
-.cta:focus-visible .ctaFill {
-  transform: none;
-}
-
-.cta:focus-visible .ctaLabel {
-  color: var(--c-void);
-}
-
-.cta:active {
-  transform: translateY(1px) scale(0.99);
+.link[aria-current='page'] .labelInk {
+  text-shadow: 0 0 12px rgba(201, 177, 145, 0.6);
+  color: #fff; /* Slight brighten */
 }
 
 /* ── Small-screen toggle + panel ─────────────────────────────── */
@@ -286,12 +232,25 @@
   display: none;
   align-items: center;
   gap: 0.6rem;
+  /*  A real 44px target. The visible mark is only the label plus the
+      bar stack; the padding grows the tappable box around it without
+      changing what is drawn. */
+  min-height: 44px;
+  padding: 0.5rem 0.1rem 0.5rem 0.75rem;
   color: var(--c-casa-ink);
   font-family: var(--f-text);
   font-size: var(--t-1);
   font-weight: 500;
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .toggleLabel {
@@ -332,14 +291,21 @@
   transform: translateY(-0.26rem) rotate(-12deg);
 }
 
+/*  The panel is a full page, not a dropped list: the index fills the
+    upper field and the export desk sits as a colophon beneath it. Its
+    plate is the deepest section black with the site's grain, so the
+    menu reads as a room the site opened rather than a sheet laid over
+    it. Safe-area padding keeps the index clear of the notch and the
+    home indicator. */
 .panel {
   position: fixed;
   inset: 0;
   z-index: -1;
   display: flex;
-  align-items: center;
-  padding: 5.5rem var(--gutter) var(--gutter);
-  background-color: var(--s-1);
+  background-color: var(--s-0);
+  background-image: var(--grain);
+  background-repeat: repeat;
+  background-size: var(--grain-size);
 
   opacity: 0;
   transform: translate3d(0, -1.25rem, 0);
@@ -360,6 +326,19 @@
     visibility 0s;
 }
 
+.panelInner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(2rem, 6vh, 4rem);
+  width: 100%;
+  /*  Clears the letterhead above and every phone bezel around. */
+  padding: max(5.25rem, calc(env(safe-area-inset-top) + 4rem))
+    max(var(--gutter), env(safe-area-inset-right))
+    max(var(--gutter), calc(env(safe-area-inset-bottom) + 1.5rem))
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
 .panelList {
   width: 100%;
   list-style: none;
@@ -369,23 +348,26 @@
 
 .panelItem {
   overflow: hidden;
-  border-top: 1px solid var(--c-rule);
+  border-top: var(--seam-width) solid var(--c-rule);
 }
 
 .panelItem:last-child {
-  border-bottom: 1px solid var(--c-rule);
+  border-bottom: var(--seam-width) solid var(--c-rule);
 }
 
 .panelLink {
+  position: relative;
   display: flex;
   align-items: baseline;
-  gap: 1rem;
-  padding: clamp(0.9rem, 3vw, 1.4rem) 0;
+  gap: clamp(0.9rem, 3vw, 1.4rem);
+  padding: clamp(1rem, 3.4vw, 1.6rem) 0;
   color: var(--c-casa-ink);
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(1.6rem, 8vw, 2.6rem);
+  font-size: clamp(1.9rem, 9vw, 2.9rem);
+  line-height: 1;
   letter-spacing: var(--track-lg);
   transform: translate3d(0, 110%, 0);
   transition: transform 420ms var(--ease-veil);
@@ -397,16 +379,121 @@
 }
 
 .panelIndex {
+  flex: none;
+  align-self: center;
   font-family: var(--f-text);
   font-size: var(--t-1);
   font-weight: 500;
   letter-spacing: var(--track-caps);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-stamp);
+  opacity: 0.7;
+}
+
+.panelLabel {
+  display: inline-block;
+  transition: transform var(--dur-ui) var(--ease-ui);
+}
+
+/*  The current page carries the house set-stamp — the same brass node
+    the wide-screen roller uses, so both navs mark position the same
+    way. */
+.panelNode {
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--c-specular);
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform var(--dur-ui) var(--ease-ui);
+}
+
+.panelLink[aria-current='page'] {
   color: var(--c-stamp);
 }
 
+.panelLink[aria-current='page'] .panelIndex {
+  opacity: 1;
+}
+
+.panelLink[aria-current='page'] .panelNode {
+  opacity: 1;
+  transform: none;
+}
+
+.panelLink:active .panelLabel {
+  transform: translateY(1px);
+}
+
+.panelLink:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── The colophon — the export desk under the index ──────────── */
+
+.panelDesk {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: clamp(1.5rem, 4vh, 2.5rem);
+  border-top: var(--seam-width) solid var(--c-rule);
+  /*  Rises a beat after the last link, so the colophon settles in
+      once the index has arrived. */
+  opacity: 0;
+  transform: translate3d(0, 0.8rem, 0);
+  transition:
+    opacity var(--dur-ui) var(--ease-ui),
+    transform 420ms var(--ease-veil);
+}
+
+.nav[data-open] .panelDesk {
+  opacity: 1;
+  transform: none;
+  transition-delay: 360ms;
+}
+
+.panelDeskKey {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.panelDeskLink {
+  font-family: var(--f-display);
+  font-size: clamp(1.05rem, 4vw, 1.35rem);
+  /*  Display-size type, so it tracks NEGATIVE — --track-sm is the
+      positive sub-13px tier and would violate the type system here. */
+  letter-spacing: var(--track-md);
+  color: var(--c-casa-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.panelDeskLink:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.panelDeskLine {
+  margin: 0;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-sm);
+  color: var(--c-ink-muted);
+}
+
 @media (max-width: 56rem) {
-  .links,
-  .cta {
+  .links {
     display: none;
   }
 
@@ -423,9 +510,9 @@
 @media (prefers-reduced-motion: reduce) {
   .panel,
   .panelLink,
+  .panelDesk,
   .labelInk,
-  .labelBrass,
-  .ctaFill {
+  .labelBrass {
     transition: none;
   }
 }

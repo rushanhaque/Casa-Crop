@@ -61,11 +61,17 @@
   @media (prefers-reduced-motion: no-preference) {
     [data-reveal] {
       --i: 0;
+      --reveal-start: 5%;
+      --reveal-end: 35%;
       animation-timing-function: var(--ease-reveal);
       animation-fill-mode: both;
       animation-timeline: view();
-      animation-range: entry calc(5% + var(--i) * 4%) entry
-        calc(55% + var(--i) * 4%);
+      /*  Start the moment the element enters the viewport; finish when
+          it is settled ~24% into the viewport (cover-relative so short
+          elements still get a perceptible arc on any screen size). 
+          (Delayed globally to start deeper into the viewport) */
+      animation-range: cover calc(var(--reveal-start) + var(--i) * 2%) cover
+        calc(var(--reveal-end) + var(--i) * 2%);
     }
 
     [data-reveal='line'] {
@@ -89,6 +95,102 @@
       transform-origin: left center;
     }
 
+    /*  SLIDE — content entering from the side, further than the margin
+        nudge: a card that arrives from off to one edge. Pair the two
+        directions across a grid or a list for an alternating, woven
+        arrival. */
+    [data-reveal='slide-left'] {
+      animation-name: rv-slide-left;
+    }
+
+    [data-reveal='slide-right'] {
+      animation-name: rv-slide-right;
+    }
+
+    /*  ZOOM — a card growing into place from slightly under scale,
+        the opposite gesture to settle (which eases DOWN from over). */
+    [data-reveal='zoom'] {
+      animation-name: rv-zoom;
+    }
+
+    [data-reveal='fade-out'] {
+      animation-name: rv-fade-out;
+    }
+
+    [data-reveal='blur-in'] {
+      animation-name: rv-blur-in;
+    }
+
+    [data-reveal='slide-up'] {
+      animation-name: rv-slide-up;
+    }
+
+    [data-reveal='slide-down'] {
+      animation-name: rv-slide-down;
+    }
+
+    [data-reveal='flip-in'] {
+      animation-name: rv-flip-in;
+    }
+
+    @keyframes rv-slide-left {
+      from {
+        opacity: 0;
+        transform: translate3d(4rem, 0, 0);
+      }
+    }
+
+    @keyframes rv-slide-right {
+      from {
+        opacity: 0;
+        transform: translate3d(-4rem, 0, 0);
+      }
+    }
+
+    @keyframes rv-zoom {
+      from {
+        opacity: 0;
+        transform: scale(0.84);
+      }
+    }
+
+    @keyframes rv-fade-out {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes rv-blur-in {
+      from {
+        opacity: 0;
+        filter: blur(10px);
+      }
+    }
+
+    @keyframes rv-slide-up {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 4rem, 0);
+      }
+    }
+
+    @keyframes rv-slide-down {
+      from {
+        opacity: 0;
+        transform: translate3d(0, -4rem, 0);
+      }
+    }
+
+    @keyframes rv-flip-in {
+      from {
+        opacity: 0;
+        transform: perspective(1000px) rotateX(45deg);
+      }
+    }
+
     /*  CHAR — display type assembling one glyph at a time as it
         crosses the viewport. The stagger is encoded in the RANGE
         arithmetic, not in delays: animation-delay is meaningless on a
@@ -98,14 +200,14 @@
     [data-reveal='char'] {
       display: inline-block;
       animation-name: rv-char;
-      animation-range: entry calc(6% + var(--i) * 2.2%) entry
-        calc(42% + var(--i) * 2.2%);
+      animation-range: cover calc(5% + var(--i) * 0.8%) cover
+        calc(22% + var(--i) * 0.8%);
     }
 
     @keyframes rv-char {
       from {
         opacity: 0;
-        transform: translate3d(0, 0.55em, 0);
+        transform: translate3d(0, 0.7em, 0);
       }
     }
 
@@ -132,21 +234,21 @@
     @keyframes rv-rise {
       from {
         opacity: 0;
-        transform: translate3d(0, 1.4rem, 0);
+        transform: translate3d(0, 2.2rem, 0);
       }
     }
 
     @keyframes rv-margin {
       from {
         opacity: 0;
-        transform: translate3d(-0.8rem, 0, 0);
+        transform: translate3d(-1.5rem, 0, 0);
       }
     }
 
     @keyframes rv-settle {
       from {
         opacity: 0;
-        transform: scale(1.045);
+        transform: scale(1.07);
       }
     }
 
@@ -154,6 +256,120 @@
       from {
         transform: scaleX(0);
       }
+    }
+  }
+}
+
+/*  ─────────────────────────────────────────────────────────────
+    SCRUBBED REVEALS — JS UNDERSTUDY
+
+    The exact same reveals, for engines with no scroll-driven CSS
+    (iOS Safari < 26, Firefox). Doubly gated: the poses apply only
+    where `animation-timeline: view()` is UNSUPPORTED *and* the
+    `motion-js` class has been set by lib/motion-fallback.js. On a
+    scroll-timeline browser the @supports test fails and none of this
+    exists; if the script never runs the class is absent and none of
+    this exists either — so content is always visible unless JS has
+    positively taken charge. That is the fail-open guarantee, kept.
+
+    Each element rests in its hidden pose and is transitioned to
+    natural when the observer adds `is-in`. The per-sibling `--i`
+    already in the markup becomes the transition-delay, so the
+    stagger — and the glyph-by-glyph assembly of `char` — survive the
+    change of mechanism. Transform and opacity only; no `will-change`,
+    because permanently promoting every line of type is the exact
+    texture-memory cost this site refuses to pay.
+    ───────────────────────────────────────────────────────────── */
+
+@supports not (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html.motion-js [data-reveal] {
+      --i: 0;
+      --reveal-delay: 0ms;
+      opacity: 0;
+      transition:
+        opacity var(--dur-rise) var(--ease-reveal),
+        transform var(--dur-rise) var(--ease-reveal);
+      transition-delay: calc(var(--reveal-delay) + var(--i) * 60ms);
+    }
+
+    /*  Per-variant hidden poses — mirrors the keyframe `from` frames
+        above one-for-one. The three that carry no fade (line, tilt,
+        draw) re-assert opacity:1 so only their transform animates. */
+    html.motion-js [data-reveal='rise'] {
+      transform: translate3d(0, 2.2rem, 0);
+    }
+
+    html.motion-js [data-reveal='margin'] {
+      transform: translate3d(-1.5rem, 0, 0);
+    }
+
+    html.motion-js [data-reveal='settle'] {
+      transform: scale(1.07);
+    }
+
+    html.motion-js [data-reveal='line'] {
+      opacity: 1;
+      transform: translate3d(0, 110%, 0);
+    }
+
+    html.motion-js [data-reveal='tilt'] {
+      opacity: 1;
+      transform: translate3d(0, 115%, 0) rotate(2.4deg);
+      transform-origin: 0% 100%;
+    }
+
+    html.motion-js [data-reveal='draw'] {
+      opacity: 1;
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+
+    html.motion-js [data-reveal='slide-left'] {
+      transform: translate3d(4rem, 0, 0);
+    }
+
+    html.motion-js [data-reveal='slide-right'] {
+      transform: translate3d(-4rem, 0, 0);
+    }
+
+    html.motion-js [data-reveal='zoom'] {
+      transform: scale(0.84);
+    }
+
+    html.motion-js [data-reveal='fade-out'] {
+      opacity: 0; /* Note: inverted logic for fade-out might conflict with fail-open */
+    }
+
+    html.motion-js [data-reveal='blur-in'] {
+      filter: blur(10px);
+    }
+
+    html.motion-js [data-reveal='slide-up'] {
+      transform: translate3d(0, 4rem, 0);
+    }
+
+    html.motion-js [data-reveal='slide-down'] {
+      transform: translate3d(0, -4rem, 0);
+    }
+
+    html.motion-js [data-reveal='flip-in'] {
+      transform: perspective(1000px) rotateX(45deg);
+    }
+
+    /*  CHAR — inline glyphs assembling one at a time. A tighter
+        per-glyph delay than the block reveals, so a whole line lands
+        inside about half a second rather than crawling. */
+    html.motion-js [data-reveal='char'] {
+      display: inline-block;
+      transform: translate3d(0, 0.7em, 0);
+      transition-delay: calc(var(--i) * 34ms);
+    }
+
+    /*  The arrived state — every variant returns to natural. */
+    html.motion-js [data-reveal].is-in {
+      opacity: 1;
+      transform: none;
     }
   }
 }

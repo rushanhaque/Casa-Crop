@@ -11,7 +11,7 @@
 
 .masthead {
   position: relative;
-  padding: clamp(5rem, 14vh, 10rem) var(--gutter) clamp(2.5rem, 6vh, 4rem);
+  padding: clamp(6rem, 16vh, 12rem) var(--gutter) clamp(3.5rem, 8vh, 5.5rem);
   overflow: hidden;
 }
 
@@ -23,7 +23,10 @@
   top: 0.02em;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(12rem, 34vw, 30rem);
+  /*  Held back on phones so the ghost supports the range name rather
+      than swamping it — a 7rem numeral over a 2rem title inverts the
+      hierarchy on a 320px screen. */
+  font-size: clamp(5.5rem, 18vw, 16rem);
   line-height: 0.8;
   letter-spacing: var(--track-xl);
   color: rgba(255, 255, 255, 0.045);
@@ -63,7 +66,11 @@
   position: relative;
   font-family: var(--f-display);
   font-weight: var(--w-display);
-  font-size: clamp(3rem, 10vw, 9rem);
+  /*  A real floor and real fluid growth through the phone band — 5vw
+      only overtook the old 2rem floor at ~640px, freezing the sole
+      headline at 32px across every phone. It now grows and reasserts
+      primacy over the ghost. */
+  font-size: clamp(2.6rem, 8vw, 4.5rem);
   line-height: 0.94;
   letter-spacing: var(--track-xl);
   margin: 0;
@@ -78,7 +85,7 @@
 .lede {
   position: relative;
   max-width: 42rem;
-  margin: clamp(1.4rem, 3vw, 2.2rem) 0 0;
+  margin: clamp(1.8rem, 3.6vw, 2.8rem) 0 0;
   font-family: var(--f-text);
   font-size: clamp(1rem, 1.3vw, 1.15rem);
   line-height: 1.6;
@@ -107,259 +114,18 @@
 .plates {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  gap: clamp(1.2rem, 2.5vw, 2rem);
+  gap: clamp(1.6rem, 3vw, 2.6rem);
+  /*  Contains the plates' slide-in off-positions so they never push the
+      page sideways. clip only on the inline axis; the grid still flows
+      vertically. */
+  overflow-x: clip;
   /*  A deeper foot than head: the catalogue is the last thing on the
       page now, and it has to clear the footer's tilted edge — which is
       pulled up over whatever precedes it — by more than the tilt. */
-  padding: clamp(3rem, 7vh, 5rem) var(--gutter) clamp(6rem, 13vh, 9rem);
+  padding: clamp(4rem, 9vh, 6.5rem) var(--gutter) clamp(7rem, 15vh, 11rem);
 }
 
-.plate {
-  position: relative;
-  border-radius: var(--radius);
-  padding: clamp(0.7rem, 1.2vw, 1rem);
-  background:
-    linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.08) 0%,
-        rgba(255, 255, 255, 0) 30%
-      )
-      padding-box,
-    linear-gradient(180deg, #1c1f24 0%, #14161a 100%) padding-box;
-  box-shadow: var(--elev-1), var(--rim);
-  /*  Transform only. The deeper hover shadow is a pre-painted layer
-      crossfaded below — transitioning box-shadow itself interpolates
-      the blur and repaints the plate every frame, the exact cost this
-      site's cards were built to avoid. */
-  transition: transform var(--dur-ui) var(--ease-ui);
-  overflow: hidden;
-}
 
-.plate::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  box-shadow: var(--elev-2);
-  opacity: 0;
-  transition: opacity var(--dur-ui) var(--ease-ui);
-  pointer-events: none;
-}
-
-/*  The raking light, plate-sized, scrubbed by each plate's own
-    passage — the grid catches the light in sequence as you scroll. */
-.plate::after {
-  content: '';
-  position: absolute;
-  inset: -40% -60%;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(
-    105deg,
-    transparent 44%,
-    rgba(255, 255, 255, 0.05) 49%,
-    rgba(255, 255, 255, 0.11) 51%,
-    rgba(255, 255, 255, 0.05) 53%,
-    transparent 58%
-  );
-  transform: translate3d(-70%, 0, 0);
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .plate::after {
-      animation: plate-rake linear both;
-      animation-timeline: view();
-      animation-range: entry 15% exit 85%;
-    }
-
-    @keyframes plate-rake {
-      from {
-        transform: translate3d(-70%, 0, 0);
-      }
-      to {
-        transform: translate3d(70%, 0, 0);
-      }
-    }
-  }
-}
-
-/*  A ghost numeral per plate — the pattern-book read carried into the
-    grid, and what makes an empty plate look designed rather than
-    unfinished. */
-.plateGhost {
-  position: absolute;
-  right: 0.15rem;
-  top: -0.35em;
-  z-index: 1;
-  font-family: var(--f-display);
-  font-weight: var(--w-display);
-  font-size: 5.5rem;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.05);
-  pointer-events: none;
-  user-select: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  /*  The plate no longer LIFTS on hover — it lights. The card was
-      rising 5px toward the pointer, which is the generic "clickable
-      tile" gesture the rest of the site was built to avoid; on a
-      catalogue of held objects it read as restlessness. The deeper
-      shadow still crossfades in, so the plate reports the hover by
-      gaining presence where it stands rather than by jumping. */
-  .plate:hover::before {
-    opacity: 1;
-  }
-}
-
-.plateWell {
-  border-radius: max(0px, calc(var(--radius) - 0.7rem));
-  overflow: hidden;
-}
-
-/*  The reserved slot: fixed aspect so photography can never shift the
-    grid when it lands. */
-.plateArt {
-  aspect-ratio: 4 / 5;
-  background: color-mix(in srgb, var(--c-casa-ink) 5%, transparent);
-}
-
-.plateFoot {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding-top: 0.8rem;
-}
-
-.plateSku {
-  font-family: var(--f-text);
-  font-size: var(--t-1);
-  font-weight: 500;
-  letter-spacing: var(--track-sm);
-  font-variant-numeric: tabular-nums;
-  color: var(--c-casa-ink);
-}
-
-.plateState {
-  font-family: var(--f-text);
-  font-size: var(--t-1);
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--c-ink-muted);
-}
-
-/* ── The sill ────────────────────────────────────────────────────
-   Molten brass rising from the foot of the well — held to a sill.
-
-   It used to flood 46% of the plate: a whole face of brass carrying
-   three words, which buried the piece under its own call to action
-   at exactly the moment the visitor was looking at it. It now rises
-   only as far as one line of type needs, and the tilted meniscus
-   reads BETTER for it — a shallow pour is where a slope is most
-   legible, because there is nothing but the slope to look at.
-
-   The surface line is the site's tilt, cut as a static clip on the
-   layer's own top edge; the layer then simply translates, so the
-   moving part is transform only and the brass arrives already
-   tilted. */
-
-.plateWell {
-  position: relative;
-}
-
-.add {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /*  Just enough for the line: the label's cap-height plus its own
-      breathing room, and the tilt's rise on top. */
-  height: 2.5rem;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 0.62rem;
-  /*  The sill is the button. A separate hit area inside a decorative
-      pour would mean the thing that looks pressable and the thing
-      that is pressable are different shapes. */
-  transform: translate3d(0, 101%, 0);
-  transition: transform 420ms var(--ease-veil);
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-}
-
-.addFill {
-  position: absolute;
-  inset: 0;
-  background: var(--metal-brass);
-  clip-path: polygon(0 22%, 100% 0, 100% 100%, 0 100%);
-}
-
-.addLabel {
-  position: relative;
-  z-index: 1;
-  font-family: var(--f-text);
-  font-size: var(--t-1);
-  font-weight: 500;
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--c-void);
-  white-space: nowrap;
-}
-
-/*  The acknowledgement. The sill stays up for a beat after the
-    press, so the plate says it heard you rather than snapping shut
-    the instant the pointer leaves. */
-.add[data-added] {
-  transform: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .plate:hover .add,
-  .add:focus-visible {
-    transform: none;
-  }
-
-  .plate:hover .plateGhost {
-    color: transparent;
-    -webkit-text-stroke: 1.25px rgba(240, 217, 168, 0.28);
-    transition: -webkit-text-stroke-color var(--dur-ui) var(--ease-ui);
-  }
-}
-
-.add:active .addLabel {
-  transform: translateY(1px);
-}
-
-/*  No hover on a touchscreen, so the sill simply sits on the well —
-    a shortlist you cannot reach is worse than a sill you did not
-    ask for. */
-@media (hover: none) {
-  .add {
-    transform: none;
-  }
-}
-
-/*  The press settles slightly INTO the page rather than lifting off
-    it — a committing gesture, not a hover held harder — and no longer
-    carries the −2px rise the removed hover left behind. */
-.plate:active {
-  transform: scale(0.994);
-  transition-duration: 120ms;
-}
-
-/*  Reduced motion keeps the sill, loses the rise: it simply sits on
-    the well, because a control that is only reachable through an
-    animation is not reachable. */
-@media (prefers-reduced-motion: reduce) {
-  .add {
-    transform: none;
-    transition: none;
-  }
-}
 
 /*  The skip link — present on every page, visible only to the
     keyboard. Same apparatus as the Casa page's. */

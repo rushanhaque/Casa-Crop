@@ -1,0 +1,12 @@
+/*  The component owns only the canvas; the wrapper's box — where it
+    sits, how tall it is, how the cursor reads over it — belongs to
+    whatever list it is strung through, and arrives as an extra class. */
+.wrap {
+  display: block;
+}
+
+.wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

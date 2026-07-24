@@ -1,0 +1,301 @@
+/* ── The plate ──────────────────────────────────────────────── */
+
+.plate {
+  position: relative;
+  border-radius: var(--radius);
+  padding: clamp(0.7rem, 1.2vw, 1rem);
+  background:
+    linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0) 30%
+      )
+      padding-box,
+    linear-gradient(180deg, #1c1f24 0%, #14161a 100%) padding-box;
+  box-shadow: var(--elev-1), var(--rim);
+  /*  Transform only. The deeper hover shadow is a pre-painted layer
+      crossfaded below — transitioning box-shadow itself interpolates
+      the blur and repaints the plate every frame, the exact cost this
+      site's cards were built to avoid. */
+  transition: transform var(--dur-ui) var(--ease-ui);
+  overflow: hidden;
+  /* Delay reveal slightly for product cards */
+  --reveal-start: 25%;
+  --reveal-end: 55%;
+}
+
+.plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow: var(--elev-2);
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-ui);
+  pointer-events: none;
+}
+
+/*  The raking light, plate-sized, scrubbed by each plate's own
+    passage — the grid catches the light in sequence as you scroll. */
+.plate::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 44%,
+    rgba(255, 255, 255, 0.05) 49%,
+    rgba(255, 255, 255, 0.11) 51%,
+    rgba(255, 255, 255, 0.05) 53%,
+    transparent 58%
+  );
+  transform: translate3d(-70%, 0, 0);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .plate::after {
+      animation: plate-rake linear both;
+      animation-timeline: view();
+      animation-range: entry 15% exit 85%;
+    }
+
+    @keyframes plate-rake {
+      from {
+        transform: translate3d(-70%, 0, 0);
+      }
+      to {
+        transform: translate3d(70%, 0, 0);
+      }
+    }
+  }
+}
+
+/*  A ghost numeral per plate — the pattern-book read carried into the
+    grid, and what makes an empty plate look designed rather than
+    unfinished. */
+.plateGhost {
+  position: absolute;
+  right: 0.15rem;
+  top: -0.35em;
+  z-index: 1;
+  font-family: var(--f-display);
+  font-weight: var(--w-display);
+  font-size: 5.5rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /*  The plate no longer LIFTS on hover — it lights. The card was
+      rising 5px toward the pointer, which is the generic "clickable
+      tile" gesture the rest of the site was built to avoid; on a
+      catalogue of held objects it read as restlessness. The deeper
+      shadow still crossfades in, so the plate reports the hover by
+      gaining presence where it stands rather than by jumping. */
+  .plate:hover::before {
+    opacity: 1;
+  }
+}
+
+.plateWell {
+  border-radius: max(0px, calc(var(--radius) - 0.7rem));
+  overflow: hidden;
+  position: relative;
+}
+
+.plateArtLink {
+  display: block;
+}
+
+/*  The reserved slot: fixed aspect so photography can never shift the
+    grid when it lands. */
+.plateArt {
+  aspect-ratio: 4 / 5;
+  background: color-mix(in srgb, var(--c-casa-ink) 5%, transparent);
+}
+
+.plateFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-top: 0.8rem;
+}
+
+.plateSku {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-casa-ink);
+}
+
+.plateState {
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+/* ── The sill ────────────────────────────────────────────────────
+   Molten brass rising from the foot of the well — held to a sill.
+
+   It used to flood 46% of the plate: a whole face of brass carrying
+   three words, which buried the piece under its own call to action
+   at exactly the moment the visitor was looking at it. It now rises
+   only as far as one line of type needs, and the tilted meniscus
+   reads BETTER for it — a shallow pour is where a slope is most
+   legible, because there is nothing but the slope to look at.
+
+   The surface line is the site's tilt, cut as a static clip on the
+   layer's own top edge; the layer then simply translates, so the
+   moving part is transform only and the brass arrives already
+   tilted. */
+
+.add {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /*  Just enough for the line: the label's cap-height plus its own
+      breathing room, and the tilt's rise on top. */
+  height: 2.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.62rem;
+  /*  The sill is the button. A separate hit area inside a decorative
+      pour would mean the thing that looks pressable and the thing
+      that is pressable are different shapes. */
+  transform: translate3d(0, 101%, 0);
+  transition: transform 420ms var(--ease-veil);
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.addFill {
+  position: absolute;
+  inset: 0;
+  background: var(--metal-brass);
+  clip-path: polygon(0 22%, 100% 0, 100% 100%, 0 100%);
+}
+
+.addLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-void);
+  white-space: nowrap;
+}
+
+/*  The acknowledgement. The sill stays up for a beat after the
+    press, so the plate says it heard you rather than snapping shut
+    the instant the pointer leaves. */
+.add[data-added] {
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plate:hover .add,
+  .add:focus-visible {
+    transform: none;
+  }
+
+  .plate:hover .plateGhost {
+    color: transparent;
+    -webkit-text-stroke: 1.25px rgba(240, 217, 168, 0.28);
+    transition: -webkit-text-stroke-color var(--dur-ui) var(--ease-ui);
+  }
+}
+
+.add:active .addLabel {
+  transform: translateY(1px);
+}
+
+/*  A real focus ring — the sill-rise alone was the only cue, and on
+    touch the sill is already up, so a keyboard focus showed nothing. */
+.add:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+/*  On touch the sill sits as a slim brass LIP on the well, not a full
+    flood — brass stays the scarce edge it is meant to be, rather than
+    eight painted bars down the phone scroll. The button keeps its full
+    44px height for the thumb; only the pour and its label are held
+    back to the meniscus until the plate is pressed or focused, then
+    the brass rises and the words appear. */
+@media (hover: none) {
+  .add {
+    transform: none;
+    min-height: 2.75rem;
+  }
+
+  .addFill {
+    transform: translate3d(0, calc(100% - 0.5rem), 0);
+    transition: transform 320ms var(--ease-veil);
+  }
+
+  .addLabel {
+    opacity: 0;
+    transition: opacity var(--dur-ui) var(--ease-ui);
+  }
+
+  .add:active .addFill,
+  .add:focus-visible .addFill,
+  .add[data-added] .addFill {
+    transform: none;
+  }
+
+  .add:active .addLabel,
+  .add:focus-visible .addLabel,
+  .add[data-added] .addLabel {
+    opacity: 1;
+  }
+}
+
+/*  The press settles slightly INTO the page rather than lifting off
+    it — a committing gesture, not a hover held harder — and no longer
+    carries the −2px rise the removed hover left behind. */
+.plate:active {
+  transform: scale(0.994);
+  transition-duration: 120ms;
+}
+
+/*  Reduced motion keeps the sill, loses the rise: it simply sits on
+    the well, because a control that is only reachable through an
+    animation is not reachable. */
+@media (prefers-reduced-motion: reduce) {
+  .add {
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .plateFoot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .plateSku,
+  .plateState {
+    min-width: 0;
+    white-space: nowrap;
+  }
+}

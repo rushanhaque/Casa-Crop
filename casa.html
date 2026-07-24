@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="view-transition" content="same-origin" />
 
     <title>Casa — Casa and Crop</title>
     <meta
       name="description"
-      content="Casa — seven ranges of home metalware, cast, machined and finished in our own Moradabad works. Brass, copper, steel and eight further materials, exported to 34 countries."
+      content="Casa — six ranges of home metalware, cast, machined and finished in our own Moradabad works. Brass, copper, steel and eight further materials, exported to 34 countries."
     />
 
     <!-- Paints the page surface before any CSS arrives, so the first frame
          is never a white flash against our warm palette. -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Casa — Casa and Crop" />
-    <meta property="og:description" content="Seven ranges of home metalware, cast and finished in our own works." />
+    <meta property="og:description" content="Six ranges of home metalware, cast and finished in our own works." />
     <meta name="theme-color" content="#0C0D0F" />
     <meta property="og:image" content="https://casaandcrop.com/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -25,16 +26,7 @@
     <!-- Font preloads land here once the typefaces are chosen. Deliberately
          empty for now: an unused preload is a wasted round trip. -->
 
-    <!-- Marks that scripting is available, before the first paint.
-         Every hidden-until-revealed rule is scoped to .js, so if this
-         line never runs the page renders fully visible instead of
-         blank. It is inline and in <head> deliberately: loaded as a
-         separate file it would arrive after paint and the revealed
-         content would flash before hiding itself. -->
-    <script>
-      document.documentElement.classList.add('js')
-    </script>
-      <link rel="preload" as="image" href="/casa-hero.avif" type="image/avif" />
+    <link rel="preload" as="image" href="/casa-hero.avif" type="image/avif" />
     <link
       rel="preload"
       as="font"

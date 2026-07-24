@@ -99,6 +99,13 @@
     image and dropping this filter costs nothing at runtime and
     looks identical. */
 .crop .art {
+  /*  The blur already forces its own compositing layer, so the parent's
+      enter-ground scale transforms a cached texture without any help.
+      A permanent will-change here would be the exact thing this site
+      refuses everywhere else — a full-viewport blurred layer held
+      promoted for the life of the page, which is real texture-memory
+      pressure on a weak GPU. The right long-term fix is to ship a
+      pre-blurred asset and drop this runtime filter entirely. */
   filter: blur(var(--crop-blur));
   transform: scale(var(--crop-bleed));
 }
@@ -139,6 +146,48 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/*  Tap feedback for the site's only interactive element. The full
+    hover choreography is fine-pointer only, so a touch press would
+    otherwise register nothing. These base transitions live outside the
+    hover gate — matched to the hover durations so nothing about the
+    fine-pointer drift changes — and the :active response is compositor
+    only. The wordmark and art carry no centring transform (that lives
+    on .inner), so a bare transform here is safe on both axes. */
+.casa .art {
+  transition: transform 900ms var(--ease-settle);
+}
+
+.casa .wordmark {
+  transition: transform 700ms var(--ease-settle);
+}
+
+.casa:active .art {
+  transform: scale(1.03);
+}
+
+.casa:active .wordmark {
+  transform: translateY(-2px);
+}
+
+/*  Keyboard focus: an on-brand brass hairline drawn under the wordmark
+    only (the mask is sized to the word, not the panel). Static — no
+    draw — so it is identical under reduced-motion and reads as its own
+    signal, distinct from both the hover choreography and the :active
+    lift. */
+.entry:focus-visible {
+  outline: none;
+}
+
+.entry:focus-visible .wordmarkMask::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--c-focus);
+}
+
 /* centre of Casa's region is at (seam / 2) of the viewport */
 .casa .inner {
   transform: translateX(calc(var(--seam) * 50% - 50%));
@@ -155,6 +204,7 @@
     mid-rise and the curtain would read as a bug. */
 .wordmarkMask {
   display: block;
+  position: relative;
   overflow: hidden;
   padding-bottom: 0.16em;
   margin-bottom: -0.16em;
@@ -179,7 +229,7 @@
     The asymmetry then reads as an editorial decision instead of an
     accident of the grid. */
 .casa .wordmark {
-  font-size: clamp(3.2rem, 8.4vw, 9.5rem);
+  font-size: clamp(2.7rem, 6.6vw, 7rem);
   letter-spacing: var(--track-xl);
 }
 
@@ -188,7 +238,7 @@
     the heritage tell this site purged everywhere else — Crop now
     holds its ground with weight rather than air. */
 .crop .wordmark {
-  font-size: clamp(2.1rem, 4.4vw, 5rem);
+  font-size: clamp(1.85rem, 3.6vw, 3.9rem);
   letter-spacing: var(--track-lg);
 }
 
@@ -211,7 +261,10 @@
   opacity: 0.88;
 }
 
-/*  Hidden until Crop is hovered, then rises into place. */
+/*  Visible by default: data-enter="rise" in the markup carries it in.
+    Committing to always-on means Crop explains itself to touch users,
+    who never trigger a hover, rather than hiding its status behind a
+    gesture they cannot perform. */
 .coming {
   display: block;
   margin-top: 1.6rem;
@@ -224,11 +277,6 @@
   color: var(--c-crop-ink);
   border: var(--seam-width) solid var(--c-crop-ink);
   border-radius: var(--radius-sm);
-  opacity: 0;
-  transform: translateY(0.6rem);
-  transition:
-    opacity 500ms var(--ease-rise),
-    transform 500ms var(--ease-rise);
   pointer-events: none;
 }
 
@@ -372,11 +420,6 @@
     opacity: 0.55;
   }
 
-  .threshold:has(.crop:hover) .coming {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
   /*  ── The seam ─────────────────────────────────────────────
       The hairline brightens slightly when either panel is
       hovered, a quiet signal that the division is live. */
@@ -432,8 +475,48 @@
     );
   }
 
+  /*  Casa floored at ~43px on phones while Crop got a mobile override,
+      collapsing the editorial 60/40 hierarchy. Set larger and looser so
+      the House still reads as the dominant field even at 320px, keeping
+      the negative display tracking. */
+  .casa .wordmark {
+    font-size: clamp(3.4rem, 13vw, 5.4rem);
+    letter-spacing: var(--track-xl);
+  }
+
   .crop .wordmark {
-    font-size: clamp(1.9rem, 9vw, 3rem);
+    font-size: clamp(1.7rem, 8vw, 2.6rem);
+  }
+
+  /*  The seam is transposed to horizontal here, so its glint must run
+      along X, not Y: a full-height thin strip sweeping across the width.
+      Same duration, ease and once-only contract as the desktop band. */
+  .seamGlint {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    height: auto;
+    width: 26%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 246, 232, 0.9) 50%,
+      transparent
+    );
+    transform: translate3d(-105%, 0, 0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .seamGlint {
+      animation: seam-glint-x 1600ms var(--ease-veil) 2100ms 1 both;
+    }
+
+    @keyframes seam-glint-x {
+      to {
+        transform: translate3d(430%, 0, 0);
+      }
+    }
   }
 }
 

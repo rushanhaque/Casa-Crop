@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Lines from '../../components/Lines/Lines'
@@ -8,17 +9,7 @@ import s from './Connect.module.css'
 
 const FIELDS = [
   { name: 'name', label: 'Name', type: 'text', autoComplete: 'name', required: true },
-  { name: 'company', label: 'Company', type: 'text', autoComplete: 'organization' },
-  { name: 'country', label: 'Country', type: 'text', autoComplete: 'country-name' },
   { name: 'email', label: 'Email', type: 'email', autoComplete: 'email', required: true },
-]
-
-const ENQUIRY = [
-  'Sample set',
-  'Production to our drawing',
-  'Catalogue and price list',
-  'Existing order',
-  'Something else',
 ]
 
 const DETAIL = [
@@ -28,45 +19,19 @@ const DETAIL = [
   { key: 'Hours', value: 'Mon–Sat, 09:00–18:00 IST', href: null },
 ]
 
-const TERMS = [
-  { key: 'Incoterms', value: 'FOB, CIF, or ex-works' },
-  { key: 'Minimum order', value: '250 pieces per SKU' },
-  { key: 'Sampling', value: '18 days from approved drawing' },
-  { key: 'Payment', value: '30% advance, balance against B/L' },
-]
-
-/**
- * The Connect page.
- *
- * A trade enquiry, not a contact form: a buyer needs to say what they
- * want made, in what alloy, to what standard, and where it is going.
- * The terms sit beside the form rather than behind a link, because
- * MOQ and Incoterms are the two questions that decide whether the
- * enquiry gets sent at all.
- */
 export default function Connect() {
   useReveal()
+  const [status, setStatus] = useState('')
 
-  /*  No server is wired, and pointing the form at a placeholder
-      endpoint would silently swallow a real buyer's enquiry — the
-      one failure this page must never have. Instead the form
-      composes the enquiry into the buyer's own mail client,
-      addressed to the export desk: nothing is ever swallowed,
-      because nothing is ever held. Replace with a real handler when
-      one exists; the markup will not need to change. */
   const onSubmit = (e) => {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
-    const regarding = data.get('enquiry-type') || 'Trade enquiry'
-    const body = [
-      `Name: ${data.get('name') || ''}`,
-      `Company: ${data.get('company') || ''}`,
-      `Country: ${data.get('country') || ''}`,
-      `Email: ${data.get('email') || ''}`,
-      '',
-      data.get('message') || '',
-    ].join('\n')
-    const subject = `${regarding} — ${data.get('name') || 'enquiry'}`
+    const name = data.get('name') || ''
+    const email = data.get('email') || ''
+    const message = data.get('message') || ''
+    const subject = `Contact — ${name}`
+    const body = [`Name: ${name}`, `Email: ${email}`, '', message].join('\n')
+    setStatus('Opening your mail client… if nothing happens, write to export@casaandcrop.com.')
     window.location.href = `mailto:export@casaandcrop.com?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(body)}`
@@ -75,10 +40,10 @@ export default function Connect() {
   return (
     <>
       <a className={s.skip} href="#enquiry">
-        Skip to the enquiry form
+        Skip to the contact form
       </a>
 
-      <Nav current="Connect" />
+      <Nav current="Contact" />
       <Progress />
 
       <main className={s.page}>
@@ -87,7 +52,7 @@ export default function Connect() {
             as="h1"
             className={s.title}
             id="connect-title"
-            lines={['Tell us what', 'you need made.']}
+            lines={['Get in touch.']}
             enter
             enterDelay={160}
             split="chars"
@@ -100,97 +65,78 @@ export default function Connect() {
         </section>
 
         <div className={s.body}>
-          {/* ── The enquiry ─────────────────────────────────── */}
+          {/* ── The form ─────────────────────────────────── */}
           <section className={s.formWrap} id="enquiry" aria-labelledby="form-title">
-            <h2 className={s.sectionKey} id="form-title">
-              Enquiry
+            <h2 className={s.sectionKey} id="form-title" data-reveal="rise" style={{ '--i': 0 }}>
+              Contact
             </h2>
 
-            {/*  Native validation deliberately left ON: the browser's
-                required-field messages are the one piece of borrowed
-                interface this page keeps, because they are translated
-                into the buyer's own language for free. */}
-            <form className={s.form} onSubmit={onSubmit}>
-              <div className={s.fieldGrid}>
-                {FIELDS.map((field, i) => (
-                  <p className={s.field} key={field.name} data-reveal="rise" style={{ '--i': i }}>
-                    <input
-                      className={s.input}
-                      id={field.name}
-                      name={field.name}
-                      type={field.type}
-                      autoComplete={field.autoComplete}
-                      required={field.required}
-                      /*  A single space, not an empty string. The
-                          floating label is driven by
-                          :placeholder-shown, which only matches when a
-                          placeholder actually exists. */
-                      placeholder=" "
-                    />
-                    <label className={s.label} htmlFor={field.name}>
-                      {field.label}
-                      {field.required ? <span aria-hidden="true"> *</span> : null}
-                    </label>
-                    {/*  The sheet is ruled up before it is filled —
-                        each line draws in as the form enters, walking
-                        down the page in the order the fields are
-                        completed. */}
-                    <span className={s.fieldRule} aria-hidden="true" data-reveal="draw" style={{ '--i': i }} />
-                  </p>
-                ))}
-              </div>
-
-              <p className={s.field} data-reveal="rise" style={{ '--i': 4 }}>
-                <select className={s.select} id="enquiry-type" name="enquiry-type" defaultValue="">
-                  <option value="" disabled>
-                    Select
-                  </option>
-                  {ENQUIRY.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+            <div className={s.card} data-reveal="zoom">
+              <form className={s.form} onSubmit={onSubmit} aria-describedby="form-required">
+                <p className={s.formRequired} id="form-required" data-reveal="rise" style={{ '--i': 0 }}>
+                  Fields marked <span aria-hidden="true">*</span>
+                  <span className={s.srOnly}> asterisk</span> are required.
+                </p>
+                <div className={s.fieldGrid}>
+                  {FIELDS.map((field, i) => (
+                    <p className={s.field} key={field.name} data-reveal="rise" style={{ '--i': i }}>
+                      <input
+                        className={s.input}
+                        id={field.name}
+                        name={field.name}
+                        type={field.type}
+                        autoComplete={field.autoComplete}
+                        required={field.required}
+                        placeholder=" "
+                      />
+                      <label className={s.label} htmlFor={field.name}>
+                        {field.label}
+                        {field.required ? <span aria-hidden="true"> *</span> : null}
+                      </label>
+                      <span className={s.fieldRule} aria-hidden="true" data-reveal="draw" style={{ '--i': i }} />
+                    </p>
                   ))}
-                </select>
-                <label className={s.labelStatic} htmlFor="enquiry-type">
-                  Regarding
-                </label>
-                <span className={s.fieldRule} aria-hidden="true" data-reveal="draw" style={{ '--i': 4 }} />
-              </p>
+                </div>
 
-              <p className={s.field} data-reveal="rise" style={{ '--i': 5 }}>
-                <textarea
-                  className={s.textarea}
-                  id="message"
-                  name="message"
-                  rows={5}
-                  placeholder=" "
-                />
-                <label className={s.label} htmlFor="message">
-                  Quantity, alloy, finish, destination
-                </label>
-                <span className={s.fieldRule} aria-hidden="true" data-reveal="draw" style={{ '--i': 5 }} />
-              </p>
+                <p className={s.field} data-reveal="rise" style={{ '--i': 2 }}>
+                  <textarea
+                    className={s.textarea}
+                    id="message"
+                    name="message"
+                    rows={5}
+                    placeholder=" "
+                  />
+                  <label className={s.label} htmlFor="message">
+                    Message
+                  </label>
+                  <span className={s.fieldRule} aria-hidden="true" data-reveal="draw" style={{ '--i': 2 }} />
+                </p>
 
-              <button className={s.submit} type="submit" data-pointer data-magnetic>
-                <span className={s.submitLabel}>Send enquiry</span>
-                <span className={s.submitFill} aria-hidden="true" />
-                <span className={s.submitRule} aria-hidden="true" />
-              </button>
+                <button className={s.submit} type="submit" data-pointer data-magnetic data-reveal="rise" style={{ '--i': 3 }}>
+                  <span className={s.submitLabel}>Send message</span>
+                  <span className={s.submitFill} aria-hidden="true" />
+                  <span className={s.submitRule} aria-hidden="true" />
+                </button>
 
-              <p className={s.formNote}>
-                Or write directly to{' '}
-                <a className={s.inlineLink} href="mailto:export@casaandcrop.com">
-                  export@casaandcrop.com
-                </a>
-                . Drawings in PDF, STEP or DWG.
-              </p>
-            </form>
+                <p className={s.formStatus} role="status" aria-live="polite">
+                  {status}
+                </p>
+
+                <p className={s.formNote} data-reveal="rise" style={{ '--i': 4 }}>
+                  Or write directly to{' '}
+                  <a className={s.inlineLink} href="mailto:export@casaandcrop.com">
+                    export@casaandcrop.com
+                  </a>
+                  . Drawings in PDF, STEP or DWG.
+                </p>
+              </form>
+            </div>
           </section>
 
           {/* ── The details ─────────────────────────────────── */}
           <aside className={s.aside}>
             <section aria-labelledby="detail-title">
-              <h2 className={s.sectionKey} id="detail-title">
+              <h2 className={s.sectionKey} id="detail-title" data-reveal="rise" style={{ '--i': 0 }}>
                 The desk
               </h2>
               <dl className={s.detailList}>
@@ -207,20 +153,6 @@ export default function Connect() {
                         item.value
                       )}
                     </dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            <section aria-labelledby="terms-title" id="samples">
-              <h2 className={s.sectionKey} id="terms-title">
-                Terms
-              </h2>
-              <dl className={s.detailList}>
-                {TERMS.map((item, i) => (
-                  <div className={s.detail} key={item.key} data-reveal="margin" style={{ '--i': i }}>
-                    <dt className={s.detailKey}>{item.key}</dt>
-                    <dd className={s.detailValue}>{item.value}</dd>
                   </div>
                 ))}
               </dl>

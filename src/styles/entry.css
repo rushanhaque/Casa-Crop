@@ -11,4 +11,9 @@ html,
 body {
   overflow: hidden;
   overscroll-behavior: none;
+  /*  The global `scrollbar-gutter: stable` keeps the tilt math honest
+      on the scrolling content pages, but the threshold never scrolls —
+      there it would only reserve a dead ~12px strip beside a full-bleed
+      tilted composition where every edge is deliberate. Reclaim it. */
+  scrollbar-gutter: auto;
 }

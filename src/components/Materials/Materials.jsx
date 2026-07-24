@@ -18,7 +18,10 @@ const MATERIALS = [
 function Specimen({ m, i }) {
   return (
     <li className={s.alloy} style={{ '--swatch': m.swatch, '--i': i }}>
-      <span className={s.swatch} aria-hidden="true" />
+      <a className={s.swatchLink} href="/connect.html" aria-label={`Book a free consultation — ${m.name}`}>
+        <span className={s.swatch} aria-hidden="true" />
+        <span className={s.consultCta} aria-hidden="true">Book a free consultation</span>
+      </a>
       <span className={s.body}>
         <span className={s.name}>{m.name}</span>
         <span className={s.spec}>{m.spec}</span>
@@ -62,7 +65,7 @@ export default function Materials() {
         {/*  The second pass. Purely visual — it exists so the loop has
             somewhere to travel to. */}
         {MATERIALS.map((m, i) => (
-          <li className={s.alloy} key={`echo-${m.name}`} style={{ '--swatch': m.swatch }} aria-hidden="true">
+          <li className={`${s.alloy} ${s.echo}`} key={`echo-${m.name}`} style={{ '--swatch': m.swatch }} aria-hidden="true">
             <span className={s.swatch} />
             <span className={s.body}>
               <span className={s.name}>{m.name}</span>

@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="view-transition" content="same-origin" />
 
     <title>Casa and Crop</title>
     <meta
@@ -10,13 +11,11 @@
       content="Casa and Crop — manufacturers and exporters of home metalware in brass, copper and steel, from Moradabad to 34 countries. Casa is the house; Crop, the land, arrives soon."
     />
 
-    <!-- Paints the page surface before any CSS arrives, so the first frame is
-         never a white flash ahead of a near-black ground — the worst version
-         of this failure, and the one people actually notice. Mirrors
-         --c-surface. -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Casa and Crop" />
     <meta property="og:description" content="Manufacturers and exporters of home metalware — Moradabad to 34 countries." />
+    <!-- Paints the page surface before any CSS arrives, so the first frame is
+         never a white flash ahead of a near-black ground. Mirrors --c-surface. -->
     <meta name="theme-color" content="#0C0D0F" />
     <meta property="og:image" content="https://casaandcrop.com/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -24,9 +23,9 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://casaandcrop.com/og.png" />
 
-    <!-- Font preloads land here once the typefaces are chosen. Deliberately
-         empty for now: an unused preload is a wasted round trip, not a free one. -->
-      <link rel="preload" as="image" href="/casa-cover.avif" type="image/avif" />
+    <!-- Preload the two cover images and the single above-the-fold webfont so
+         they are already in flight before the module script parses. -->
+    <link rel="preload" as="image" href="/casa-cover.avif" type="image/avif" />
     <link rel="preload" as="image" href="/crop-cover.avif" type="image/avif" />
     <link
       rel="preload"
