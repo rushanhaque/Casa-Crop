@@ -56,12 +56,16 @@ const ITEMS = [
     title: 'Accessories',
     meta: 'Brass · Zinc',
     subcategories: ['Hooks', 'Handles', 'Knobs', 'Hinges'],
+    imageBeforeHover: '/covers/AccessoriesSketch.jpg',
+    imageAfterHover: '/covers/Accessories.jpg',
   },
   {
     index: '06',
     title: 'Furniture',
     meta: 'Tube · Inlay',
     subcategories: ['Tables', 'Seating', 'Shelving', 'Mirrors'],
+    imageBeforeHover: '/covers/FurnitureSketch.jpg',
+    imageAfterHover: '/covers/Furniture.jpg',
   },
 ]
 
