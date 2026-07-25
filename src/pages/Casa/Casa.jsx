@@ -263,8 +263,50 @@ const STANDING = [
  * from its margin, rules draw themselves, figures tick up. One fade
  * doing every job is the clearest tell of generated work.
  */
+/*  ── The landing sequence ─────────────────────────────────────────
+    Six renders of ONE room from ONE camera, differing only in which
+    lamps are lit. Stacked and cross-dissolved, the identical plates
+    make light appear to BLOOM ON in place — the walls, ceiling and
+    brass all take each source's warm bounce — so the landing reads as
+    a slow film of the house waking, not a slideshow.
+
+    Frame 1 is the room dark, every lamp off; it is the permanent base
+    layer, so the room is never blank and the page opens on darkness.
+    The five lit plates dissolve up over it in turn — the left lamps,
+    the table globes, the floor lamp, the right pendant, and finally
+    the chandelier in full — then the cycle travels on as one
+    continuous glow. */
+const HERO_BASE = 1
+const HERO_SEQUENCE = [3, 6, 5, 4, 2]
+
+function heroSources(n) {
+  return {
+    avif: `/hero/f${n}-900.avif 900w, /hero/f${n}-1600.avif 1600w`,
+    webp: `/hero/f${n}-900.webp 900w, /hero/f${n}-1600.webp 1600w`,
+    jpg: `/hero/f${n}-900.jpg 900w, /hero/f${n}-1600.jpg 1600w`,
+    fallback: `/hero/f${n}-1600.jpg`,
+  }
+}
+
 export default function Casa() {
   useReveal()
+
+  /*  The landing loop is a continuous cross-dissolve of six full-bleed
+      plates; there is no reason to keep the compositor busy once it is
+      scrolled away. One observer parks the animation whenever the hero
+      leaves the viewport and restarts it on return — the loop is paid
+      for only while it is actually being watched. */
+  const heroRef = useRef(null)
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(
+      ([entry]) => el.toggleAttribute('data-paused', !entry.isIntersecting),
+      { threshold: 0 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   return (
     <>
@@ -303,17 +345,62 @@ export default function Casa() {
         </nav>
 
         {/* ── 1. Landing ─────────────────────────────────────── */}
-        <section className={s.hero} aria-labelledby="hero-title">
-          {/*  Two elements, deliberately. data-enter and data-scrub both
-              set animation-*, so on one element the entrance name binds
-              to the scroll timeline and the parallax never runs. The
-              wrapper fades and settles; the child drifts. Where scroll
-              timelines exist, the module re-declares the wrapper's
-              animation as entrance + departure: the photograph swells
-              slightly and dims as it exits, so leaving the hero reads
-              as moving through it rather than cropping it. */}
+        <section className={s.hero} aria-labelledby="hero-title" ref={heroRef}>
+          {/*  The wrapper carries the entrance and the departure: where
+              scroll timelines exist it swells slightly and dims as the
+              hero exits, so leaving the landing reads as moving through
+              the doorway rather than cropping a picture. Inside it, the
+              stage holds the plates, which sit whole on the dark ground
+              and only ever cross-dissolve — the whole apparatus stays
+              on the compositor. */}
           <div className={s.heroArtWrap}>
-            <div className={s.heroArt} data-scrub="parallax" />
+            <div className={s.heroStage}>
+              {/*  The base: the room with every lamp off. Never animated,
+                  so there is always a plate beneath the dissolve and the
+                  landing opens in darkness. */}
+              {(() => {
+                const src = heroSources(HERO_BASE)
+                return (
+                  <picture className={`${s.frame} ${s.frameBase}`}>
+                    <source type="image/avif" srcSet={src.avif} sizes="100vw" />
+                    <source type="image/webp" srcSet={src.webp} sizes="100vw" />
+                    <img
+                      className={s.frameImg}
+                      src={src.fallback}
+                      srcSet={src.jpg}
+                      sizes="100vw"
+                      alt=""
+                      aria-hidden="true"
+                      decoding="async"
+                      fetchPriority="high"
+                    />
+                  </picture>
+                )
+              })()}
+
+              {/*  The five lit plates, dissolving up over the base in
+                  turn so the lamps appear to warm on around the room. */}
+              {HERO_SEQUENCE.map((n, i) => {
+                const src = heroSources(n)
+                return (
+                  <picture className={`${s.frame} ${s.frameLit}`} key={n} style={{ '--f': i }}>
+                    <source type="image/avif" srcSet={src.avif} sizes="100vw" />
+                    <source type="image/webp" srcSet={src.webp} sizes="100vw" />
+                    <img
+                      className={s.frameImg}
+                      src={src.fallback}
+                      srcSet={src.jpg}
+                      sizes="100vw"
+                      alt=""
+                      aria-hidden="true"
+                      decoding="async"
+                      loading="eager"
+                      fetchPriority={i === 0 ? 'high' : 'low'}
+                    />
+                  </picture>
+                )
+              })}
+            </div>
           </div>
 
           {/*  The landing is the photograph and nothing else.
@@ -343,7 +430,7 @@ export default function Casa() {
             <span className={s.scrollHintLine} />
           </div>
 
-          <h1 className={s.srOnly}>Casa — metal for the house</h1>
+          <h1 className={s.srOnly} id="hero-title">Casa — metal for the house</h1>
         </section>
 
         {/* ── 2. Ranges ──────────────────────────────────────── */}

@@ -44,7 +44,8 @@
 .cell {
   position: relative;
   min-width: 0;
-  height: clamp(25rem, 45vh, 35rem);
+  /* Reduced card size per user request */
+  height: clamp(20rem, 35vh, 28rem);
   /*  Lets the card travel in Z. Per-cell rather than one for the whole
       grid: a shared vanishing point would put the outer cards at a
       severe angle to it and they would shear rather than lift. */
@@ -289,7 +290,11 @@
   position: absolute;
   top: 0;
   height: 100%;
-  width: calc(100% / var(--n));
+  /*  +0.5px overlap: when the louvres pivot in 3D (the stack-pivot
+      animation), the exact mathematical seams between adjacent slats
+      can let the dark card background show through due to GPU
+      anti-aliasing and depth precision. The overlap seals the gap. */
+  width: calc(100% / var(--n) + 0.5px);
   left: calc(var(--i) * 100% / var(--n));
   transform-style: preserve-3d;
   /*  Long enough to read as weight turning, short enough that the last

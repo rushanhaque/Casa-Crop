@@ -15,12 +15,21 @@ const MATERIALS = [
   { name: 'Paper Mache', spec: 'Kashmiri, hand-painted', swatch: '#C2A878' },
 ]
 
-function Specimen({ m, i }) {
+function Specimen({ m, i, isEcho = false }) {
   return (
-    <li className={s.alloy} style={{ '--swatch': m.swatch, '--i': i }}>
-      <a className={s.swatchLink} href="/connect.html" aria-label={`Book a free consultation — ${m.name}`}>
+    <li
+      className={`${s.alloy} ${isEcho ? s.echo : ''}`}
+      style={{ '--swatch': m.swatch, '--i': i }}
+      {...(isEcho ? { 'aria-hidden': 'true' } : {})}
+    >
+      <a
+        className={s.swatchLink}
+        href="/connect.html"
+        tabIndex={isEcho ? -1 : undefined}
+        aria-label={isEcho ? undefined : `Book a consultation — ${m.name}`}
+      >
         <span className={s.swatch} aria-hidden="true" />
-        <span className={s.consultCta} aria-hidden="true">Book a free consultation</span>
+        <span className={s.consultCta} aria-hidden="true">Book a consultation</span>
       </a>
       <span className={s.body}>
         <span className={s.name}>{m.name}</span>
@@ -65,13 +74,7 @@ export default function Materials() {
         {/*  The second pass. Purely visual — it exists so the loop has
             somewhere to travel to. */}
         {MATERIALS.map((m, i) => (
-          <li className={`${s.alloy} ${s.echo}`} key={`echo-${m.name}`} style={{ '--swatch': m.swatch }} aria-hidden="true">
-            <span className={s.swatch} />
-            <span className={s.body}>
-              <span className={s.name}>{m.name}</span>
-              <span className={s.spec}>{m.spec}</span>
-            </span>
-          </li>
+          <Specimen m={m} i={i} key={`echo-${m.name}`} isEcho />
         ))}
       </ul>
     </div>

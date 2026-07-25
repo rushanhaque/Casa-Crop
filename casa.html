@@ -26,7 +26,16 @@
     <!-- Font preloads land here once the typefaces are chosen. Deliberately
          empty for now: an unused preload is a wasted round trip. -->
 
-    <link rel="preload" as="image" href="/casa-hero.avif" type="image/avif" />
+    <!-- The landing's base plate (the room dark) is the LCP; preload it
+         in AVIF at the width the responsive <img> will pick. -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href="/hero/f1-1600.avif"
+      imagesrcset="/hero/f1-900.avif 900w, /hero/f1-1600.avif 1600w"
+      imagesizes="100vw"
+    />
     <link
       rel="preload"
       as="font"

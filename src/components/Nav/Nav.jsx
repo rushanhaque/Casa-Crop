@@ -33,6 +33,22 @@ export default function Nav({ current }) {
   const navRef = useRef(null)
   const toggleRef = useRef(null)
 
+  const isHome = current === 'Home'
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!isHome) return undefined
+
+    const onScroll = () => {
+      setScrolled(window.scrollY > 50)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [isHome])
+
   useEffect(() => {
     if (!open) return undefined
 
@@ -100,7 +116,12 @@ export default function Nav({ current }) {
   }, [open])
 
   return (
-    <header className={s.nav} data-open={open ? '' : undefined} ref={navRef}>
+    <header 
+      className={s.nav} 
+      data-open={open ? '' : undefined} 
+      data-home-top={isHome && !scrolled && !open ? '' : undefined}
+      ref={navRef}
+    >
       <span className={s.plate} aria-hidden="true" />
 
       <div className={s.inner}>

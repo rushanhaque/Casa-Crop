@@ -196,19 +196,10 @@
 /* ── 1. Landing ──────────────────────────────────────────────── */
 
 .hero {
-  /*  Two declarations, not one. --art is the PNG every browser can
-      read; --art-set adds the modern formats. They are separate custom
-      properties rather than one overriding the other because a custom
-      property accepts almost any token at parse time — an unsupported
-      image-set would sail through here and then fail where it is USED,
-      taking the background with it and leaving a blank panel. The
-      @supports test below chooses between them explicitly instead. */
-  --art: url('/casa-hero.png');
-  --art-set: image-set(
-    url('/casa-hero.avif') type('image/avif'),
-    url('/casa-hero.webp') type('image/webp'),
-    url('/casa-hero.png') type('image/png')
-  );
+  /*  The landing loop's period — one full pass of the five lit plates
+      cross-dissolving over the dark base. Held here so the whole
+      sequence can be retuned from a single line. */
+  --hero-cycle: 14s;
   position: relative;
   height: 100dvh;
   display: flex;
@@ -327,16 +318,109 @@
   }
 }
 
-.heroArt {
+/*  ── The landing loop ────────────────────────────────────────────
+    Six plates of one room, one camera, stacked. Only which lamps are
+    lit differs between them, so cross-dissolving the stack makes light
+    appear to bloom on in place rather than reading as a slideshow. */
+
+.heroStage {
   position: absolute;
   inset: 0;
-  background-image: var(--art, none);
-  background-size: cover;
-  background-position: center;
-  /*  Oversized so the parallax travel never exposes an edge. Set here
-      rather than in the keyframe so it holds where view timelines are
-      unsupported. */
-  transform: scale(1.14);
+  /*  The chandelier's glow sits at ~53% of the plate width, just right
+      of centre. Overscaling from an upper-right origin trims the LEFT
+      (and a touch from below, top held) and slides that 53% point onto
+      the viewport's midline — measured, so the chandelier lands dead
+      centre. Raise the origin's x to shift the plate further left. */
+  transform: scale(1.08);
+  transform-origin: 90% 0%;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/*  The plate fills the landing edge to edge — no bars. cover scales it
+    to cover the whole viewport and anchors the TOP, so any overflow is
+    cropped from BELOW: the chandelier and the lit walls are always
+    held, and only the near foreground of rug and table is trimmed.
+    Every plate shares the same dimensions and anchor, so their crops
+    line up exactly and the dissolve stays seamless. */
+.frameImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/*  The base plate sits at the foot of the stack, lamps-off and always
+    opaque, so there is never a gap beneath the dissolve. */
+.frameBase {
+  opacity: 1;
+}
+
+/*  The lit plates rest hidden and are dissolved up over the dark base
+    in turn. The base plate — every lamp off — is never animated, so the
+    room is never blank and the page opens on darkness. */
+.frameLit {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .frameLit {
+    --f: 0;
+    animation: hero-cycle var(--hero-cycle) linear infinite both;
+    /*  A one-time lead of darkness, then each plate phased 16% of the
+        period apart. A positive delay applies only before the first
+        pass, so the landing opens dark and wakes lamp by lamp. Five
+        plates at 16% span 0–86% of the loop; the tail 86–100% carries
+        no lit plate, which is the periodic dark REST — the room powers
+        down, holds, then wakes again. */
+    animation-delay: calc(1.2s + var(--f) * var(--hero-cycle) * 0.16);
+  }
+
+  /*  Nothing worth compositing once the landing is scrolled away. */
+  .hero[data-paused] .frameLit {
+    animation-play-state: paused;
+  }
+
+  /*  An on-window of 0–22% against a 16% phase step: each plate is
+      still dissolving out as the next dissolves in (6% overlap), so the
+      glow travels seamlessly from one source to the next — while the
+      last plate's window ends at 86%, leaving a dark rest before the
+      cycle wakes again. The soft-in, hold, soft-out curve reads as a
+      filament warming rather than a wipe. */
+  @keyframes hero-cycle {
+    0% {
+      opacity: 0;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    6% {
+      opacity: 1;
+      animation-timing-function: linear;
+    }
+    16% {
+      opacity: 1;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    22% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
+/*  With motion suppressed the loop is stilled on its climax — the
+    chandelier in full — rather than on the dark base, so the static
+    landing is the warmest plate the sequence holds, not the coldest. */
+@media (prefers-reduced-motion: reduce) {
+  .frameLit:last-child {
+    opacity: 1;
+  }
 }
 
 .heroLight {
@@ -590,6 +674,10 @@
   min-height: 100dvh;
   padding-top: clamp(4rem, 9vh, 7rem);
   padding-bottom: clamp(3rem, 7vh, 5rem);
+  background-color: var(--c-void);
+  background-image: var(--grain);
+  background-repeat: repeat;
+  background-size: var(--grain-size);
 }
 
 @supports not (height: 100dvh) {
@@ -1228,30 +1316,3 @@
   }
 }
 
-/*  THE HERO OVERSCALE IS A PARALLAX ALLOWANCE, NOT A CROP.
-
-    .heroArt holds scale(1.14) so its parallax travel never exposes an
-    edge. Where no scroll-driven CSS runs, that travel is the JS
-    understudy's job — and where THAT is not running either (reduced
-    motion, or no observer) the zoom would be pure loss: the composed
-    LCP frame shown cropped 14% to hide motion that never happens. So
-    reset it to the composed framing, and let the JS path re-assert the
-    allowance it actually uses. */
-@supports not (animation-timeline: view()) {
-  .heroArt {
-    transform: none;
-  }
-
-  html.motion-js .heroArt {
-    transform: scale(1.14);
-  }
-}
-
-/*  AVIF where it is understood, WebP next, PNG last. The hero is the
-    Largest Contentful Paint element, so its weight is very nearly the
-    LCP figure on a slow connection — 640KB of PNG became 31KB of AVIF. */
-@supports (background-image: image-set(url('/x.avif') type('image/avif'))) {
-  .heroArt {
-    background-image: var(--art-set, var(--art, none));
-  }
-}

@@ -368,6 +368,9 @@
   display: grid;
   gap: clamp(2.5rem, 6vh, 4rem);
   align-content: start;
+  /*  Nudge the desk down so its key sits a little below the form's
+      rather than dead level with it. Reset on the single-column stack. */
+  margin-top: clamp(1rem, 3vh, 2.25rem);
 }
 
 .detailList {
@@ -454,6 +457,12 @@
 @media (max-width: 60rem) {
   .body {
     grid-template-columns: 1fr;
+  }
+
+  /*  Stacked under the form now — the desktop nudge would only add a
+      gap, so drop it. */
+  .aside {
+    margin-top: 0;
   }
 }
 
