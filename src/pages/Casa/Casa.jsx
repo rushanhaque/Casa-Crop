@@ -277,7 +277,7 @@ const STANDING = [
     the chandelier in full — then the cycle travels on as one
     continuous glow. */
 const HERO_BASE = 1
-const HERO_SEQUENCE = [3, 6, 5, 4, 2]
+const HERO_SEQUENCE = [3, 4, 5, 6, 7, 2]
 
 function heroSources(n) {
   return {
