@@ -201,8 +201,8 @@ export default function Nav({ current }) {
               last link. */}
           <div className={s.panelDesk}>
             <span className={s.panelDeskKey}>Export desk</span>
-            <a className={s.panelDeskLink} href="mailto:export@casaandcrop.com">
-              export@casaandcrop.com
+            <a className={s.panelDeskLink} href="mailto:sufiyan@casaandcrop.com">
+              sufiyan@casaandcrop.com
             </a>
             <p className={s.panelDeskLine}>Moradabad, Uttar Pradesh · India</p>
           </div>

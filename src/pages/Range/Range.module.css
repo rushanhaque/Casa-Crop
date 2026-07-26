@@ -109,6 +109,55 @@
     they ride each piece into the shortlist, so the enquiry that
     leaves carries the alloy and the finish with it. */
 
+/* ── Subcategory filters ─────────────────────────────────────── */
+
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 var(--gutter) clamp(1.8rem, 4vh, 2.8rem);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filterChip {
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+  background: transparent;
+  border: 1px solid var(--c-rule);
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filterChip[data-active] {
+  color: var(--c-void);
+  background: var(--c-stamp);
+  border-color: var(--c-stamp);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .filterChip:not([data-active]):hover {
+    color: var(--c-casa-ink);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
 /* ── The plates ──────────────────────────────────────────────── */
 
 .plates {

@@ -13,8 +13,8 @@ const FIELDS = [
 ]
 
 const DETAIL = [
-  { key: 'Export desk', value: 'export@casaandcrop.com', href: 'mailto:export@casaandcrop.com' },
-  { key: 'Telephone', value: '+91 591 245 8890', href: 'tel:+915912458890' },
+  { key: 'Export desk', value: 'sufiyan@casaandcrop.com', href: 'mailto:sufiyan@casaandcrop.com' },
+  { key: 'Telephone', value: '+91 75792 39454', href: 'tel:+917579239454' },
   { key: 'Works', value: '14 Peetal Nagri, Civil Lines, Moradabad, Uttar Pradesh 244001', href: null },
   { key: 'Hours', value: 'Mon–Sat, 09:00–18:00 IST', href: null },
 ]
@@ -31,8 +31,8 @@ export default function Connect() {
     const message = data.get('message') || ''
     const subject = `Contact — ${name}`
     const body = [`Name: ${name}`, `Email: ${email}`, '', message].join('\n')
-    setStatus('Opening your mail client… if nothing happens, write to export@casaandcrop.com.')
-    window.location.href = `mailto:export@casaandcrop.com?subject=${encodeURIComponent(
+    setStatus('Opening your mail client… if nothing happens, write to info@casaandcrop.com.')
+    window.location.href = `mailto:info@casaandcrop.com?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(body)}`
   }
@@ -124,8 +124,8 @@ export default function Connect() {
 
                 <p className={s.formNote} data-reveal="rise" style={{ '--i': 4 }}>
                   Or write directly to{' '}
-                  <a className={s.inlineLink} href="mailto:export@casaandcrop.com">
-                    export@casaandcrop.com
+                  <a className={s.inlineLink} href="mailto:sufiyan@casaandcrop.com">
+                    sufiyan@casaandcrop.com
                   </a>
                   . Drawings in PDF, STEP or DWG.
                 </p>

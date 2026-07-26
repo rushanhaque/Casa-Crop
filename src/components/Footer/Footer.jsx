@@ -108,8 +108,8 @@ export default function Footer() {
             <div className={s.contactRow} data-reveal="rise" style={{ '--i': 2 }}>
               <dt className={s.contactKind}>Email</dt>
               <dd className={s.contactVal}>
-                <a className={s.contactLink} href="mailto:export@casaandcrop.com">
-                  <span className={s.linkLabel}>export@casaandcrop.com</span>
+                <a className={s.contactLink} href="mailto:sufiyan@casaandcrop.com">
+                  <span className={s.linkLabel}>sufiyan@casaandcrop.com</span>
                   <span className={s.linkRule} aria-hidden="true" />
                 </a>
               </dd>
@@ -117,8 +117,8 @@ export default function Footer() {
             <div className={s.contactRow} data-reveal="rise" style={{ '--i': 3 }}>
               <dt className={s.contactKind}>Tel</dt>
               <dd className={s.contactVal}>
-                <a className={s.contactLink} href="tel:+915912458890">
-                  <span className={s.linkLabel}>+91 591 245 8890</span>
+                <a className={s.contactLink} href="tel:+917579239454">
+                  <span className={s.linkLabel}>+91 75792 39454</span>
                   <span className={s.linkRule} aria-hidden="true" />
                 </a>
               </dd>

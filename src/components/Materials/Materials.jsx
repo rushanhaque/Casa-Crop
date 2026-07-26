@@ -1,4 +1,5 @@
 import s from './Materials.module.css'
+import { useDragScroll } from '../../lib/useDragScroll'
 
 /*  Specifications are PLACEHOLDERS in the right shape. Swatches are
     indicative of the material, not a colour promise. */
@@ -60,13 +61,15 @@ function Specimen({ m, i, isEcho = false }) {
  * indistinguishable from a mistake.
  */
 export default function Materials() {
+  const scrollRef = useDragScroll()
+
   return (
     /*  data-scrub="drift": the whole band also drifts shallowly with
         the page's scroll, so the row travels on two axes at two
         rates — the marquee inside it, the page outside it — and the
         section reads in layers. The global `marquee` class lets the
         page transition pause the row while a navigation is running. */
-    <div className={s.shell} data-scrub="drift">
+    <div ref={scrollRef} className={s.shell} data-scrub="drift">
       <ul className={`${s.track} marquee`}>
         {MATERIALS.map((m, i) => (
           <Specimen m={m} i={i} key={m.name} />

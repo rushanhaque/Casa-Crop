@@ -3,14 +3,7 @@ import { addItem } from '../../lib/cart'
 import { PLATE_REVEALS } from '../../lib/data'
 import s from './Plate.module.css'
 
-/**
- * One catalogue plate.
- *
- * A component of its own only because of the acknowledgement: the
- * button has to say it heard you, and that is a piece of state that
- * belongs to this plate and no other.
- */
-export default function Plate({ i, range, sku, rangeSlug, reveal }) {
+export default function Plate({ i, range, sku, rangeSlug, reveal, product }) {
   const [added, setAdded] = useState(false)
 
   useEffect(() => {
@@ -23,7 +16,7 @@ export default function Plate({ i, range, sku, rangeSlug, reveal }) {
     e.preventDefault()
     addItem({
       sku,
-      name: range.name,
+      name: product?.name || range.name,
       range: range.meta,
       spec: range.spec
         .filter(([k]) => k === 'Alloy' || k === 'Finish')
@@ -35,6 +28,8 @@ export default function Plate({ i, range, sku, rangeSlug, reveal }) {
 
   const revealAnim = reveal === 'none' ? undefined : (reveal || PLATE_REVEALS[i % PLATE_REVEALS.length])
 
+  const hasPhoto = product?.photo
+
   return (
     <article className={s.plate} data-reveal={revealAnim} style={{ '--i': i % 4 }}>
       <span className={s.plateGhost} aria-hidden="true" data-scrub="float">
@@ -42,7 +37,7 @@ export default function Plate({ i, range, sku, rangeSlug, reveal }) {
       </span>
       <div className={s.plateWell}>
         <a href={`/product.html?sku=${sku}&r=${rangeSlug}`} className={s.plateArtLink} aria-label={`View details for ${sku}`}>
-          <div className={s.plateArt} />
+          <div className={s.plateArt} style={hasPhoto ? { backgroundImage: `url(${product.photo})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} />
         </a>
 
         <button
@@ -59,8 +54,10 @@ export default function Plate({ i, range, sku, rangeSlug, reveal }) {
         </button>
       </div>
       <div className={s.plateFoot}>
-        <span className={s.plateSku}>{sku}</span>
-        <span className={s.plateState}>Awaiting catalogue</span>
+        <span className={s.plateSku}>{product?.name || sku}</span>
+        <span className={s.plateState}>
+          {product ? (product.subcategory || range.name) : 'Awaiting catalogue'}
+        </span>
       </div>
     </article>
   )

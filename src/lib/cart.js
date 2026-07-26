@@ -124,7 +124,7 @@ if (typeof window !== 'undefined') {
    whatever the buyer's procurement system is. */
 
 export const WHATSAPP = '915912458890'
-export const EMAIL = 'export@casaandcrop.com'
+export const EMAIL = 'sufiyan@casaandcrop.com'
 
 export function composeEnquiry(list = items) {
   const lines = list.map(
