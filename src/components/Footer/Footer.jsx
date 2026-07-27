@@ -1,4 +1,5 @@
 import s from './Footer.module.css'
+import { useEffect, useState, useRef } from 'react'
 
 const NAV = [
   { label: 'Home', href: '/' },
@@ -43,6 +44,26 @@ const BRAND = 'Casa & Crop'
  * not eleven fragments.
  */
 export default function Footer() {
+  const [visible, setVisible] = useState(false)
+  const brandRef = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true)
+          } else {
+            setVisible(false)
+          }
+        })
+      },
+      { threshold: 0.9, rootMargin: '0px 0px -40px 0px' }
+    )
+    if (brandRef.current) observer.observe(brandRef.current)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <footer className={s.footer}>
       {/*  The footer stands on the dark tone with the rest of the
@@ -128,7 +149,7 @@ export default function Footer() {
       </div>
 
       {/* ── The pour ─────────────────────────────────────────── */}
-      <a className={s.brand} href="/" aria-label="Casa and Crop — home" data-reveal="zoom">
+      <a className={s.brand} href="/" aria-label="Casa and Crop — home" data-reveal="zoom" ref={brandRef} data-visible={visible ? '' : undefined}>
         <span className={s.srOnly}>{BRAND}</span>
         <span className={s.brandLine} aria-hidden="true">
           {BRAND.split('').map((ch, i) => (

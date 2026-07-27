@@ -1196,41 +1196,7 @@
       display: none;
     }
 
-    /*  Focus discipline — rooms far from the visible neighbourhood
-        are removed from the tab order (same ranges as desktop). */
-    .room {
-      animation: room-vis linear both;
-      animation-timeline: --gal;
-    }
-
-    .room:nth-child(1) {
-      animation-range: entry 0% contain 26%;
-    }
-
-    .room:nth-child(2) {
-      animation-range: contain 0% contain 40%;
-    }
-
-    .room:nth-child(3) {
-      animation-range: contain 8% contain 54%;
-    }
-
-    .room:nth-child(4) {
-      animation-range: contain 22% contain 68%;
-    }
-
-    .room:nth-child(5) {
-      animation-range: contain 36% contain 82%;
-    }
-
-    .room:nth-child(6) {
-      animation-range: contain 50% contain 96%;
-    }
-
-    .room:nth-child(7) {
-      animation-range: contain 64% exit 100%;
-    }
-
+    /*  Focus discipline removed for mobile to prevent incorrect disappearing */
     /*  Corridor instruments — ghost drifts, light rakes, override the
         stacked view() scrubs declared in the block above. */
     .roomGhost {

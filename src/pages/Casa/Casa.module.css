@@ -278,28 +278,36 @@
 }
 
 .scrollHintLine {
-  width: 1px;
-  height: clamp(2.2rem, 5.5vh, 3.6rem);
-  background: linear-gradient(180deg, var(--c-stamp), transparent);
-  transform: scaleY(0);
-  transform-origin: top center;
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-right: 2px solid var(--c-casa-ink);
+  border-bottom: 2px solid var(--c-casa-ink);
+  transform: rotate(45deg);
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .scrollHintLine {
-    animation: hint-line 1000ms var(--ease-draw) 1700ms both;
+    /* Minimal float down and fade animation */
+    animation: hint-arrow 2000ms ease-in-out infinite;
   }
 
-  @keyframes hint-line {
-    to {
-      transform: scaleY(1);
+  @keyframes hint-arrow {
+    0%, 100% {
+      transform: rotate(45deg) translate(-3px, -3px);
+      opacity: 0.4;
+    }
+    50% {
+      transform: rotate(45deg) translate(4px, 4px);
+      opacity: 1;
     }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scrollHintLine {
-    transform: none;
+    transform: rotate(45deg);
   }
 }
 
