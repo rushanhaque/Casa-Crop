@@ -466,7 +466,7 @@
 
   .navLink {
     padding: 0.15rem 0 0.15rem 1.7rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .navLink::before {
@@ -484,7 +484,7 @@
   /*  The pour, brought down to a sign-off — still the mark the page
       closes on, no longer a viewport-scaled headline. */
   .brandLine {
-    font-size: clamp(2rem, 13vw, 3.6rem);
+    font-size: clamp(1.5rem, 9vw, 2.8rem);
   }
 }
 
@@ -684,6 +684,31 @@
   .hollow {
     opacity: 0.25;
   }
+
+  @supports (animation-timeline: view()) {
+    .pour {
+      transform: translate3d(0, 102%, 0);
+      animation: pour-scroll linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--l) * 3%) cover calc(35% + var(--l) * 3%);
+      transition: none;
+    }
+    .hollow {
+      opacity: 1;
+      animation: hollow-scroll linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--l) * 3%) cover calc(35% + var(--l) * 3%);
+      transition: none;
+    }
+  }
+}
+
+@keyframes pour-scroll {
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes hollow-scroll {
+  to { opacity: 0.25; }
 }
 
 /*  THE CASTING BED IS GONE.

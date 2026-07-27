@@ -281,11 +281,18 @@
 
   .alloy {
     scroll-snap-align: start;
+    flex: 0 0 clamp(13rem, 45vw, 16rem);
   }
 
   .consultCta {
     opacity: 1;
     transform: none;
+    font-size: 0.65rem;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .swatch {
+    height: clamp(14rem, 40vw, 18rem);
   }
 
   /*  A tap dips the specimen — the compositor-only stand-in for the

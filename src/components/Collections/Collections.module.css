@@ -115,9 +115,8 @@
   .cell[data-cell] {
     grid-column: 1 / -1;
     height: auto;
-    /*  15% shorter than the previous clamp(18rem, 32vh, 24rem) — a
-        tighter card on the phone. */
-    min-height: clamp(15.3rem, 27vh, 20.4rem);
+    /* Increased height for mobile tiles */
+    min-height: clamp(26rem, 55vh, 36rem);
   }
 }
 
@@ -619,11 +618,9 @@
         An aspect ratio sizes the mount from its own width, with a floor,
         so the image area can never vanish. */
     height: auto;
-    /*  Flattened from 3/2 to 7/4 and the floor cut proportionally, so
-        the image area — the card's main height driver on touch — is
-        ~15% shorter. */
-    aspect-ratio: 7 / 4;
-    min-height: 10.2rem;
+    /*  Restored to a taller ratio to increase tile height on mobile. */
+    aspect-ratio: 4 / 5;
+    min-height: 16rem;
   }
 
   .info {
@@ -633,16 +630,7 @@
   }
 
   .specPlain {
-    position: static;
-    width: auto;
-    height: auto;
-    margin: 0;
-    overflow: visible;
-    clip-path: none;
-    white-space: normal;
-    display: grid;
-    gap: 0.3rem;
-    padding: 0 clamp(1rem, 2vw, 1.6rem) clamp(1rem, 2vw, 1.6rem);
+    display: none;
   }
 
   .specRow {

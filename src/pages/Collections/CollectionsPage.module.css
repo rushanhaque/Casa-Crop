@@ -779,7 +779,7 @@
         viewport-relative. */
     .exhibit {
       grid-area: exhibit;
-      justify-self: center;
+      justify-self: end;
       align-self: end;
       transform: translateY(-13vh);
     }
@@ -838,11 +838,7 @@
     }
 
     .room:nth-child(6) {
-      animation-range: contain 50% contain 96%;
-    }
-
-    .room:nth-child(7) {
-      animation-range: contain 64% exit 100%;
+      animation-range: contain 50% exit 100%;
     }
 
     /*  The title hangs over the mount's edge — type in front of the
@@ -1376,4 +1372,31 @@
 
 .skip:focus {
   left: 0;
+}
+
+@keyframes track-pan {
+  0%, 4% { transform: translate3d(0, 0, 0); }
+  92%, 100% { transform: translate3d(calc(-100% + 100vw), 0, 0); }
+}
+
+@keyframes room-vis {
+  0%, 45%, 55%, 100% { opacity: 0; pointer-events: none; }
+  49%, 51% { opacity: 1; pointer-events: auto; }
+}
+
+@keyframes ghost-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-3rem, 0, 0); }
+}
+
+@keyframes title-drift {
+  from { transform: translate3d(-1rem, 0, 0); opacity: 0; }
+  45% { transform: translate3d(0, 0, 0); opacity: 1; }
+  55% { transform: translate3d(0, 0, 0); opacity: 1; }
+  to { transform: translate3d(1rem, 0, 0); opacity: 0; }
+}
+
+@keyframes rake-pass {
+  from { transform: translate3d(-120%, 0, 0); }
+  to { transform: translate3d(120%, 0, 0); }
 }

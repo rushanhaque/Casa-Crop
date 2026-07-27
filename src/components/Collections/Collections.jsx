@@ -23,7 +23,7 @@ const ITEMS = [
     index: '01',
     title: 'Funeral',
     meta: 'Cast · Spun',
-    subcategories: ['Urns', 'Caskets', 'Memorials', 'Keepsakes'],
+    subcategories: ['Cremation Urns', 'Pet Urns', 'Memorial Frames', 'Coffin Boxes', 'Caskets'],
     imageBeforeHover: '/covers/Funeral.png',
     imageAfterHover: '/covers/FuneralSketch.png',
   },
@@ -31,7 +31,7 @@ const ITEMS = [
     index: '02',
     title: 'Lighting',
     meta: 'Spun · Plated',
-    subcategories: ['Pendants', 'Chandeliers', 'Sconces', 'Table Lamps'],
+    subcategories: ['Chandeliers', 'Pendant Lights', 'Table Lamps', 'Floor Lamps', 'Wall Sconces', 'Lanterns', 'Outdoor Lighting'],
     imageBeforeHover: '/covers/Lighting.png',
     imageAfterHover: '/covers/LightingSketch.png',
   },
@@ -39,7 +39,7 @@ const ITEMS = [
     index: '03',
     title: 'Décor',
     meta: 'Cast · Wrought',
-    subcategories: ['Vases', 'Sculptures', 'Trays', 'Bookends'],
+    subcategories: ['Vases', 'Planters', 'Sculptures & Figurines', 'Wall Décor', 'Mirrors', 'Candle Holders', 'Photo Frames', 'Clocks', 'Tissue Boxes'],
     imageBeforeHover: '/covers/Decor.png',
     imageAfterHover: '/covers/DecorSketch.png',
   },
@@ -47,7 +47,7 @@ const ITEMS = [
     index: '04',
     title: 'Kitchenware',
     meta: 'Steel · Copper',
-    subcategories: ['Cookware', 'Utensils', 'Serveware', 'Cutlery'],
+    subcategories: ['Cake Stands', 'Trays', 'Bowls', 'Drinkware', 'Wine Accessories', 'Chopping Boards', 'Coasters', 'Napkin Holders', 'Cutlery Holders', 'Storage Containers', 'Baskets', 'Platters', 'Ice Buckets', 'Bar Accessories', 'Spice Containers', 'waste bins'],
     imageBeforeHover: '/covers/KitchenWare.jpg',
     imageAfterHover: '/covers/KitchenWareSketch.jpg',
   },
@@ -63,7 +63,7 @@ const ITEMS = [
     index: '06',
     title: 'Furniture',
     meta: 'Tube · Inlay',
-    subcategories: ['Tables', 'Seating', 'Shelving', 'Mirrors'],
+    subcategories: ['Coffee Tables', 'Side Tables', 'Console Tables', 'Accent Chairs', 'Benches', 'Stools', 'Bar Stools', 'Cabinets', 'Bookshelves', 'Display Shelves', 'Nesting Tables', 'Entryway Tables'],
     imageBeforeHover: '/covers/Furniture.jpg',
     imageAfterHover: '/covers/FurnitureSketch.jpg',
   },
@@ -122,11 +122,16 @@ export default function Collections() {
                         <span className={s.papersName}>{item.title}</span>
                         <span className={s.papersMeta}>{item.meta}</span>
                         <span className={s.papersList}>
-                          {item.subcategories.map((sub) => (
+                          {item.subcategories.slice(0, 3).map((sub) => (
                             <span className={s.papersRow} key={sub}>
                               <span className={s.papersValue}>{sub}</span>
                             </span>
                           ))}
+                          {item.subcategories.length > 3 && (
+                            <span className={s.papersRow} key="more">
+                              <span className={s.papersValue}>+ many more</span>
+                            </span>
+                          )}
                         </span>
                       </span>
                     </span>
@@ -154,11 +159,16 @@ export default function Collections() {
 
             {/*  The accessible and touch-visible copy of the reverse. */}
             <span className={s.specPlain}>
-              {item.subcategories.map((sub) => (
+              {item.subcategories.slice(0, 3).map((sub) => (
                 <span className={s.specRow} key={sub}>
                   <span className={s.specValue}>{sub}</span>
                 </span>
               ))}
+              {item.subcategories.length > 3 && (
+                <span className={s.specRow} key="more">
+                  <span className={s.specValue}>+ many more</span>
+                </span>
+              )}
             </span>
           </a>
         </li>

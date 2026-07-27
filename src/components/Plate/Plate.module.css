@@ -255,12 +255,14 @@
     transition: opacity var(--dur-ui) var(--ease-ui);
   }
 
+  .plate[data-visible] .addFill,
   .add:active .addFill,
   .add:focus-visible .addFill,
   .add[data-added] .addFill {
     transform: none;
   }
 
+  .plate[data-visible] .addLabel,
   .add:active .addLabel,
   .add:focus-visible .addLabel,
   .add[data-added] .addLabel {

@@ -13,7 +13,7 @@ const FIELDS = [
 ]
 
 const DETAIL = [
-  { key: 'Export desk', value: 'sufiyan@casaandcrop.com', href: 'mailto:sufiyan@casaandcrop.com' },
+  { key: 'Export desk', value: 'connect@casaandcrop.com', href: 'mailto:connect@casaandcrop.com' },
   { key: 'Telephone', value: '+91 75792 39454', href: 'tel:+917579239454' },
   { key: 'Works', value: '14 Peetal Nagri, Civil Lines, Moradabad, Uttar Pradesh 244001', href: null },
   { key: 'Hours', value: 'Mon–Sat, 09:00–18:00 IST', href: null },
@@ -124,8 +124,8 @@ export default function Connect() {
 
                 <p className={s.formNote} data-reveal="rise" style={{ '--i': 4 }}>
                   Or write directly to{' '}
-                  <a className={s.inlineLink} href="mailto:sufiyan@casaandcrop.com">
-                    sufiyan@casaandcrop.com
+                  <a className={s.inlineLink} href="mailto:connect@casaandcrop.com">
+                    connect@casaandcrop.com
                   </a>
                   . Drawings in PDF, STEP or DWG.
                 </p>

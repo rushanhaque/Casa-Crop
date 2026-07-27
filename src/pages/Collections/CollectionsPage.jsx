@@ -25,7 +25,7 @@ const EXHIBITS = [
     meta: 'Cast · Spun',
     lede: 'Memorial and cremation ware in cast brass and copper — urns, plaques and keepsakes, finished by hand to an antique standard.',
     spec: [
-      ['Alloy', 'Cast brass / copper'],
+      ['Metal', 'Cast brass / copper'],
       ['Finish', 'Antique, hand-polished'],
       ['Minimum', '250 pcs / SKU'],
     ],
@@ -37,7 +37,7 @@ const EXHIBITS = [
     meta: 'Spun · Plated',
     lede: 'Spun brass shades, bases and fittings, plated to a stated film thickness rather than to appearance alone.',
     spec: [
-      ['Alloy', 'Spun brass, 1.2 mm'],
+      ['Metal', 'Spun brass, 1.2 mm'],
       ['Finish', 'Nickel / PVD, 12 µm'],
       ['Minimum', '250 pcs / SKU'],
     ],
@@ -49,7 +49,7 @@ const EXHIBITS = [
     meta: 'Steel · Copper',
     lede: 'Serveware and cookware in 304 steel and ETP copper, mirror-finished and food-safe.',
     spec: [
-      ['Alloy', '304 steel / ETP copper'],
+      ['Metal', '304 steel / ETP copper'],
       ['Finish', 'Mirror, food-safe'],
       ['Minimum', '250 pcs / SKU'],
     ],
@@ -61,7 +61,7 @@ const EXHIBITS = [
     meta: 'Cast · Wrought',
     lede: 'Objects for the room — cast, wrought and waxed, in the antique register the house is known for.',
     spec: [
-      ['Alloy', 'Gravity die cast brass'],
+      ['Metal', 'Gravity die cast brass'],
       ['Finish', 'Antique, waxed'],
       ['Minimum', '250 pcs / SKU'],
     ],
@@ -73,7 +73,7 @@ const EXHIBITS = [
     meta: 'Brass · Zinc',
     lede: 'The small hardware of a finished house — hooks, handles, stays and stands in brass and zinc alloy.',
     spec: [
-      ['Alloy', 'Brass, zinc alloy'],
+      ['Metal', 'Brass, zinc alloy'],
       ['Finish', 'Plated, lacquered'],
       ['Minimum', '250 pcs / SKU'],
     ],
@@ -85,12 +85,24 @@ const EXHIBITS = [
     meta: 'Tube · Inlay',
     lede: 'Frames and accent pieces in mild-steel tube with brass inlay, powder-coated to sixty microns.',
     spec: [
-      ['Alloy', 'MS tube, brass inlay'],
+      ['Metal', 'MS tube, brass inlay'],
       ['Finish', 'Powder coat, 60 µm'],
       ['Minimum', '250 pcs / SKU'],
     ],
   },
 ]
+
+const getCover = (name) => {
+  const map = {
+    'Funeral': 'Funeral.png',
+    'Lighting': 'Lighting.png',
+    'Kitchenware': 'KitchenWare.jpg',
+    'Décor': 'Decor.png',
+    'Accessories': 'Accessories.jpg',
+    'Furniture': 'Furniture.jpg'
+  }
+  return `/covers/${map[name]}`
+}
 
 /**
  * The Collections page — the pattern book hung as an exhibition.
@@ -205,7 +217,7 @@ export default function CollectionsPage() {
                         then the well is presented as a prepared mount,
                         not a missing image. */}
                     <span className={s.plinth} data-reveal="blur-in" style={{ '--i': 1 }}>
-                      <span className={s.plinthWell} />
+                      <span className={s.plinthWell} style={{ backgroundImage: `url(${getCover(ex.name)})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                       <span className={s.plinthLip} aria-hidden="true" />
                     </span>
                     {/*  On touch there is no hover lift, glint or

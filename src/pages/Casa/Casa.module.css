@@ -374,10 +374,10 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .frameLit {
-    --f: 0;
+    --f: var(--f-desktop, 0);
     animation: hero-cycle var(--hero-cycle) linear infinite both;
     /*  A 2 s lead of pure darkness, then lamps phase-staggered 13% of
-        the period apart — 2.86 s between each ignition at 22 s.
+        the period apart - 2.86 s between each ignition at 22 s.
         Six plates span 0–65% of the loop; the tail 85–100% carries no
         lit plate, which is the periodic dark REST — the room exhales,
         holds, then wakes again. */
@@ -463,6 +463,22 @@
 }
 
 /* ── Shared section rhythm ───────────────────────────────────── */
+
+@media (max-width: 63.99rem) {
+  .heroStage {
+    --hero-cycle: 6s;
+    transform-origin: center center;
+    transform: scale(1.15) translateX(-5%);
+  }
+  
+  .frameDesktopOnly {
+    display: none;
+  }
+
+  .frameLit {
+    --f: var(--f-mobile, 0);
+  }
+}
 
 /*  Each chapter names its own view timeline for the rail to read.
     Declaring the timeline costs nothing per frame — it is a
@@ -727,27 +743,39 @@
   min-height: 82vh;
 }
 
-/*  Heritage takes the whole screen. It carries the figures a buyer is
-    actually weighing, so it gets a viewport to itself and is read as
-    one held view rather than passed through.
-
-    dvh rather than vh: on a phone the browser chrome retracts as you
-    scroll, and vh sizes to the tallest state — the section would
-    overflow at rest and the fit would be wrong exactly where screens
-    are smallest. */
 .heritage {
   min-height: 100dvh;
-  /*  Content pushed to the extremes: the heading holds the top of the
-      chapter and the figures settle to the foot, so the whole viewport
-      becomes the measure between the house's name and its numbers. */
   justify-content: space-between;
+  padding-bottom: clamp(2rem, 5vh, 4rem);
 }
 
-@supports not (height: 100dvh) {
+@media (max-width: 63.99rem) {
   .heritage {
-    min-height: 100vh;
+    min-height: auto;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
   }
 }
+
+.heritageBg {
+  position: absolute;
+  inset: 4vh 0 0 0;
+  width: 100%;
+  height: calc(100% - 4vh);
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (max-width: 63.99rem) {
+  .heritageBg {
+    inset: 0;
+    height: 100%;
+  }
+}
+
+
 
 /* ── 5. Signature ────────────────────────────────────────────── */
 

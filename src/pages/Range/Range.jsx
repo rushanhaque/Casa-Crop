@@ -7,6 +7,7 @@ import Progress from '../../components/Progress/Progress'
 import { useReveal } from '../../lib/useReveal'
 import { useDragScroll } from '../../lib/useDragScroll'
 import s from './Range.module.css'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 import Plate from '../../components/Plate/Plate'
 import { RANGES, ORDER, PLATE_COUNT } from '../../lib/data'
@@ -15,6 +16,7 @@ import { getProductsByRange, subscribe } from '../../lib/products'
 export default function Range() {
   useReveal()
   const scrollRef = useDragScroll()
+  const [parent] = useAutoAnimate()
 
   const slug = new URLSearchParams(window.location.search).get('r')
   const known = slug && RANGES[slug]
@@ -97,7 +99,7 @@ export default function Range() {
           </div>
         )}
 
-        <section className={s.plates} aria-label="Catalogue">
+        <section className={s.plates} aria-label="Catalogue" ref={parent}>
           {!showPlaceholders && filtered.map((product, i) => (
             <Plate
               key={product.id}

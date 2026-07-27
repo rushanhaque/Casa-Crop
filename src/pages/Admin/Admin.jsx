@@ -191,7 +191,7 @@ export default function Admin() {
                 onChange={v => set('sku', v)} placeholder="CC-FUN-001" />
 
               <div className={s.row2}>
-                <Field label="Alloy" value={form.alloy}
+                <Field label="Metal" value={form.alloy}
                   onChange={v => set('alloy', v)} placeholder={RANGES[form.category]?.spec?.[0]?.[1]} />
                 <Field label="Finish" value={form.finish}
                   onChange={v => set('finish', v)} placeholder={RANGES[form.category]?.spec?.[1]?.[1]} />

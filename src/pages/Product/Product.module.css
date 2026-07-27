@@ -93,7 +93,8 @@
 }
 
 .photoCol:hover .photo {
-  transform: scale(1.06);
+  transform: scale(2.5);
+  transition: none;
 }
 
 .infoCol {

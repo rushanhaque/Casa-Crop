@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Nav from '../../components/Nav/Nav'
@@ -6,6 +6,7 @@ import Progress from '../../components/Progress/Progress'
 import { addItem } from '../../lib/cart'
 import { useReveal } from '../../lib/useReveal'
 import { RANGES, ORDER } from '../../lib/data'
+import { getProducts } from '../../lib/products'
 import Plate from '../../components/Plate/Plate'
 import s from './Product.module.css'
 
@@ -16,13 +17,38 @@ export default function Product() {
   const sku = params.get('sku') || 'CC-UNK-000'
   const slug = params.get('r')
   const known = slug && RANGES[slug]
-  const range = known ? RANGES[slug] : RANGES[ORDER[0]]
+  const baseRange = known ? RANGES[slug] : RANGES[ORDER[0]]
   const activeSlug = known ? slug : ORDER[0]
+
+  const customProduct = getProducts().find(p => p.sku === sku)
+
+  const range = customProduct ? {
+    ...baseRange,
+    name: customProduct.subcategory || baseRange.name,
+    spec: baseRange.spec.map(([k, v]) => {
+      if (k === 'Metal' && customProduct.alloy) return [k, customProduct.alloy]
+      if (k === 'Finish' && customProduct.finish) return [k, customProduct.finish]
+      return [k, v]
+    })
+  } : baseRange
+
+  const title = customProduct?.name || sku
+  const photo = customProduct?.photo || ''
 
   const [added, setAdded] = useState(false)
 
   if (typeof document !== 'undefined') {
     document.title = `${sku} — Casa and Crop`
+  }
+
+  const photoRef = useRef(null)
+
+  const handleMouseMove = (e) => {
+    if (!photoRef.current) return
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - left) / width) * 100
+    const y = ((e.clientY - top) / height) * 100
+    photoRef.current.style.transformOrigin = `${x}% ${y}%`
   }
 
   useEffect(() => {
@@ -34,10 +60,10 @@ export default function Product() {
   const onAdd = () => {
     addItem({
       sku,
-      name: range.name,
+      name: title,
       range: range.meta,
       spec: range.spec
-        .filter(([k]) => k === 'Alloy' || k === 'Finish')
+        .filter(([k]) => k === 'Metal' || k === 'Finish')
         .map(([k, v]) => `${k}: ${v}`)
         .join(' · '),
     })
@@ -69,14 +95,19 @@ export default function Product() {
         </div>
 
         <section className={s.detail}>
-          <div className={s.photoCol} data-enter="blur-in">
+          <div 
+            className={s.photoCol} 
+            data-enter="blur-in" 
+            onMouseMove={handleMouseMove} 
+            onMouseLeave={() => photoRef.current && (photoRef.current.style.transformOrigin = 'center')}
+          >
             <div className={s.photoWell}>
-              <div className={s.photo} />
+              <div ref={photoRef} className={s.photo} style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} />
             </div>
           </div>
           <div className={s.infoCol} data-enter="slide-up">
-            <h1 className={s.title}>{sku}</h1>
-            <p className={s.meta}>{range.name} · {range.meta}</p>
+            <h1 className={s.title}>{title}</h1>
+            <p className={s.meta}>{baseRange.name} · {baseRange.meta}</p>
             
             <dl className={s.specs}>
               {range.spec.map(([k, v]) => (

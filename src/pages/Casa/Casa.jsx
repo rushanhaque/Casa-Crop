@@ -277,7 +277,14 @@ const STANDING = [
     the chandelier in full — then the cycle travels on as one
     continuous glow. */
 const HERO_BASE = 1
-const HERO_SEQUENCE = [3, 4, 5, 6, 7, 2]
+const HERO_SEQUENCE = [
+  { n: 3, mobile: true },
+  { n: 4, mobile: false },
+  { n: 5, mobile: false },
+  { n: 6, mobile: true },
+  { n: 7, mobile: true },
+  { n: 2, mobile: false },
+]
 
 function heroSources(n) {
   return {
@@ -380,26 +387,34 @@ export default function Casa() {
 
               {/*  The five lit plates, dissolving up over the base in
                   turn so the lamps appear to warm on around the room. */}
-              {HERO_SEQUENCE.map((n, i) => {
-                const src = heroSources(n)
-                return (
-                  <picture className={`${s.frame} ${s.frameLit}`} key={n} style={{ '--f': i }}>
-                    <source type="image/avif" srcSet={src.avif} sizes="100vw" />
-                    <source type="image/webp" srcSet={src.webp} sizes="100vw" />
-                    <img
-                      className={s.frameImg}
-                      src={src.fallback}
-                      srcSet={src.jpg}
-                      sizes="100vw"
-                      alt=""
-                      aria-hidden="true"
-                      decoding="async"
-                      loading="eager"
-                      fetchPriority={i === 0 ? 'high' : 'low'}
-                    />
-                  </picture>
-                )
-              })}
+              {(() => {
+                let mIndex = 0;
+                return HERO_SEQUENCE.map((step, i) => {
+                  const src = heroSources(step.n)
+                  const currentMIndex = step.mobile ? mIndex++ : -1
+                  return (
+                    <picture 
+                      className={`${s.frame} ${s.frameLit} ${!step.mobile ? s.frameDesktopOnly : ''}`} 
+                      key={step.n} 
+                      style={{ '--f-desktop': i, '--f-mobile': currentMIndex }}
+                    >
+                      <source type="image/avif" srcSet={src.avif} sizes="100vw" />
+                      <source type="image/webp" srcSet={src.webp} sizes="100vw" />
+                      <img
+                        className={s.frameImg}
+                        src={src.fallback}
+                        srcSet={src.jpg}
+                        sizes="100vw"
+                        alt=""
+                        aria-hidden="true"
+                        decoding="async"
+                        loading="eager"
+                        fetchPriority={i === 0 ? 'high' : 'low'}
+                      />
+                    </picture>
+                  )
+                })
+              })()}
             </div>
           </div>
 
@@ -492,7 +507,7 @@ export default function Casa() {
                 and the section reads in layers. */}
             <dl className={s.notes} data-scrub="drift">
               {[
-                { key: 'Alloy', value: 'CuZn39Pb3, gravity die cast' },
+                { key: 'Metal', value: 'CuZn39Pb3, gravity die cast' },
                 { key: 'Finish', value: 'Brushed, lacquered — 12 µm' },
                 { key: 'Tolerance', value: '±0.05 mm on mating faces' },
                 { key: 'Lead time', value: '45 days from approved sample' },
@@ -514,6 +529,15 @@ export default function Casa() {
 
         {/* ── 5. Heritage ────────────────────────────────────── */}
         <section className={s.heritage} id="heritage" aria-labelledby="heritage-title">
+          <video 
+            className={s.heritageBg} 
+            src="/HeritageBG.mp4" 
+            autoPlay 
+            muted 
+            loop 
+            playsInline 
+            aria-hidden="true" 
+          />
           <header className={s.head}>
             <Lines as="h2" className={s.sectionTitle} id="heritage-title" lines={['Heritage']} split="chars" />
           </header>

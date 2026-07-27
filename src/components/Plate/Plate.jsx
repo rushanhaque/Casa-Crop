@@ -1,10 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { addItem } from '../../lib/cart'
 import { PLATE_REVEALS } from '../../lib/data'
 import s from './Plate.module.css'
 
 export default function Plate({ i, range, sku, rangeSlug, reveal, product }) {
   const [added, setAdded] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const btnRef = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true)
+          } else {
+            setVisible(false)
+          }
+        })
+      },
+      { threshold: 1.0, rootMargin: '0px 0px -50px 0px' }
+    )
+    if (btnRef.current) observer.observe(btnRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!added) return undefined
@@ -19,7 +38,7 @@ export default function Plate({ i, range, sku, rangeSlug, reveal, product }) {
       name: product?.name || range.name,
       range: range.meta,
       spec: range.spec
-        .filter(([k]) => k === 'Alloy' || k === 'Finish')
+        .filter(([k]) => k === 'Metal' || k === 'Finish')
         .map(([k, v]) => `${k}: ${v}`)
         .join(' · '),
     })
@@ -31,7 +50,7 @@ export default function Plate({ i, range, sku, rangeSlug, reveal, product }) {
   const hasPhoto = product?.photo
 
   return (
-    <article className={s.plate} data-reveal={revealAnim} style={{ '--i': i % 4 }}>
+    <article className={s.plate} data-reveal={revealAnim} data-visible={visible ? '' : undefined} style={{ '--i': i % 4 }}>
       <span className={s.plateGhost} aria-hidden="true" data-scrub="float">
         {String(i + 1).padStart(2, '0')}
       </span>
@@ -46,6 +65,7 @@ export default function Plate({ i, range, sku, rangeSlug, reveal, product }) {
           onClick={onAdd}
           data-added={added ? '' : undefined}
           aria-label={added ? `${sku} added to cart` : `Add ${sku} to cart`}
+          ref={btnRef}
         >
           <span className={s.addFill} aria-hidden="true" />
           <span className={s.addLabel}>

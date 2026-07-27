@@ -175,9 +175,9 @@ export default function Cart() {
                   className={s.strike}
                   type="button"
                   onClick={() => removeItem(it.sku)}
-                  aria-label={`Strike ${it.sku} from the shortlist`}
+                  aria-label={`Remove ${it.sku} from the shortlist`}
                 >
-                  Strike
+                  Remove
                 </button>
               </div>
 
