@@ -2,6 +2,7 @@
     three principles, one quote. Density falling as the page descends. */
 
 .page {
+  position: relative;
   background: var(--c-void);
   color: var(--c-casa-ink);
 }

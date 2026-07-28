@@ -96,8 +96,10 @@
 .swatch {
   display: block;
   height: clamp(8rem, 17vw, 15rem);
-  background: var(--swatch);
-  background-image: var(--sheen);
+  background-color: var(--swatch);
+  background-image: var(--sheen), var(--mat-img);
+  background-size: cover;
+  background-position: center;
   border-radius: var(--radius);
   /*  A solid held against a surface, so it takes the same elevation
       as everything else.

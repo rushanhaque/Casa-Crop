@@ -483,7 +483,7 @@ export default function Casa() {
               as="h2"
               className={s.sectionTitle}
               id="signature-title"
-              lines={['The Ferro 14 lever set']}
+              lines={['The Aurelia Brass Pull']}
               split="chars"
             />
           </header>
@@ -493,11 +493,18 @@ export default function Casa() {
                 architectural scale — the same apparatus the range pages
                 carry, so the reference reads as one of the book. */}
             <span className={s.vitrineGhost} aria-hidden="true" data-scrub="float">
-              №14
+              №01
             </span>
 
             <div className={s.vitrineFrame} data-specular>
-              <Figure ratio="4 / 5" className={s.vitrineArt} reveal={null} data-scrub="parallax" />
+              <Figure 
+                src="/signature-piece.png" 
+                avif="/signature-piece.avif" 
+                webp="/signature-piece.webp" 
+                ratio="1122 / 1402" 
+                className={s.vitrineArt} 
+                reveal={null} 
+              />
               {/*  The raking light the cards carry, at vitrine scale. */}
               <span className={s.vitrineRake} aria-hidden="true" />
             </div>
@@ -507,10 +514,8 @@ export default function Casa() {
                 and the section reads in layers. */}
             <dl className={s.notes} data-scrub="drift">
               {[
-                { key: 'Metal', value: 'CuZn39Pb3, gravity die cast' },
-                { key: 'Finish', value: 'Brushed, lacquered — 12 µm' },
-                { key: 'Tolerance', value: '±0.05 mm on mating faces' },
-                { key: 'Lead time', value: '45 days from approved sample' },
+                { key: 'Material', value: 'Wood' },
+                { key: 'Finish', value: 'Polished' },
               ].map((note, i) => (
                 <div className={s.note} key={note.key} data-reveal="margin" style={{ '--i': i }}>
                   {/*  The leader — the annotation line of a working
@@ -523,6 +528,12 @@ export default function Casa() {
                   <dd className={s.noteValue}>{note.value}</dd>
                 </div>
               ))}
+              
+              <div className={s.noteAction} data-reveal="margin" style={{ '--i': 2 }}>
+                <a href="/connect.html" className={s.enquireBtn}>
+                  Enquire
+                </a>
+              </div>
             </dl>
           </div>
         </section>

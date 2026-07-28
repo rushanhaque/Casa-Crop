@@ -1,4 +1,4 @@
-import { useState } from 'react'
+
 import Cart from '../../components/Cart/Cart'
 import Footer from '../../components/Footer/Footer'
 import Lines from '../../components/Lines/Lines'
@@ -21,21 +21,6 @@ const DETAIL = [
 
 export default function Connect() {
   useReveal()
-  const [status, setStatus] = useState('')
-
-  const onSubmit = (e) => {
-    e.preventDefault()
-    const data = new FormData(e.currentTarget)
-    const name = data.get('name') || ''
-    const email = data.get('email') || ''
-    const message = data.get('message') || ''
-    const subject = `Contact — ${name}`
-    const body = [`Name: ${name}`, `Email: ${email}`, '', message].join('\n')
-    setStatus('Opening your mail client… if nothing happens, write to info@casaandcrop.com.')
-    window.location.href = `mailto:info@casaandcrop.com?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`
-  }
 
   return (
     <>
@@ -72,7 +57,8 @@ export default function Connect() {
             </h2>
 
             <div className={s.card} data-reveal="zoom">
-              <form className={s.form} onSubmit={onSubmit} aria-describedby="form-required">
+              <form className={s.form} action="https://formsubmit.co/connect@casaandcrop.com" method="POST" aria-describedby="form-required">
+                <input type="hidden" name="_subject" value="New enquiry from Casa and Crop" />
                 <p className={s.formRequired} id="form-required" data-reveal="rise" style={{ '--i': 0 }}>
                   Fields marked <span aria-hidden="true">*</span>
                   <span className={s.srOnly}> asterisk</span> are required.
@@ -117,10 +103,6 @@ export default function Connect() {
                   <span className={s.submitFill} aria-hidden="true" />
                   <span className={s.submitRule} aria-hidden="true" />
                 </button>
-
-                <p className={s.formStatus} role="status" aria-live="polite">
-                  {status}
-                </p>
 
                 <p className={s.formNote} data-reveal="rise" style={{ '--i': 4 }}>
                   Or write directly to{' '}

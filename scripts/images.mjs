@@ -20,9 +20,9 @@ import sharp from 'sharp'
 const DIR = 'public'
 const kb = (n) => (n / 1024).toFixed(0).padStart(6) + ' KB'
 
-const files = (await readdir(DIR)).filter((f) => /\.png$/i.test(f))
+const files = (await readdir(DIR)).filter((f) => /\.(png|jpe?g)$/i.test(f))
 if (files.length === 0) {
-  console.log('No PNGs in public/.')
+  console.log('No images found in public/.')
   process.exit(0)
 }
 
@@ -54,7 +54,7 @@ for (const file of files) {
   after += avif
 
   console.log(
-    `${file.padEnd(20)} png ${kb(original)}   webp ${kb(webp)}   avif ${kb(avif)}   → ${(
+    `${file.padEnd(20)} orig ${kb(original)}   webp ${kb(webp)}   avif ${kb(avif)}   → ${(
       (1 - avif / original) *
       100
     ).toFixed(0)}% smaller`,

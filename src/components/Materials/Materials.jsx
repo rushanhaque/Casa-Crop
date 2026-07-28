@@ -6,7 +6,7 @@ import { useDragScroll } from '../../lib/useDragScroll'
 const MATERIALS = [
   { name: 'Brass', spec: 'IS 319 / CuZn39Pb3', swatch: '#B08D57' },
   { name: 'Copper', spec: 'ETP, 99.9% Cu', swatch: '#A9613F' },
-  { name: 'Stainless', spec: '304 / 316 grade', swatch: '#9AA0A0' },
+  { name: 'Stainless Steel', spec: '304 / 316 grade', swatch: '#9AA0A0' },
   { name: 'Aluminium', spec: 'LM6 / 6063', swatch: '#A8ABA6' },
   { name: 'Iron', spec: 'Grey cast, powder coat', swatch: '#5C5A57' },
   { name: 'Resin', spec: 'Polyresin, pigmented', swatch: '#D6C7A8' },
@@ -20,7 +20,11 @@ function Specimen({ m, i, isEcho = false }) {
   return (
     <li
       className={`${s.alloy} ${isEcho ? s.echo : ''}`}
-      style={{ '--swatch': m.swatch, '--i': i }}
+      style={{
+        '--swatch': m.swatch,
+        '--mat-img': `url('/Materials/${m.name.replace(/\s+/g, '')}.jpg')`,
+        '--i': i,
+      }}
       {...(isEcho ? { 'aria-hidden': 'true' } : {})}
     >
       <a

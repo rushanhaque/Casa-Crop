@@ -30,6 +30,9 @@
 .page {
   background: var(--c-void);
   color: var(--c-casa-ink);
+  --bg-dot-spacing: 32px;
+  --bg-dot-color: rgba(0, 0, 0, 0.04);
+  --bg-mask: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 90%);
 }
 
 /* ── The entrance hall ───────────────────────────────────────── */
@@ -801,44 +804,9 @@
         boundaries with no per-frame cost. Windows are generous
         (±­one room), written as literals per room — range arithmetic
         cannot go negative. */
+    /*  Room visibility optimization removed to prevent content from hiding prematurely on scroll. */
     .room {
-      animation: room-vis linear both;
       animation-timeline: --gal;
-    }
-
-    @keyframes room-vis {
-      0%,
-      100% {
-        visibility: hidden;
-      }
-      3%,
-      97% {
-        visibility: visible;
-      }
-    }
-
-    .room:nth-child(1) {
-      animation-range: entry 0% contain 26%;
-    }
-
-    .room:nth-child(2) {
-      animation-range: contain 0% contain 40%;
-    }
-
-    .room:nth-child(3) {
-      animation-range: contain 8% contain 54%;
-    }
-
-    .room:nth-child(4) {
-      animation-range: contain 22% contain 68%;
-    }
-
-    .room:nth-child(5) {
-      animation-range: contain 36% contain 82%;
-    }
-
-    .room:nth-child(6) {
-      animation-range: contain 50% exit 100%;
     }
 
     /*  The title hangs over the mount's edge — type in front of the
@@ -932,7 +900,9 @@
         no corridor instrument here; cancel the generic reveal so it
         cannot misfire against the pinned, horizontally-panned track. */
     .plinth[data-reveal] {
-      animation: none;
+      animation: none !important;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
     /*  Room one's label resolves during the APPROACH — while the
@@ -1188,7 +1158,9 @@
 
     /*  Cancel the data-reveal on the plinth — the corridor conducts it. */
     .plinth[data-reveal] {
-      animation: none;
+      animation: none !important;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
     /*  Compass is a desktop-corridor instrument; no room on mobile. */
