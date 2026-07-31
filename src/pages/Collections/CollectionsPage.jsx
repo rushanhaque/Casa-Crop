@@ -4,6 +4,7 @@ import Lines from '../../components/Lines/Lines'
 import Nav from '../../components/Nav/Nav'
 import Progress from '../../components/Progress/Progress'
 import { useReveal } from '../../lib/useReveal'
+import { RANGES } from '../../lib/data'
 import s from './CollectionsPage.module.css'
 
 /*  DEMO DATA — the same fictional sheet the rest of the site quotes,
@@ -238,20 +239,20 @@ export default function CollectionsPage() {
                     style={{ '--i': 2 }}
                   >
                     <span className={s.plaqueIndex}>
-                      № {ex.index} — {ex.meta}
+                      № {ex.index} — {ex.name}
                     </span>
-                    <p className={s.plaqueLede}>{ex.lede}</p>
-                    <span className={s.plaqueNote}>
-                      Pieces at the works — photography forthcoming.
-                    </span>
-                    <dl className={s.plaqueSpec}>
-                      {ex.spec.map(([k, v]) => (
-                        <div className={s.plaqueRow} key={k}>
-                          <dt className={s.plaqueKey}>{k}</dt>
-                          <dd className={s.plaqueValue}>{v}</dd>
+                    <div className={s.plaqueSpec} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem' }}>
+                      {RANGES[ex.slug]?.subcategories?.slice(0, 4).map((sub) => (
+                        <div className={s.plaqueRow} key={sub} style={{ justifyContent: 'flex-start' }}>
+                          <span className={s.plaqueLede} style={{ margin: 0 }}>{sub}</span>
                         </div>
                       ))}
-                    </dl>
+                      {RANGES[ex.slug]?.subcategories?.length > 4 && (
+                        <div className={s.plaqueRow} key="more" style={{ justifyContent: 'flex-start' }}>
+                          <span className={s.plaqueLede} style={{ margin: 0 }}>+ many more</span>
+                        </div>
+                      )}
+                    </div>
                   </aside>
                 </li>
               ))}

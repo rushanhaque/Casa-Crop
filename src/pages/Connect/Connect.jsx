@@ -15,7 +15,7 @@ const FIELDS = [
 const DETAIL = [
   { key: 'Export desk', value: 'connect@casaandcrop.com', href: 'mailto:connect@casaandcrop.com' },
   { key: 'Telephone', value: '+91 75792 39454', href: 'tel:+917579239454' },
-  { key: 'Works', value: '14 Peetal Nagri, Civil Lines, Moradabad, Uttar Pradesh 244001', href: null },
+  { key: 'Works', value: 'Maqbara Road, Moradabad-244001, India', href: null },
   { key: 'Hours', value: 'Mon–Sat, 09:00–18:00 IST', href: null },
 ]
 

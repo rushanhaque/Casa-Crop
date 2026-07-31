@@ -309,11 +309,11 @@
 /*  The two bars cross rather than swap for an icon — the same object
     rearranging, not a glyph exchange. */
 .nav[data-open] .toggleBars i:first-child {
-  transform: translateY(0.26rem) rotate(12deg);
+  transform: translateY(0.26rem) rotate(45deg);
 }
 
 .nav[data-open] .toggleBars i:last-child {
-  transform: translateY(-0.26rem) rotate(-12deg);
+  transform: translateY(-0.26rem) rotate(-45deg);
 }
 
 /*  The panel is a full page, not a dropped list: the index fills the
@@ -539,5 +539,169 @@
   .labelInk,
   .labelBrass {
     transition: none;
+  }
+}
+
+/* ── Search ──────────────────────────────────────────────────── */
+
+.searchLi {
+  display: flex;
+  align-items: center;
+}
+
+.searchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.searchIconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  color: var(--c-casa-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.searchIconBtn:hover {
+  color: var(--metal-brass);
+}
+
+.searchField {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.searchFieldOpen {
+  width: 140px;
+  opacity: 1;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--c-rule);
+  border-radius: 0;
+  padding: 0.4rem 0.4rem 0.4rem 0;
+  color: var(--c-casa-ink);
+  font-family: var(--f-text);
+  font-size: 0.85rem;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--metal-brass);
+}
+
+/* Remove default webkit search input styling */
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-results-button,
+.searchInput::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+.searchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  min-width: 240px;
+  background: var(--s-0);
+  border: 1px solid var(--c-rule);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchResultItem {
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  border-bottom: 1px solid var(--c-rule);
+  transition: background-color 0.2s ease;
+}
+
+.searchResultItem:last-child {
+  border-bottom: none;
+}
+
+.searchResultItem:hover, .searchResultItem:focus {
+  background-color: var(--s-1);
+  outline: none;
+}
+
+.searchResultName {
+  font-family: var(--f-text);
+  font-size: 0.85rem;
+  color: var(--c-casa-ink);
+  font-weight: 500;
+}
+
+.searchResultSku {
+  font-family: var(--f-text);
+  font-size: 0.75rem;
+  color: var(--c-ink-muted);
+  margin-top: 0.2rem;
+}
+
+.panelSearchWrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.panelSearchInput {
+  background: transparent;
+  border: 1px solid var(--c-rule);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  color: var(--c-casa-ink);
+  font-family: var(--f-text);
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.panelSearchInput:focus {
+  outline: none;
+  border-color: var(--metal-brass);
+}
+
+.panelSearchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--s-0);
+  border: 1px solid var(--c-rule);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 56rem) {
+  .searchWrap {
+    display: none;
   }
 }

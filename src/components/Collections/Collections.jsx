@@ -120,14 +120,13 @@ export default function Collections() {
                       <span className={s.papers}>
                         <span className={s.papersIndex}>{item.index}</span>
                         <span className={s.papersName}>{item.title}</span>
-                        <span className={s.papersMeta}>{item.meta}</span>
                         <span className={s.papersList}>
-                          {item.subcategories.slice(0, 3).map((sub) => (
+                          {item.subcategories.slice(0, 4).map((sub) => (
                             <span className={s.papersRow} key={sub}>
                               <span className={s.papersValue}>{sub}</span>
                             </span>
                           ))}
-                          {item.subcategories.length > 3 && (
+                          {item.subcategories.length > 4 && (
                             <span className={s.papersRow} key="more">
                               <span className={s.papersValue}>+ many more</span>
                             </span>
@@ -148,7 +147,6 @@ export default function Collections() {
                 the next document's headline. */}
             <span className={s.info}>
               <span className={s.title} data-vt-title>{item.title}</span>
-              <span className={s.meta}>{item.meta}</span>
             </span>
 
             {/*  The light that runs across the face when the card is
@@ -159,12 +157,12 @@ export default function Collections() {
 
             {/*  The accessible and touch-visible copy of the reverse. */}
             <span className={s.specPlain}>
-              {item.subcategories.slice(0, 3).map((sub) => (
+              {item.subcategories.slice(0, 4).map((sub) => (
                 <span className={s.specRow} key={sub}>
                   <span className={s.specValue}>{sub}</span>
                 </span>
               ))}
-              {item.subcategories.length > 3 && (
+              {item.subcategories.length > 4 && (
                 <span className={s.specRow} key="more">
                   <span className={s.specValue}>+ many more</span>
                 </span>

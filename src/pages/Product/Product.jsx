@@ -107,7 +107,7 @@ export default function Product() {
           </div>
           <div className={s.infoCol} data-enter="slide-up">
             <h1 className={s.title}>{title}</h1>
-            <p className={s.meta}>{baseRange.name} · {baseRange.meta}</p>
+            <p className={s.meta}>{baseRange.name}</p>
             
             <dl className={s.specs}>
               {range.spec.map(([k, v]) => (

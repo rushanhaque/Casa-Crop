@@ -31,10 +31,10 @@ function Specimen({ m, i, isEcho = false }) {
         className={s.swatchLink}
         href="/connect.html"
         tabIndex={isEcho ? -1 : undefined}
-        aria-label={isEcho ? undefined : `Book a consultation — ${m.name}`}
+        aria-label={isEcho ? undefined : `Enquire now — ${m.name}`}
       >
         <span className={s.swatch} aria-hidden="true" />
-        <span className={s.consultCta} aria-hidden="true">Book a consultation</span>
+        <span className={s.consultCta} aria-hidden="true">Enquire now</span>
       </a>
       <span className={s.body}>
         <span className={s.name}>{m.name}</span>

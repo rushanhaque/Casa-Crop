@@ -116,15 +116,9 @@
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0 var(--gutter) clamp(1.8rem, 4vh, 2.8rem);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.filters::-webkit-scrollbar {
-  display: none;
 }
 
 .filterChip {

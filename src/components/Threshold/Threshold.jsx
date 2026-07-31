@@ -81,7 +81,7 @@ export default function Threshold() {
               ))}
             </p>
           </span>
-          <p className={s.legend} data-enter="rise" style={{ '--enter-delay': '540ms' }}>The Land</p>
+          <p className={s.legend} data-enter="rise" style={{ '--enter-delay': '540ms' }}>Spice, Pulses, and oils</p>
           <span className={s.coming} data-enter="rise" style={{ '--enter-delay': '700ms' }}>Coming Soon</span>
         </div>
       </section>

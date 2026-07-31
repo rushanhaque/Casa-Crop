@@ -5,7 +5,6 @@ import Lines from '../../components/Lines/Lines'
 import Nav from '../../components/Nav/Nav'
 import Progress from '../../components/Progress/Progress'
 import { useReveal } from '../../lib/useReveal'
-import { useDragScroll } from '../../lib/useDragScroll'
 import s from './Range.module.css'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 
@@ -15,7 +14,6 @@ import { getProductsByRange, subscribe } from '../../lib/products'
 
 export default function Range() {
   useReveal()
-  const scrollRef = useDragScroll()
   const [parent] = useAutoAnimate()
 
   const slug = new URLSearchParams(window.location.search).get('r')
@@ -68,7 +66,7 @@ export default function Range() {
               Collections
             </a>
             <span aria-hidden="true"> — </span>
-            <span>{range.meta}</span>
+            <span>{range.name}</span>
           </p>
 
           <Lines as="h1" className={s.title} lines={[range.name]} enter enterDelay={180} />
@@ -85,7 +83,7 @@ export default function Range() {
         </section>
 
         {subcategories.length > 0 && (
-          <div ref={scrollRef} className={s.filters} role="group" aria-label="Filter by subcategory">
+          <div className={s.filters} role="group" aria-label="Filter by subcategory">
             {['All', ...subcategories].map(f => (
               <button
                 key={f}

@@ -117,9 +117,9 @@ export default function Footer() {
               human locality line lifted to full ink, the postcode set
               in tabular figures like a stamped number. */}
           <address className={s.address} data-reveal="rise" style={{ '--i': 1 }}>
-            <span className={s.addrStreet}>14 Peetal Nagri, Civil Lines</span>
-            <span className={s.addrCity}>Moradabad, Uttar Pradesh</span>
-            <span className={s.addrCode}>244001</span>
+            <span className={s.addrStreet}>Maqbara Road</span>
+            <span className={s.addrCity}>Moradabad-244001</span>
+            <span className={s.addrCode}>India</span>
           </address>
 
           {/*  Contact set as a ledger: a sand key, then the machined

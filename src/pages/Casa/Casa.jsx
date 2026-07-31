@@ -483,8 +483,9 @@ export default function Casa() {
               as="h2"
               className={s.sectionTitle}
               id="signature-title"
-              lines={['The Aurelia Brass Pull']}
+              lines={['The Aurelia Horse Figure']}
               split="chars"
+              style={{ whiteSpace: 'nowrap', fontSize: 'clamp(1.2rem, 3.8vw, 4.4rem)' }}
             />
           </header>
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import s from './Nav.module.css'
+import { getProducts } from '../../lib/products'
 
 const LINKS = [
   { label: 'Home', href: '/' },
@@ -35,6 +36,29 @@ export default function Nav({ current }) {
 
   const isHome = current === 'Home'
   const [scrolled, setScrolled] = useState(false)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [allProducts, setAllProducts] = useState([])
+  const [searchResults, setSearchResults] = useState([])
+
+  useEffect(() => {
+    setAllProducts(getProducts())
+  }, [])
+
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setSearchResults([])
+      return
+    }
+    const q = searchTerm.toLowerCase()
+    const results = allProducts.filter(p => 
+      (p.name && p.name.toLowerCase().includes(q)) ||
+      (p.sku && p.sku.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q))
+    )
+    setSearchResults(results)
+  }, [searchTerm, allProducts])
 
   useEffect(() => {
     if (!isHome) return undefined
@@ -147,6 +171,37 @@ export default function Nav({ current }) {
                 </a>
               </li>
             ))}
+            <li className={s.searchLi}>
+              <div className={s.searchWrap}>
+                <button 
+                  className={s.searchIconBtn} 
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  aria-label="Toggle search"
+                  type="button"
+                >
+                  <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'></circle><line x1='21' y1='21' x2='16.65' y2='16.65'></line></svg>
+                </button>
+                <div className={`${s.searchField} ${isSearchOpen ? s.searchFieldOpen : ''}`}>
+                  <input 
+                    type="search" 
+                    placeholder="Search products..." 
+                    className={s.searchInput}
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                  />
+                  {searchResults.length > 0 && (
+                    <div className={s.searchResults}>
+                      {searchResults.map(p => (
+                        <a key={p.id} href={`/product.html?sku=${p.sku}&r=${p.category}`} className={s.searchResultItem}>
+                          <span className={s.searchResultName}>{p.name}</span>
+                          <span className={s.searchResultSku}>{p.sku}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </li>
           </ul>
         </nav>
 
@@ -179,6 +234,25 @@ export default function Nav({ current }) {
         inert={!open}
       >
         <div className={s.panelInner}>
+          <div className={s.panelSearchWrap}>
+            <input 
+              type="search" 
+              placeholder="Search products..." 
+              className={s.panelSearchInput}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+            {searchResults.length > 0 && (
+              <div className={s.panelSearchResults}>
+                {searchResults.map(p => (
+                  <a key={p.id} href={`/product.html?sku=${p.sku}&r=${p.category}`} className={s.searchResultItem}>
+                    <span className={s.searchResultName}>{p.name}</span>
+                    <span className={s.searchResultSku}>{p.sku}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
           <ul className={s.panelList}>
             {LINKS.map((link, i) => (
               <li className={s.panelItem} key={link.label} style={{ '--i': i }}>
@@ -204,7 +278,7 @@ export default function Nav({ current }) {
             <a className={s.panelDeskLink} href="mailto:connect@casaandcrop.com">
               connect@casaandcrop.com
             </a>
-            <p className={s.panelDeskLine}>Moradabad, Uttar Pradesh · India</p>
+            <p className={s.panelDeskLine}>Maqbara Road, Moradabad-244001, India</p>
           </div>
         </div>
       </div>
