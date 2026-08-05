@@ -49,7 +49,8 @@ export default defineConfig({
         collections: resolve(import.meta.dirname, 'collections.html'),
         range: resolve(import.meta.dirname, 'range.html'),
         product: resolve(import.meta.dirname, 'product.html'),
-        admin: resolve(import.meta.dirname, 'admin/index.html'),
+        admin: resolve(import.meta.dirname, 'admin.html'),
+        adminNested: resolve(import.meta.dirname, 'admin/index.html'),
       },
     },
 
