@@ -68,6 +68,12 @@ export async function syncToGitHub(products, subcategories, removedSubcategories
       })
     })
 
+    if (putRes.status === 401) {
+      console.error('GitHub Token Invalid or Revoked (401)')
+      notifySync('token-invalid')
+      return
+    }
+
     if (putRes.ok) {
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       notifySync('synced', now)

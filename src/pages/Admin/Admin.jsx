@@ -102,8 +102,12 @@ export default function Admin() {
     reader.readAsDataURL(file)
   }
 
-  const onSave = () => {
-    if (!form.name.trim()) return
+  const onSave = (e) => {
+    if (e) e.preventDefault()
+    if (!form.name || !form.name.trim()) {
+      alert('Please enter a Product Name.')
+      return
+    }
     if (sheet === 'add') addProduct(form)
     else updateProduct(sheet, form)
     close()
@@ -165,10 +169,25 @@ export default function Admin() {
           <span>Casa</span> Admin
         </a>
         <div className={s.headerActions}>
-          <div className={s.syncBadge} data-status={syncState.status} title="Automatic GitHub Repository Sync">
+          <div
+            className={s.syncBadge}
+            data-status={syncState.status}
+            onClick={() => {
+              if (syncState.status === 'error' || syncState.status === 'token-invalid') {
+                const tok = prompt('Enter your GitHub Personal Access Token:')
+                if (tok && tok.trim()) {
+                  localStorage.setItem('casa-and-crop:github-token', tok.trim())
+                  publishToGitHub()
+                }
+              }
+            }}
+            style={{ cursor: (syncState.status === 'error' || syncState.status === 'token-invalid') ? 'pointer' : 'default' }}
+            title={syncState.status === 'token-invalid' ? 'Click to set valid GitHub Token' : 'Automatic GitHub Repository Sync'}
+          >
             {syncState.status === 'syncing' && '⏳ Syncing to GitHub...'}
             {syncState.status === 'synced' && `🟢 Synced (${syncState.time})`}
-            {syncState.status === 'error' && '⚠️ Sync Error'}
+            {syncState.status === 'token-invalid' && '⚠️ Token Invalid (Tap to set)'}
+            {syncState.status === 'error' && '⚠️ Sync Error (Tap to retry)'}
             {syncState.status === 'idle' && '🟢 Live GitHub Ready'}
           </div>
           <button className={s.publishBtn} onClick={publishToGitHub} title="Publish latest products to live site">
@@ -275,7 +294,9 @@ export default function Admin() {
                 <Field label="Finish" value={form.finish}
                   onChange={v => set('finish', v)} placeholder={RANGES[form.category]?.spec?.[1]?.[1]} />
               </div>
+            </div>
 
+            <div className={s.sheetFooter}>
               <div className={s.sheetActions}>
                 {sheet !== 'add' && (
                   <button
@@ -287,9 +308,9 @@ export default function Admin() {
                   </button>
                 )}
                 <button
+                  type="button"
                   className={s.saveBtn}
                   onClick={onSave}
-                  disabled={!form.name.trim()}
                 >
                   {sheet === 'add' ? 'Add product' : 'Save changes'}
                 </button>
