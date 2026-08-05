@@ -249,7 +249,7 @@ export default function CollectionsPage() {
                       ))}
                       {RANGES[ex.slug]?.subcategories?.length > 4 && (
                         <div className={s.plaqueRow} key="more" style={{ justifyContent: 'flex-start' }}>
-                          <span className={s.plaqueLede} style={{ margin: 0 }}>+ many more</span>
+                          <span className={s.plaqueLede} style={{ margin: 0 }}>+ Many more</span>
                         </div>
                       )}
                     </div>

@@ -3,7 +3,20 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'admin-url-rewrite',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === '/admin' || req.url === '/admin/') {
+            req.url = '/admin/index.html'
+          }
+          next()
+        })
+      },
+    },
+  ],
 
   server: {
     port: Number(process.env.PORT) || 5173,
@@ -36,7 +49,7 @@ export default defineConfig({
         collections: resolve(import.meta.dirname, 'collections.html'),
         range: resolve(import.meta.dirname, 'range.html'),
         product: resolve(import.meta.dirname, 'product.html'),
-        admin: resolve(import.meta.dirname, 'admin.html'),
+        admin: resolve(import.meta.dirname, 'admin/index.html'),
       },
     },
 

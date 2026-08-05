@@ -22,6 +22,7 @@ const ITEMS = [
   {
     index: '01',
     title: 'Funeral',
+    slug: 'funeral',
     meta: 'Cast · Spun',
     subcategories: ['Cremation Urns', 'Pet Urns', 'Memorial Frames', 'Coffin Boxes', 'Caskets'],
     imageBeforeHover: '/covers/Funeral.png',
@@ -30,6 +31,7 @@ const ITEMS = [
   {
     index: '02',
     title: 'Lighting',
+    slug: 'lighting',
     meta: 'Spun · Plated',
     subcategories: ['Chandeliers', 'Pendant Lights', 'Table Lamps', 'Floor Lamps', 'Wall Sconces', 'Lanterns', 'Outdoor Lighting'],
     imageBeforeHover: '/covers/Lighting.png',
@@ -38,6 +40,7 @@ const ITEMS = [
   {
     index: '03',
     title: 'Décor',
+    slug: 'decor',
     meta: 'Cast · Wrought',
     subcategories: ['Vases', 'Planters', 'Sculptures & Figurines', 'Wall Décor', 'Mirrors', 'Candle Holders', 'Photo Frames', 'Clocks', 'Tissue Boxes'],
     imageBeforeHover: '/covers/Decor.png',
@@ -46,6 +49,7 @@ const ITEMS = [
   {
     index: '04',
     title: 'Kitchenware',
+    slug: 'kitchenware',
     meta: 'Steel · Copper',
     subcategories: ['Cake Stands', 'Trays', 'Bowls', 'Drinkware', 'Wine Accessories', 'Chopping Boards', 'Coasters', 'Napkin Holders', 'Cutlery Holders', 'Storage Containers', 'Baskets', 'Platters', 'Ice Buckets', 'Bar Accessories', 'Spice Containers', 'waste bins'],
     imageBeforeHover: '/covers/KitchenWare.jpg',
@@ -54,6 +58,7 @@ const ITEMS = [
   {
     index: '05',
     title: 'Accessories',
+    slug: 'accessories',
     meta: 'Brass · Zinc',
     subcategories: ['Hooks', 'Handles', 'Knobs', 'Hinges'],
     imageBeforeHover: '/covers/Accessories.jpg',
@@ -62,6 +67,7 @@ const ITEMS = [
   {
     index: '06',
     title: 'Furniture',
+    slug: 'furniture',
     meta: 'Tube · Inlay',
     subcategories: ['Coffee Tables', 'Side Tables', 'Console Tables', 'Accent Chairs', 'Benches', 'Stools', 'Bar Stools', 'Cabinets', 'Bookshelves', 'Display Shelves', 'Nesting Tables', 'Entryway Tables'],
     imageBeforeHover: '/covers/Furniture.jpg',
@@ -94,7 +100,7 @@ export default function Collections() {
         <li className={s.cell} key={item.index} data-cell={ci + 1} data-reveal="zoom" style={{ '--i': ci % 4 }}>
           <a
             className={s.card}
-            href={`/range.html?r=${item.title.toLowerCase().replace(/[^a-z]/g, '')}`}
+            href={`/range.html?r=${item.slug}`}
             data-louvres
             style={{ '--n': SLATS }}
           >
@@ -128,7 +134,7 @@ export default function Collections() {
                           ))}
                           {item.subcategories.length > 4 && (
                             <span className={s.papersRow} key="more">
-                              <span className={s.papersValue}>+ many more</span>
+                              <span className={s.papersValue}>+ Many more</span>
                             </span>
                           )}
                         </span>
@@ -164,7 +170,7 @@ export default function Collections() {
               ))}
               {item.subcategories.length > 4 && (
                 <span className={s.specRow} key="more">
-                  <span className={s.specValue}>+ many more</span>
+                  <span className={s.specValue}>+ </span>
                 </span>
               )}
             </span>

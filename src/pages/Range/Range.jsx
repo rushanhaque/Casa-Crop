@@ -10,7 +10,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 import Plate from '../../components/Plate/Plate'
 import { RANGES, ORDER, PLATE_COUNT } from '../../lib/data'
-import { getProductsByRange, subscribe } from '../../lib/products'
+import { getProductsByRange, getSubcategories, subscribe } from '../../lib/products'
 
 export default function Range() {
   useReveal()
@@ -44,7 +44,7 @@ export default function Range() {
   const showPlaceholders = cmsProducts.length === 0
   const placeholderCount = showPlaceholders ? PLATE_COUNT : Math.max(0, PLATE_COUNT - filtered.length)
 
-  const subcategories = range.subcategories || []
+  const subcategories = getSubcategories(activeSlug)
 
   return (
     <>

@@ -122,14 +122,28 @@
   border-color: var(--c-rule-strong);
 }
 
-/* ── Product list ────────────────────────────────────────────── */
+/* ── Product grid ────────────────────────────────────────────── */
 
 .list {
   flex: 1;
   overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.1rem;
+  padding: 1.25rem 1.1rem 5rem;
+  align-content: start;
+}
+
+@media (min-width: 600px) {
+  .list {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1.4rem;
+    padding: 1.5rem 1.8rem 3rem;
+  }
 }
 
 .empty {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -155,30 +169,41 @@
 }
 
 .row {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.75rem 1.1rem;
-  border-bottom: 1px solid var(--c-rule);
+  flex-direction: column;
+  background: var(--c-surface);
+  border: 1px solid var(--c-rule);
+  border-radius: 10px;
+  padding: 0.75rem;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 120ms;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  overflow: hidden;
+}
+
+.row:hover {
+  transform: translateY(-2px);
+  border-color: var(--c-rule-strong);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .row:active {
-  background: var(--c-surface);
+  transform: scale(0.98);
 }
 
 .thumb {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 4px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
   background: var(--c-surface-raised);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .thumbImg {
@@ -189,22 +214,23 @@
 
 .thumbEmpty {
   font-family: var(--f-display);
-  font-size: 1rem;
+  font-size: 2rem;
   font-weight: var(--w-display);
   color: var(--c-ink-muted);
   text-transform: uppercase;
 }
 
 .rowBody {
-  flex: 1;
-  min-width: 0;
+  padding-top: 0.7rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .rowName {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -213,7 +239,7 @@
 }
 
 .rowMeta {
-  font-size: var(--t-1);
+  font-size: 0.78rem;
   color: var(--c-ink-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -221,26 +247,37 @@
 }
 
 .delBtn {
-  width: 2rem;
-  height: 2rem;
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 5;
+  width: 1.9rem;
+  height: 1.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  color: var(--c-ink-muted);
-  background: transparent;
-  border: 1px solid transparent;
+  font-size: 1.05rem;
+  color: var(--c-casa-ink);
+  background: rgba(6, 6, 7, 0.78);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 120ms, border-color 120ms, background 120ms;
+  transition: color 120ms, border-color 120ms, background 120ms, transform 120ms;
   -webkit-tap-highlight-color: transparent;
+}
+
+.delBtn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border-color: #ef4444;
 }
 
 .delBtn[data-confirm] {
   color: #ef4444;
   border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.4);
 }
 
 /* ── Bottom sheet ────────────────────────────────────────────── */
@@ -331,7 +368,9 @@
 
 .photoZone {
   width: 100%;
-  height: 9rem;
+  max-width: 16rem;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
   border: 1px dashed var(--c-rule-strong);
   border-radius: 8px;
   display: flex;
@@ -347,7 +386,7 @@
 .photoImg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .photoPrompt {
@@ -425,12 +464,18 @@
   gap: 0.7rem;
 }
 
-/* ── Save button ─────────────────────────────────────────────── */
+/* ── Sheet Action buttons ────────────────────────────────────── */
+
+.sheetActions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.4rem;
+}
 
 .saveBtn {
+  flex: 1;
   width: 100%;
   padding: 0.85rem;
-  margin-top: 0.4rem;
   font-family: var(--f-text);
   font-size: 0.88rem;
   font-weight: 500;
@@ -448,6 +493,322 @@
 .saveBtn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+.sheetDeleteBtn {
+  flex: 1;
+  padding: 0.85rem;
+  font-family: var(--f-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: #ef4444;
+  background: transparent;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 140ms, color 140ms;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.sheetDeleteBtn[data-confirm] {
+  background: #ef4444;
+  color: var(--c-void);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.syncBadge {
+  font-size: 0.76rem;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  border-radius: 100px;
+  background: var(--c-surface-raised);
+  border: 1px solid var(--c-rule);
+  color: var(--c-ink-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.syncBadge[data-status="synced"],
+.syncBadge[data-status="idle"] {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.syncBadge[data-status="syncing"] {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.syncBadge[data-status="error"] {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.subBtn {
+  padding: 0.38rem 0.9rem;
+  font-family: var(--f-text);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  color: var(--c-casa-ink);
+  background: transparent;
+  border: 1px solid var(--c-rule-strong);
+  border-radius: 100px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 140ms, color 140ms;
+}
+
+.subBtn:hover {
+  border-color: var(--c-stamp);
+  color: var(--c-stamp);
+}
+
+.fieldHeadActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.inlineAddBtn {
+  font-family: var(--f-text);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--c-stamp);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  padding: 0;
+}
+
+.inlineDelBtn {
+  font-family: var(--f-text);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #ef4444;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  padding: 0;
+}
+
+.subChipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.subChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.6rem;
+  background: var(--c-surface-raised);
+  border: 1px solid var(--c-rule);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  color: var(--c-ink-muted);
+  cursor: pointer;
+  transition: all 120ms;
+  user-select: none;
+}
+
+.subChipActive {
+  background: rgba(240, 217, 168, 0.12);
+  border-color: var(--c-stamp);
+  color: var(--c-casa-ink);
+}
+
+.subChipDel {
+  background: transparent;
+  border: none;
+  color: var(--c-ink-muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0 0.1rem;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 120ms, color 120ms;
+  display: flex;
+  align-items: center;
+}
+
+.subChipDel:hover {
+  opacity: 1;
+  color: #ef4444;
+}
+
+.inlineAddRow {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.inlineSaveBtn {
+  padding: 0.65rem 0.9rem;
+  font-family: var(--f-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--c-void);
+  background: var(--c-stamp);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inlineCancelBtn {
+  padding: 0.65rem 0.6rem;
+  font-size: 1.1rem;
+  color: var(--c-ink-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--c-surface-raised);
+  border: 1px solid var(--c-rule);
+  border-radius: 100px;
+  font-size: var(--t-1);
+  color: var(--c-casa-ink);
+}
+
+.chipDel {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.15rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Confirmation Modal ───────────────────────────────────────── */
+
+.confirmModal {
+  width: calc(100% - 2.4rem);
+  max-width: 400px;
+  margin: auto;
+  background: var(--c-surface);
+  border: 1px solid var(--c-rule-strong);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: modal-pop 200ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes modal-pop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.confirmHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.confirmIcon {
+  font-size: 1.4rem;
+}
+
+.confirmTitle {
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  font-weight: var(--w-display);
+  color: var(--c-casa-ink);
+  margin: 0;
+}
+
+.confirmMessage {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--c-ink-muted);
+  margin: 0 0 1.5rem 0;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.confirmCancelBtn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  font-family: var(--f-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--c-casa-ink);
+  background: var(--c-surface-raised);
+  border: 1px solid var(--c-rule);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.confirmCancelBtn:hover {
+  background: var(--c-rule);
+}
+
+.confirmYesBtn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  font-family: var(--f-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: #fff;
+  background: #ef4444;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 120ms;
+}
+
+.confirmYesBtn:hover {
+  opacity: 0.88;
 }
 
 /* ── Desktop refinements ─────────────────────────────────────── */

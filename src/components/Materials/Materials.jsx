@@ -4,16 +4,16 @@ import { useDragScroll } from '../../lib/useDragScroll'
 /*  Specifications are PLACEHOLDERS in the right shape. Swatches are
     indicative of the material, not a colour promise. */
 const MATERIALS = [
-  { name: 'Brass', spec: 'IS 319 / CuZn39Pb3', swatch: '#B08D57' },
-  { name: 'Copper', spec: 'ETP, 99.9% Cu', swatch: '#A9613F' },
-  { name: 'Stainless Steel', spec: '304 / 316 grade', swatch: '#9AA0A0' },
-  { name: 'Aluminium', spec: 'LM6 / 6063', swatch: '#A8ABA6' },
-  { name: 'Iron', spec: 'Grey cast, powder coat', swatch: '#5C5A57' },
-  { name: 'Resin', spec: 'Polyresin, pigmented', swatch: '#D6C7A8' },
-  { name: 'Wood', spec: 'Sheesham · Mango · Acacia', swatch: '#7A5637' },
-  { name: 'Glass', spec: 'Soda-lime, hand-blown', swatch: '#A8B5B8' },
-  { name: 'Ceramic', spec: 'Stoneware, glazed', swatch: '#DDD5C6' },
-  { name: 'Paper Mache', spec: 'Kashmiri, hand-painted', swatch: '#C2A878' },
+  { name: 'Brass', swatch: '#B08D57' },
+  { name: 'Copper', swatch: '#A9613F' },
+  { name: 'Stainless Steel', swatch: '#9AA0A0' },
+  { name: 'Aluminium', swatch: '#A8ABA6' },
+  { name: 'Iron', swatch: '#5C5A57' },
+  { name: 'Resin', swatch: '#D6C7A8' },
+  { name: 'Wood', swatch: '#7A5637' },
+  { name: 'Glass', swatch: '#A8B5B8' },
+  { name: 'Ceramic', swatch: '#DDD5C6' },
+  { name: 'Paper Mache', swatch: '#C2A878', ext: 'jpeg' },
 ]
 
 function Specimen({ m, i, isEcho = false }) {
@@ -22,7 +22,7 @@ function Specimen({ m, i, isEcho = false }) {
       className={`${s.alloy} ${isEcho ? s.echo : ''}`}
       style={{
         '--swatch': m.swatch,
-        '--mat-img': `url('/Materials/${m.name.replace(/\s+/g, '')}.jpg')`,
+        '--mat-img': `url('/Materials/${m.name.replace(/\s+/g, '')}.${m.ext || 'jpg'}')`,
         '--i': i,
       }}
       {...(isEcho ? { 'aria-hidden': 'true' } : {})}
@@ -38,7 +38,6 @@ function Specimen({ m, i, isEcho = false }) {
       </a>
       <span className={s.body}>
         <span className={s.name}>{m.name}</span>
-        <span className={s.spec}>{m.spec}</span>
       </span>
     </li>
   )

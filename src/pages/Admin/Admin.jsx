@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { RANGES, ORDER } from '../../lib/data'
-import { getProducts, addProduct, updateProduct, deleteProduct, subscribe } from '../../lib/products'
+import {
+  getProducts, addProduct, updateProduct, deleteProduct, subscribe,
+  getSubcategories, getCustomSubcategoriesOnly, addSubcategory, removeSubcategory
+} from '../../lib/products'
+import { subscribeSyncStatus } from '../../lib/githubSync'
 import { useDragScroll } from '../../lib/useDragScroll'
 import s from './Admin.module.css'
 
@@ -30,7 +34,20 @@ export default function Admin() {
   const [confirmId, setConfirmId] = useState(null)
   const fileRef = useRef(null)
 
+  /* Subcategory management state */
+  const [subModal, setSubModal] = useState(false)
+  const [subCategorySlug, setSubCategorySlug] = useState(ORDER[0])
+  const [subManageInput, setSubManageInput] = useState('')
+
+  /* Confirmation Popup state */
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  // null | { type: 'product', id: string, name: string } | { type: 'subcategory', categorySlug: string, name: string }
+
+  /* GitHub Sync state */
+  const [syncState, setSyncState] = useState({ status: 'idle', time: null })
+
   useEffect(() => subscribe(setProducts), [])
+  useEffect(() => subscribeSyncStatus(setSyncState), [])
 
   const visible = tab === 'all' ? products : products.filter(p => p.category === tab)
 
@@ -57,6 +74,14 @@ export default function Admin() {
     return next
   })
 
+  const handleManagerAddSub = () => {
+    const clean = subManageInput.trim()
+    if (clean) {
+      addSubcategory(subCategorySlug, clean)
+      setSubManageInput('')
+    }
+  }
+
   const onPhoto = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -75,12 +100,7 @@ export default function Admin() {
     close()
   }
 
-  const onDelete = (id) => {
-    if (confirmId === id) { deleteProduct(id); setConfirmId(null) }
-    else setConfirmId(id)
-  }
-
-  const subs = RANGES[form.category]?.subcategories || []
+  const subs = getSubcategories(form.category)
 
   return (
     <div className={s.root}>
@@ -89,7 +109,16 @@ export default function Admin() {
         <a className={s.brand} href="/casa.html">
           <span>Casa</span> Admin
         </a>
-        <button className={s.addBtn} onClick={openAdd}>＋ Add</button>
+        <div className={s.headerActions}>
+          <div className={s.syncBadge} data-status={syncState.status} title="Automatic GitHub Repository Sync">
+            {syncState.status === 'syncing' && '⏳ Syncing to GitHub...'}
+            {syncState.status === 'synced' && `🟢 Synced to GitHub (${syncState.time})`}
+            {syncState.status === 'error' && '⚠️ Sync Error'}
+            {syncState.status === 'idle' && '🟢 GitHub Sync Ready'}
+          </div>
+          <button className={s.subBtn} onClick={() => setSubModal(true)}>＋ Subcategories</button>
+          <button className={s.addBtn} onClick={openAdd}>＋ Add</button>
+        </div>
       </header>
 
       {/* Category tabs */}
@@ -126,14 +155,6 @@ export default function Admin() {
                   {p.subcategory && <> · {p.subcategory}</>}
                 </span>
               </div>
-              <button
-                className={s.delBtn}
-                data-confirm={confirmId === p.id ? '' : undefined}
-                onClick={e => { e.stopPropagation(); onDelete(p.id) }}
-                aria-label="Delete product"
-              >
-                {confirmId === p.id ? '✓' : '×'}
-              </button>
             </div>
           ))
         )}
@@ -142,7 +163,7 @@ export default function Admin() {
       {/* Floating add button — mobile only */}
       <button className={s.fab} onClick={openAdd}>＋ Add product</button>
 
-      {/* Sheet overlay */}
+      {/* Product Sheet overlay */}
       {sheet && (
         <div className={s.overlay} onClick={close}>
           <div className={s.sheet} onClick={e => e.stopPropagation()}>
@@ -197,9 +218,138 @@ export default function Admin() {
                   onChange={v => set('finish', v)} placeholder={RANGES[form.category]?.spec?.[1]?.[1]} />
               </div>
 
-              <button className={s.saveBtn} onClick={onSave}
-                disabled={!form.name.trim()}>
-                {sheet === 'add' ? 'Add product' : 'Save changes'}
+              <div className={s.sheetActions}>
+                {sheet !== 'add' && (
+                  <button
+                    type="button"
+                    className={s.sheetDeleteBtn}
+                    onClick={() => setDeleteConfirm({ type: 'product', id: sheet, name: form.name })}
+                  >
+                    Delete product
+                  </button>
+                )}
+                <button
+                  className={s.saveBtn}
+                  onClick={onSave}
+                  disabled={!form.name.trim()}
+                >
+                  {sheet === 'add' ? 'Add product' : 'Save changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subcategories Management Modal */}
+      {subModal && (
+        <div className={s.overlay} onClick={() => setSubModal(false)}>
+          <div className={s.sheet} onClick={e => e.stopPropagation()}>
+            <div className={s.sheetBar}>
+              <span className={s.sheetHandle} />
+            </div>
+            <div className={s.sheetHead}>
+              <span className={s.sheetTitle}>Manage Subcategories</span>
+              <button className={s.sheetClose} onClick={() => setSubModal(false)}>×</button>
+            </div>
+
+            <div className={s.sheetBody}>
+              <div className={s.field}>
+                <label className={s.label}>Category</label>
+                <select
+                  className={s.select}
+                  value={subCategorySlug}
+                  onChange={e => setSubCategorySlug(e.target.value)}
+                >
+                  {ORDER.map(slug => (
+                    <option key={slug} value={slug}>{RANGES[slug].name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={s.field}>
+                <label className={s.label}>Add New Subcategory</label>
+                <div className={s.inlineAddRow}>
+                  <input
+                    className={s.input}
+                    type="text"
+                    placeholder="e.g. Vase Sets, Wall Sconces..."
+                    value={subManageInput}
+                    onChange={e => setSubManageInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleManagerAddSub()
+                      }
+                    }}
+                  />
+                  <button type="button" className={s.inlineSaveBtn} onClick={handleManagerAddSub}>
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              <div className={s.field}>
+                <label className={s.label}>
+                  Current Subcategories ({RANGES[subCategorySlug]?.name})
+                </label>
+                <div className={s.chipList}>
+                  {getSubcategories(subCategorySlug).map(sub => (
+                    <span className={s.chip} key={sub}>
+                      {sub}
+                      <button
+                        type="button"
+                        className={s.chipDel}
+                        onClick={() => setDeleteConfirm({ type: 'subcategory', categorySlug: subCategorySlug, name: sub })}
+                        aria-label={`Remove ${sub}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Permanent Deletion Confirmation Modal */}
+      {deleteConfirm && (
+        <div className={s.overlay} style={{ zIndex: 100 }} onClick={() => setDeleteConfirm(null)}>
+          <div className={s.confirmModal} onClick={e => e.stopPropagation()}>
+            <div className={s.confirmHead}>
+              <span className={s.confirmIcon}>⚠️</span>
+              <h3 className={s.confirmTitle}>Permanently Delete?</h3>
+            </div>
+            <p className={s.confirmMessage}>
+              {deleteConfirm.type === 'product'
+                ? `Are you sure you want to permanently delete "${deleteConfirm.name || 'this product'}"? This action cannot be undone.`
+                : `Are you sure you want to permanently delete the subcategory "${deleteConfirm.name}"? This action cannot be undone.`}
+            </p>
+            <div className={s.confirmActions}>
+              <button
+                type="button"
+                className={s.confirmCancelBtn}
+                onClick={() => setDeleteConfirm(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={s.confirmYesBtn}
+                onClick={() => {
+                  if (deleteConfirm.type === 'product') {
+                    deleteProduct(deleteConfirm.id)
+                    setDeleteConfirm(null)
+                    close()
+                  } else if (deleteConfirm.type === 'subcategory') {
+                    removeSubcategory(deleteConfirm.categorySlug, deleteConfirm.name)
+                    setDeleteConfirm(null)
+                  }
+                }}
+              >
+                Yes, Delete
               </button>
             </div>
           </div>

@@ -166,6 +166,7 @@
 .body {
   display: block;
   padding-top: 0.9rem;
+  text-align: center;
 }
 
 .name {
@@ -175,16 +176,7 @@
   font-size: clamp(1rem, 1.5vw, 1.3rem);
   line-height: 1.2;
   letter-spacing: var(--track-md);
-  transition: opacity var(--dur-ui) var(--ease-ui);
-}
-
-.spec {
-  display: block;
-  margin-top: 0.35rem;
-  font-family: var(--f-text);
-  font-size: var(--t-1);
-  letter-spacing: var(--track-sm);
-  color: var(--c-ink-muted);
+  text-align: center;
   transition: opacity var(--dur-ui) var(--ease-ui);
 }
 

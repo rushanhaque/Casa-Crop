@@ -233,40 +233,23 @@
   outline-offset: 2px;
 }
 
-/*  On touch the sill sits as a slim brass LIP on the well, not a full
-    flood — brass stays the scarce edge it is meant to be, rather than
-    eight painted bars down the phone scroll. The button keeps its full
-    44px height for the thumb; only the pour and its label are held
-    back to the meniscus until the plate is pressed or focused, then
-    the brass rises and the words appear. */
-@media (hover: none) {
+/*  On mobile / touch view, the Add to cart option is static and always
+    visible at the bottom of the card with no slide-up animation. */
+@media (hover: none), (max-width: 48rem) {
   .add {
     transform: none;
+    transition: none;
     min-height: 2.75rem;
   }
 
   .addFill {
-    transform: translate3d(0, calc(100% - 0.5rem), 0);
-    transition: transform 320ms var(--ease-veil);
+    transform: none;
+    transition: none;
   }
 
   .addLabel {
-    opacity: 0;
-    transition: opacity var(--dur-ui) var(--ease-ui);
-  }
-
-  .plate[data-visible] .addFill,
-  .add:active .addFill,
-  .add:focus-visible .addFill,
-  .add[data-added] .addFill {
-    transform: none;
-  }
-
-  .plate[data-visible] .addLabel,
-  .add:active .addLabel,
-  .add:focus-visible .addLabel,
-  .add[data-added] .addLabel {
     opacity: 1;
+    transition: none;
   }
 }
 
