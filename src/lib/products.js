@@ -36,6 +36,10 @@ function write(data) {
   triggerAutoSync()
 }
 
+export function publishToGitHub() {
+  triggerAutoSync()
+}
+
 export function getProducts() { return read() }
 
 export function getProductsByRange(rangeSlug) {

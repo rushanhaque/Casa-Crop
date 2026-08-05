@@ -2,11 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { RANGES, ORDER } from '../../lib/data'
 import {
   getProducts, addProduct, updateProduct, deleteProduct, subscribe,
-  getSubcategories, getCustomSubcategoriesOnly, addSubcategory, removeSubcategory
+  getSubcategories, getCustomSubcategoriesOnly, addSubcategory, removeSubcategory,
+  publishToGitHub
 } from '../../lib/products'
 import { subscribeSyncStatus } from '../../lib/githubSync'
 import { useDragScroll } from '../../lib/useDragScroll'
 import s from './Admin.module.css'
+
+const AUTH_KEY = 'casa-and-crop:admin-authed'
+const ADMIN_PASSWORD = 'Publish@Casa'
 
 const EMPTY = {
   name: '', sku: '', category: ORDER[0], subcategory: '',
@@ -33,6 +37,11 @@ export default function Admin() {
   const [preview, setPreview] = useState('')
   const [confirmId, setConfirmId] = useState(null)
   const fileRef = useRef(null)
+
+  /* Authentication State */
+  const [isAuthed, setIsAuthed] = useState(() => localStorage.getItem(AUTH_KEY) === 'true')
+  const [passInput, setPassInput] = useState('')
+  const [passError, setPassError] = useState('')
 
   /* Subcategory management state */
   const [subModal, setSubModal] = useState(false)
@@ -102,6 +111,52 @@ export default function Admin() {
     close()
   }
 
+  const handleAuthSubmit = (e) => {
+    e.preventDefault()
+    if (passInput === ADMIN_PASSWORD) {
+      localStorage.setItem(AUTH_KEY, 'true')
+      setIsAuthed(true)
+      setPassError('')
+    } else {
+      setPassError('Incorrect password. Please try again.')
+    }
+  }
+
+  if (!isAuthed) {
+    return (
+      <div className={s.authRoot}>
+        <div className={s.authCard}>
+          <div className={s.authIcon}>🔒</div>
+          <h2 className={s.authTitle}>Casa Admin Portal</h2>
+          <p className={s.authSubtitle}>Enter password to unlock administrative controls & publishing</p>
+          <form onSubmit={handleAuthSubmit}>
+            <div className={s.field} style={{ marginBottom: '1.2rem' }}>
+              <input
+                type="password"
+                className={s.input}
+                placeholder="Enter password..."
+                value={passInput}
+                onChange={e => {
+                  setPassInput(e.target.value)
+                  setPassError('')
+                }}
+                autoFocus
+              />
+              {passError && (
+                <span style={{ color: '#ef4444', fontSize: '0.82rem', marginTop: '0.4rem', display: 'block', textAlign: 'left' }}>
+                  {passError}
+                </span>
+              )}
+            </div>
+            <button type="submit" className={s.saveBtn}>
+              Unlock Admin
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   const subs = getSubcategories(form.category)
 
   return (
@@ -119,6 +174,9 @@ export default function Admin() {
             {syncState.status === 'no-token' && '⚙️ Token Needed'}
             {syncState.status === 'idle' && '🟢 GitHub Sync Ready'}
           </div>
+          <button className={s.publishBtn} onClick={publishToGitHub} title="Publish latest products to live site">
+            🚀 Publish
+          </button>
           <button className={s.subBtn} onClick={() => setTokenModal(true)} title="Configure GitHub Sync Token">⚙️ Token</button>
           <button className={s.subBtn} onClick={() => setSubModal(true)}>＋ Subcategories</button>
           <button className={s.addBtn} onClick={openAdd}>＋ Add</button>
