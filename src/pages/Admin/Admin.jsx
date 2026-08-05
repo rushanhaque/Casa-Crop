@@ -45,6 +45,8 @@ export default function Admin() {
 
   /* GitHub Sync state */
   const [syncState, setSyncState] = useState({ status: 'idle', time: null })
+  const [tokenModal, setTokenModal] = useState(false)
+  const [tokenInput, setTokenInput] = useState(() => localStorage.getItem('casa-and-crop:github-token') || '')
 
   useEffect(() => subscribe(setProducts), [])
   useEffect(() => subscribeSyncStatus(setSyncState), [])
@@ -112,10 +114,12 @@ export default function Admin() {
         <div className={s.headerActions}>
           <div className={s.syncBadge} data-status={syncState.status} title="Automatic GitHub Repository Sync">
             {syncState.status === 'syncing' && '⏳ Syncing to GitHub...'}
-            {syncState.status === 'synced' && `🟢 Synced to GitHub (${syncState.time})`}
+            {syncState.status === 'synced' && `🟢 Synced (${syncState.time})`}
             {syncState.status === 'error' && '⚠️ Sync Error'}
+            {syncState.status === 'no-token' && '⚙️ Token Needed'}
             {syncState.status === 'idle' && '🟢 GitHub Sync Ready'}
           </div>
+          <button className={s.subBtn} onClick={() => setTokenModal(true)} title="Configure GitHub Sync Token">⚙️ Token</button>
           <button className={s.subBtn} onClick={() => setSubModal(true)}>＋ Subcategories</button>
           <button className={s.addBtn} onClick={openAdd}>＋ Add</button>
         </div>
@@ -350,6 +354,51 @@ export default function Admin() {
                 }}
               >
                 Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GitHub Sync Token Modal */}
+      {tokenModal && (
+        <div className={s.overlay} style={{ zIndex: 100 }} onClick={() => setTokenModal(false)}>
+          <div className={s.confirmModal} onClick={e => e.stopPropagation()}>
+            <div className={s.confirmHead}>
+              <span className={s.confirmIcon}>⚙️</span>
+              <h3 className={s.confirmTitle}>GitHub Sync Token</h3>
+            </div>
+            <p className={s.confirmMessage}>
+              Your token enables automatic background commits to GitHub when products or subcategories change.
+            </p>
+            <div className={s.field} style={{ marginBottom: '1.2rem' }}>
+              <label className={s.label}>Personal Access Token</label>
+              <input
+                type="password"
+                className={s.input}
+                value={tokenInput}
+                onChange={e => setTokenInput(e.target.value)}
+                placeholder="github_pat_..."
+              />
+            </div>
+            <div className={s.confirmActions}>
+              <button
+                type="button"
+                className={s.confirmCancelBtn}
+                onClick={() => setTokenModal(false)}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className={s.confirmYesBtn}
+                style={{ background: 'var(--c-stamp)' }}
+                onClick={() => {
+                  localStorage.setItem('casa-and-crop:github-token', tokenInput.trim())
+                  setTokenModal(false)
+                }}
+              >
+                Save Token
               </button>
             </div>
           </div>
