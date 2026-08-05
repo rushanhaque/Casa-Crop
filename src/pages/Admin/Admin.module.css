@@ -814,26 +814,26 @@
 /* ── Publish Button ───────────────────────────────────────────── */
 
 .publishBtn {
-  padding: 0.55rem 1.1rem;
+  padding: 0.55rem 1.15rem;
   font-family: var(--f-text);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: #fff;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #10b981, #059669);
   border: none;
   border-radius: 100px;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4);
   transition: transform 120ms, box-shadow 120ms, opacity 120ms;
   -webkit-tap-highlight-color: transparent;
 }
 
 .publishBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.55);
 }
 
 .publishBtn:active {
