@@ -193,7 +193,10 @@ export default function Admin() {
           <button className={s.publishBtn} onClick={publishToGitHub} title="Publish latest products to live site">
             Publish
           </button>
-          <button className={s.subBtn} onClick={() => setSubModal(true)}>＋ Subcategories</button>
+          <button className={s.subBtn} onClick={() => setSubModal(true)}>
+            <span className={s.subBtnFull}>＋ Subcategories</span>
+            <span className={s.subBtnShort} aria-hidden="true">⊞ Sub</span>
+          </button>
           <button className={s.addBtn} onClick={openAdd}>＋ Add</button>
         </div>
       </header>
