@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Cart from '../../components/Cart/Cart'
 import Collections from '../../components/Collections/Collections'
 import Figure from '../../components/Figure/Figure'
@@ -7,6 +7,7 @@ import Lines from '../../components/Lines/Lines'
 import Materials from '../../components/Materials/Materials'
 import Nav from '../../components/Nav/Nav'
 import Progress from '../../components/Progress/Progress'
+import { getProducts, subscribe } from '../../lib/products'
 import { useReveal } from '../../lib/useReveal'
 import s from './Casa.module.css'
 
@@ -240,6 +241,52 @@ const STANDING = [
   { value: 7, plus: false, label: 'Ranges in production', note: 'Tooled and held as running lines' },
   { value: 10, plus: true, label: 'Materials worked', note: 'Metal, resin, wood, glass, ceramic' },
 ]
+
+function BestSellers() {
+  const [items, setItems] = useState(() => getProducts().filter(p => p.bestSeller))
+
+  useEffect(() => subscribe(all => setItems(all.filter(p => p.bestSeller))), [])
+
+  if (items.length === 0) return null
+
+  return (
+    <section className={s.bestSellers} aria-labelledby="bestsellers-title">
+      <header className={s.head} data-reveal="slide-up">
+        <Lines
+          as="h2"
+          className={s.sectionTitle}
+          id="bestsellers-title"
+          lines={['Best Sellers']}
+          split="chars"
+        />
+      </header>
+      <div className={s.bsTrack}>
+        {items.map((p, i) => (
+          <a
+            key={p.id}
+            className={s.bsCard}
+            href={p.sku ? `/product?sku=${encodeURIComponent(p.sku)}&r=${p.category}` : '#'}
+            data-reveal="rise"
+            style={{ '--i': i }}
+          >
+            <div className={s.bsMedia}>
+              {p.photo
+                ? <img src={p.photo} alt={p.name} className={s.bsImg} loading="lazy" />
+                : <span className={s.bsEmpty} aria-hidden="true" />}
+              <span className={s.bsRake} aria-hidden="true" />
+            </div>
+            <div className={s.bsInfo}>
+              <h3 className={s.bsName}>{p.name}</h3>
+              {(p.alloy || p.finish) && (
+                <p className={s.bsSpec}>{[p.alloy, p.finish].filter(Boolean).join(' · ')}</p>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
 
 /**
  * The Casa page — home metal products, manufactured and exported.
@@ -483,45 +530,33 @@ export default function Casa() {
               as="h2"
               className={s.sectionTitle}
               id="signature-title"
-              lines={['The Aurelia Horse Figure']}
+              lines={['Royal Glow Pendant Lantern']}
               split="chars"
               style={{ whiteSpace: 'nowrap', fontSize: 'clamp(1.2rem, 3.8vw, 4.4rem)' }}
             />
           </header>
 
           <div className={s.vitrine}>
-            {/*  The pattern-plate number, ghosted behind the object at
-                architectural scale — the same apparatus the range pages
-                carry, so the reference reads as one of the book. */}
             <span className={s.vitrineGhost} aria-hidden="true" data-scrub="float">
               №01
             </span>
 
             <div className={s.vitrineFrame} data-specular>
-              <Figure 
-                src="/signature-piece.png" 
-                avif="/signature-piece.avif" 
-                webp="/signature-piece.webp" 
-                ratio="1122 / 1402" 
-                className={s.vitrineArt} 
-                reveal={null} 
+              <Figure
+                src="/signature-lantern.jpg"
+                ratio="4 / 5"
+                className={s.vitrineArt}
+                reveal={null}
               />
-              {/*  The raking light the cards carry, at vitrine scale. */}
               <span className={s.vitrineRake} aria-hidden="true" />
             </div>
 
-            {/*  The notes drift shallowly against the image's own
-                parallax, so the two columns travel at different rates
-                and the section reads in layers. */}
             <dl className={s.notes} data-scrub="drift">
               {[
-                { key: 'Material', value: 'Wood' },
-                { key: 'Finish', value: 'Polished' },
+                { key: 'Material', value: 'Brass & Glass' },
+                { key: 'Finish', value: 'Brass Antique' },
               ].map((note, i) => (
                 <div className={s.note} key={note.key} data-reveal="margin" style={{ '--i': i }}>
-                  {/*  The leader — the annotation line of a working
-                      drawing, running from the note toward its subject
-                      and drawing itself in as you reach it. */}
                   <span className={s.leader} aria-hidden="true" data-reveal="draw" style={{ '--i': i + 1 }}>
                     <i className={s.leaderDot} />
                   </span>
@@ -529,7 +564,7 @@ export default function Casa() {
                   <dd className={s.noteValue}>{note.value}</dd>
                 </div>
               ))}
-              
+
               <div className={s.noteAction} data-reveal="margin" style={{ '--i': 2 }}>
                 <a href="/connect.html" className={s.enquireBtn}>
                   Enquire
@@ -538,6 +573,9 @@ export default function Casa() {
             </dl>
           </div>
         </section>
+
+        {/* ── 4b. Best sellers ────────────────────────────────── */}
+        <BestSellers />
 
         {/* ── 5. Heritage ────────────────────────────────────── */}
         <section className={s.heritage} id="heritage" aria-labelledby="heritage-title">

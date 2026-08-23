@@ -1517,3 +1517,48 @@
   color: var(--c-ink-muted);
   opacity: 0.8;
 }
+
+/* ── Best seller badge & checkbox ─────────────────────────────── */
+
+.bsBadge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: #c9b191;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  padding: 0.75rem 0.75rem;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r, 8px);
+  transition: background 0.15s;
+}
+
+.checkRow:hover { background: var(--c-surface-raised, rgba(255,255,255,0.04)); }
+
+.checkInput {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: #c9b191;
+  cursor: pointer;
+}
+
+.checkLabel {
+  font-size: 0.84375rem;
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.checkStar {
+  color: #c9b191;
+  font-size: 0.9rem;
+}

@@ -1,5 +1,5 @@
 import { RANGES, ORDER } from './data'
-import { syncToGitHub, syncNow } from './githubSync'
+import { syncNow } from './githubSync'
 import initialData from '../data/products.json'
 
 const KEY = 'casa-and-crop:products'
@@ -131,7 +131,6 @@ function commit(products, message) {
   writeJSON(KEY, products)
   markDirty(true)
   announce()
-  syncToGitHub(products, readSubcategories(), readRemovedSubcategories(), message)
 }
 
 export function addProduct(product) {
@@ -191,7 +190,6 @@ function commitSubs(map, removed, message) {
   if (removed) writeJSON(REMOVED_SUB_KEY, removed)
   markDirty(true)
   announce()
-  syncToGitHub(read(), readSubcategories(), readRemovedSubcategories(), message)
 }
 
 export function getSubcategories(categorySlug) {

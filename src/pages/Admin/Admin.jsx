@@ -16,7 +16,7 @@ const ADMIN_PASSWORD = 'Publish@Casa'
 
 const EMPTY = {
   name: '', sku: '', category: ORDER[0], subcategory: '',
-  alloy: '', finish: '', photo: '',
+  alloy: '', finish: '', photo: '', bestSeller: false,
 }
 
 /*  The publish request carries the whole catalogue, photos included, and
@@ -400,10 +400,10 @@ export default function Admin() {
     }
     if (editing === 'new') {
       addProduct(clean)
-      toast('Product added — publishing shortly.')
+      toast('Product added — press Publish to go live.')
     } else {
       updateProduct(editing, clean)
-      toast('Changes saved — publishing shortly.')
+      toast('Changes saved — press Publish to go live.')
     }
     closeForm()
   }
@@ -669,7 +669,10 @@ export default function Admin() {
                       : <span className={s.cardMediaEmpty}>{RANGES[p.category]?.name?.[0] || '—'}</span>}
                   </div>
                   <div className={s.cardBody}>
-                    <h3 className={s.cardName}>{p.name || 'Untitled product'}</h3>
+                    <h3 className={s.cardName}>
+                      {p.name || 'Untitled product'}
+                      {p.bestSeller && <span className={s.bsBadge} title="Best seller">★</span>}
+                    </h3>
                     <p className={s.cardMeta}>
                       <span className={s.cardSku} data-missing={!p.sku ? '' : undefined}>
                         {p.sku || 'No SKU'}
@@ -830,6 +833,19 @@ export default function Admin() {
               <Field label="Finish" value={form.finish} onChange={v => set('finish', v)}
                 placeholder={RANGES[form.category]?.spec?.[1]?.[1]} />
             </div>
+
+            <label className={s.checkRow}>
+              <input
+                type="checkbox"
+                className={s.checkInput}
+                checked={!!form.bestSeller}
+                onChange={e => set('bestSeller', e.target.checked)}
+              />
+              <span className={s.checkLabel}>
+                <span className={s.checkStar} aria-hidden="true">★</span>
+                Feature on homepage as a Best Seller
+              </span>
+            </label>
 
             <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
           </form>

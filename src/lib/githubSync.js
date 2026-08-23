@@ -20,14 +20,17 @@ const FILE_PATH = 'src/data/products.json'
 const BRANCH = 'main'
 const TOKEN_KEY = 'casa-and-crop:github-token'
 
-/*  Edits arrive in bursts — a save, then another save, then a delete.
-    One commit per keystroke-sized change buries the repository history,
-    so writes coalesce into a single commit once the operator pauses. */
-const DEBOUNCE_MS = 1800
+/*  PUBLISHING IS EXPLICIT.
 
-/*  status:
+    Editing the catalogue writes to this browser only. Nothing reaches
+    GitHub until the operator presses Publish. An earlier version synced
+    on every change, which meant a half-finished product — named but not
+    yet photographed, or carrying a SKU about to be corrected — went live
+    the moment it was typed, and buried the repository history under a
+    commit per edit.
+
+    status:
       'idle'          nothing published yet this session
-      'pending'       edits queued, waiting out the debounce
       'syncing'       request in flight
       'synced'        the remote file matches local state
       'token-needed'  no server token and no local token
@@ -36,7 +39,6 @@ const DEBOUNCE_MS = 1800
       'error'         anything else, with `detail` for the operator      */
 let state = { status: 'idle', time: null, detail: null }
 let listeners = []
-let timer = null
 let queued = null
 let inFlight = false
 
@@ -196,15 +198,6 @@ async function run(payload) {
     run(next)
   }
   return result.outcome === 'ok'
-}
-
-/*  Queue a publish. Coalesces bursts of edits into one commit. */
-export function syncToGitHub(products, subcategories, removedSubcategories, message) {
-  const payload = buildPayload(products, subcategories, removedSubcategories, message)
-  if (inFlight) { queued = payload; return }
-  emit('pending')
-  clearTimeout(timer)
-  timer = setTimeout(() => run(payload), DEBOUNCE_MS)
 }
 
 /*  Publish immediately — the Publish button, and the retry after a
