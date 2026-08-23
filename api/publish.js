@@ -25,9 +25,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  /*  "The server has no credential" is a capability answer, not a
+      failure, and the client has a documented fallback for it. Answering
+      501 made every publish log a red error in the operator's console
+      for a path that then succeeded — so it answers 200 and says so in
+      the body instead. */
   const token = process.env.GITHUB_TOKEN
   if (!token) {
-    return res.status(501).json({
+    return res.status(200).json({
+      ok: false,
       error: 'not-configured',
       message: 'GITHUB_TOKEN is not set on the server.',
     })

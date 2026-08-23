@@ -4,7 +4,7 @@ import {
   getProducts, addProduct, updateProduct, deleteProduct, subscribe,
   getSubcategories, isCustomSubcategory, addSubcategory, removeSubcategory,
   countProductsInSubcategory, publishToGitHub, hasUnpublishedChanges,
-  nextSku, isSkuTaken, skuPrefix,
+  nextSku, isSkuTaken, skuPrefix, resetToPublished,
 } from '../../lib/products'
 import { subscribeSyncStatus, getStoredToken, setStoredToken } from '../../lib/githubSync'
 import { compressImage, formatBytes } from '../../lib/image'
@@ -965,6 +965,26 @@ export default function Admin() {
                 </p>
               </div>
             </div>
+
+            <div className={s.field}>
+              <span className={s.label}>Local copy</span>
+              <p className={s.hint}>
+                This browser keeps a working copy of the catalogue. It normally
+                follows the published file, but is held back whenever there are
+                edits that have not been published — so nothing is lost to a
+                deploy. Discard it to take the published catalogue as it stands.
+              </p>
+              <div className={s.photoBtns}>
+                <button
+                  type="button"
+                  className={s.btnGhost}
+                  data-danger=""
+                  onClick={() => setConfirm({ kind: 'reset' })}
+                >
+                  Discard local changes
+                </button>
+              </div>
+            </div>
           </div>
         </Dialog>
       )}
@@ -972,7 +992,11 @@ export default function Admin() {
       {/* ─── Confirm dialog ──────────────────────────────────── */}
       {confirm && (
         <Dialog
-          title={confirm.kind === 'product' ? 'Delete this product?' : 'Remove this subcategory?'}
+          title={
+            confirm.kind === 'product' ? 'Delete this product?'
+              : confirm.kind === 'reset' ? 'Discard local changes?'
+              : 'Remove this subcategory?'
+          }
           onClose={() => setConfirm(null)}
           size="compact"
           footer={
@@ -987,6 +1011,11 @@ export default function Admin() {
                     deleteProduct(confirm.id)
                     toast(`Deleted “${confirm.name || 'product'}”.`, 'warn')
                     if (editing === confirm.id) closeForm()
+                  } else if (confirm.kind === 'reset') {
+                    resetToPublished()
+                    setDirty(false)
+                    setSettingsOpen(false)
+                    toast('Local copy reset to the published catalogue.', 'warn')
                   } else {
                     removeSubcategory(confirm.slug, confirm.name)
                     toast(`Removed “${confirm.name}”.`, 'warn')
@@ -995,7 +1024,7 @@ export default function Admin() {
                 }}
               >
                 <Icon name="trash" />
-                <span>Delete</span>
+                <span>{confirm.kind === 'reset' ? 'Discard' : 'Delete'}</span>
               </button>
             </div>
           }
@@ -1003,6 +1032,8 @@ export default function Admin() {
           <p className={s.confirmBody}>
             {confirm.kind === 'product'
               ? <>“{confirm.name || 'This product'}” will be removed from the catalogue and from the live site at the next publish. This cannot be undone.</>
+              : confirm.kind === 'reset'
+              ? <>Any edit in this browser that has not been published will be lost, and the catalogue will be reloaded from the published file. This cannot be undone.</>
               : <>“{confirm.name}” will stop appearing as a filter on the {RANGES[confirm.slug]?.name} page.</>}
           </p>
           {confirm.kind === 'subcategory' && confirm.used > 0 && (

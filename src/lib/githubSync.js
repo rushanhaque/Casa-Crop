@@ -76,8 +76,17 @@ function buildPayload(products, subcategories, removedSubcategories, message) {
   }
 }
 
+/*  Once the server route has said it cannot publish, it will keep saying
+    so for the life of the page. Re-probing on every edit costs a request
+    and — where the answer is a non-2xx — a red line in the console for
+    something already known and already handled. A reload re-probes, which
+    is the moment the answer could actually have changed. */
+let serverRoute = 'unknown' // 'unknown' | 'available' | 'unavailable'
+
 /*  Route 1 — the server holds the credential. */
 async function publishViaServer(payload) {
+  if (serverRoute === 'unavailable') return { outcome: 'unavailable' }
+
   let res
   try {
     res = await fetch('/api/publish', {
@@ -86,21 +95,32 @@ async function publishViaServer(payload) {
       body: JSON.stringify(payload),
     })
   } catch {
+    serverRoute = 'unavailable'
     return { outcome: 'unavailable' }
   }
 
   /*  A static host with no function runtime answers the POST with the
       SPA shell or a 404/405 rather than JSON. Either way: not available. */
-  if (res.status === 404 || res.status === 405 || res.status === 501) {
-    return { outcome: 'unavailable' }
-  }
-  if (!res.headers.get('content-type')?.includes('application/json')) {
+  const unavailable = () => {
+    serverRoute = 'unavailable'
     return { outcome: 'unavailable' }
   }
 
+  if (res.status === 404 || res.status === 405 || res.status === 501) return unavailable()
+  if (!res.headers.get('content-type')?.includes('application/json')) return unavailable()
+
   const data = await res.json().catch(() => ({}))
-  if (res.ok) return { outcome: 'ok' }
-  if (data.error === 'not-configured') return { outcome: 'unavailable' }
+
+  /*  Checked before res.ok: the endpoint reports a missing server
+      credential as a 200 so it does not read as an error, and the
+      distinguishing signal is in the body. */
+  if (data.error === 'not-configured') return unavailable()
+
+  if (res.ok && data.ok) {
+    serverRoute = 'available'
+    return { outcome: 'ok' }
+  }
+  if (res.ok) return unavailable()
   if (res.status === 401 || res.status === 403) return { outcome: 'token-invalid' }
   return { outcome: 'error', detail: data.message || data.detail || `Server responded ${res.status}` }
 }

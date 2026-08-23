@@ -70,6 +70,22 @@ function reconcileWithPublished() {
 
 reconcileWithPublished()
 
+/*  Throw away this browser's working copy and take the published file as
+    it stands. reconcileWithPublished() deliberately will not do this
+    while there are unpublished edits — that guard is what stops a deploy
+    eating someone's work — so there has to be a deliberate way to ask
+    for it when the local copy is the thing that is wrong. */
+export function resetToPublished() {
+  writeJSON(KEY, initialData?.products || [])
+  writeJSON(SUB_KEY, initialData?.subcategories || {})
+  writeJSON(REMOVED_SUB_KEY, initialData?.removedSubcategories || {})
+  try {
+    localStorage.setItem(STAMP_KEY, initialData?.updatedAt || '')
+    localStorage.setItem(DIRTY_KEY, 'false')
+  } catch { /* quota */ }
+  announce()
+}
+
 function markDirty(dirty) {
   try { localStorage.setItem(DIRTY_KEY, dirty ? 'true' : 'false') } catch { /* quota */ }
 }
