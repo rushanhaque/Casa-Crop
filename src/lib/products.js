@@ -1,43 +1,106 @@
-import { RANGES } from './data'
-import { syncToGitHub } from './githubSync'
+import { RANGES, ORDER } from './data'
+import { syncToGitHub, syncNow } from './githubSync'
 import initialData from '../data/products.json'
 
 const KEY = 'casa-and-crop:products'
 const SUB_KEY = 'casa-and-crop:subcategories'
 const REMOVED_SUB_KEY = 'casa-and-crop:removed-subcategories'
+/*  Which published snapshot this browser's localStorage was seeded from,
+    and whether it has drifted from that snapshot since. */
+const STAMP_KEY = 'casa-and-crop:data-stamp'
+const DIRTY_KEY = 'casa-and-crop:unpublished'
+
+const EVENT = 'casa-and-crop:data'
+
+/* ── storage plumbing ──────────────────────────────────────────── */
+
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    if (raw === null) return undefined
+    const parsed = JSON.parse(raw)
+    return parsed ?? fallback
+  } catch {
+    return fallback
+  }
+}
+
+function writeJSON(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* quota */ }
+}
+
+/*  The published file is the source of truth; localStorage is a working
+    copy of it. When a newer snapshot ships with the bundle — because
+    somebody published from another device and the site redeployed — the
+    working copy is replaced, UNLESS this browser is holding edits that
+    were never published. Losing an unpublished edit to a deploy is the
+    one outcome worth guarding against; everything else should converge
+    on the file.
+
+    Without this, an admin who published from their phone would open the
+    panel on their laptop and see the old catalogue indefinitely, because
+    the old code seeded localStorage exactly once and never looked again.
+
+    Runs on module load, before any read can observe stale state. */
+function reconcileWithPublished() {
+  if (typeof localStorage === 'undefined') return
+
+  const published = initialData?.updatedAt || ''
+  let seeded = ''
+  let dirty = false
+  let firstRun = true
+  try {
+    seeded = localStorage.getItem(STAMP_KEY) || ''
+    dirty = localStorage.getItem(DIRTY_KEY) === 'true'
+    firstRun = localStorage.getItem(KEY) === null
+  } catch {
+    return
+  }
+
+  if (!firstRun && (dirty || published <= seeded)) return
+
+  writeJSON(KEY, initialData?.products || [])
+  writeJSON(SUB_KEY, initialData?.subcategories || {})
+  writeJSON(REMOVED_SUB_KEY, initialData?.removedSubcategories || {})
+  try {
+    localStorage.setItem(STAMP_KEY, published)
+    localStorage.setItem(DIRTY_KEY, 'false')
+  } catch { /* quota */ }
+}
+
+reconcileWithPublished()
+
+function markDirty(dirty) {
+  try { localStorage.setItem(DIRTY_KEY, dirty ? 'true' : 'false') } catch { /* quota */ }
+}
+
+export function hasUnpublishedChanges() {
+  try { return localStorage.getItem(DIRTY_KEY) === 'true' } catch { return false }
+}
+
+function announce() {
+  window.dispatchEvent(new CustomEvent(EVENT))
+  /*  Kept so other tabs, which only ever see the native StorageEvent,
+      still refresh. */
+  window.dispatchEvent(new StorageEvent('storage', { key: KEY }))
+}
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
 }
 
+/* ── reads ─────────────────────────────────────────────────────── */
+
 function read() {
-  try {
-    const item = localStorage.getItem(KEY)
-    if (item === null && initialData?.products) {
-      localStorage.setItem(KEY, JSON.stringify(initialData.products))
-      return initialData.products
-    }
-    return JSON.parse(item || '[]')
-  } catch {
-    return initialData?.products || []
-  }
+  return readJSON(KEY, []) ?? initialData?.products ?? []
 }
 
-function triggerAutoSync() {
-  const p = read()
-  const s = readSubcategories()
-  const r = readRemovedSubcategories()
-  syncToGitHub(p, s, r)
+function readSubcategories() {
+  return readJSON(SUB_KEY, {}) ?? initialData?.subcategories ?? {}
 }
 
-function write(data) {
-  localStorage.setItem(KEY, JSON.stringify(data))
-  window.dispatchEvent(new StorageEvent('storage', { key: KEY }))
-  triggerAutoSync()
-}
-
-export function publishToGitHub() {
-  triggerAutoSync()
+function readRemovedSubcategories() {
+  return readJSON(REMOVED_SUB_KEY, {}) ?? initialData?.removedSubcategories ?? {}
 }
 
 export function getProducts() { return read() }
@@ -46,125 +109,154 @@ export function getProductsByRange(rangeSlug) {
   return read().filter(p => p.category === rangeSlug)
 }
 
+/* ── writes ────────────────────────────────────────────────────── */
+
+function commit(products, message) {
+  writeJSON(KEY, products)
+  markDirty(true)
+  announce()
+  syncToGitHub(products, readSubcategories(), readRemovedSubcategories(), message)
+}
+
 export function addProduct(product) {
-  const entry = { ...product, id: uid(), addedAt: Date.now() }
-  write([...read(), entry])
+  const entry = { ...product, id: uid(), addedAt: Date.now(), updatedAt: Date.now() }
+  commit([...read(), entry], 'Add product: ' + (entry.name || entry.sku || 'untitled'))
   return entry
 }
 
 export function updateProduct(id, changes) {
-  write(read().map(p => p.id === id ? { ...p, ...changes } : p))
+  const next = read().map(p => (p.id === id ? { ...p, ...changes, updatedAt: Date.now() } : p))
+  const name = changes.name || next.find(p => p.id === id)?.name || id
+  commit(next, 'Update product: ' + name)
 }
 
 export function deleteProduct(id) {
-  write(read().filter(p => p.id !== id))
+  const gone = read().find(p => p.id === id)
+  commit(read().filter(p => p.id !== id), 'Delete product: ' + (gone?.name || id))
 }
 
-/* ── Custom Subcategories API ──────────────────────────────── */
+/* ── SKU ───────────────────────────────────────────────────────── */
 
-function readSubcategories() {
-  try {
-    const item = localStorage.getItem(SUB_KEY)
-    if (item === null && initialData?.subcategories) {
-      localStorage.setItem(SUB_KEY, JSON.stringify(initialData.subcategories))
-      return initialData.subcategories
-    }
-    return JSON.parse(item || '{}')
-  } catch {
-    return initialData?.subcategories || {}
-  }
+/*  The public product page resolves a product by its SKU — /product?sku=…
+    — so a product without one, or sharing one with another product, is
+    either unreachable or reachable as the wrong item. Both are silent
+    failures on the live site, which is why the SKU is generated rather
+    than left to be typed, and validated rather than trusted. */
+
+const PREFIX = {
+  funeral: 'FUN', lighting: 'LIT', kitchenware: 'KIT',
+  decor: 'DEC', accessories: 'ACC', furniture: 'FUR',
 }
 
-function writeSubcategories(data) {
-  localStorage.setItem(SUB_KEY, JSON.stringify(data))
-  window.dispatchEvent(new StorageEvent('storage', { key: SUB_KEY }))
-  triggerAutoSync()
+export function skuPrefix(categorySlug) {
+  return 'CC-' + (PREFIX[categorySlug] || (categorySlug || 'GEN').slice(0, 3).toUpperCase()) + '-'
 }
 
-function readRemovedSubcategories() {
-  try {
-    const item = localStorage.getItem(REMOVED_SUB_KEY)
-    if (item === null && initialData?.removedSubcategories) {
-      localStorage.setItem(REMOVED_SUB_KEY, JSON.stringify(initialData.removedSubcategories))
-      return initialData.removedSubcategories
-    }
-    return JSON.parse(item || '{}')
-  } catch {
-    return initialData?.removedSubcategories || {}
-  }
+export function nextSku(categorySlug) {
+  const prefix = skuPrefix(categorySlug)
+  const highest = read()
+    .filter(p => typeof p.sku === 'string' && p.sku.startsWith(prefix))
+    .map(p => parseInt(p.sku.slice(prefix.length), 10))
+    .filter(n => Number.isFinite(n))
+    .reduce((a, b) => Math.max(a, b), 0)
+  return prefix + String(highest + 1).padStart(3, '0')
 }
 
-function writeRemovedSubcategories(data) {
-  localStorage.setItem(REMOVED_SUB_KEY, JSON.stringify(data))
-  window.dispatchEvent(new StorageEvent('storage', { key: REMOVED_SUB_KEY }))
-  triggerAutoSync()
+export function isSkuTaken(sku, exceptId) {
+  const clean = (sku || '').trim().toLowerCase()
+  if (!clean) return false
+  return read().some(p => p.id !== exceptId && (p.sku || '').trim().toLowerCase() === clean)
+}
+
+/* ── subcategories ─────────────────────────────────────────────── */
+
+function commitSubs(map, removed, message) {
+  if (map) writeJSON(SUB_KEY, map)
+  if (removed) writeJSON(REMOVED_SUB_KEY, removed)
+  markDirty(true)
+  announce()
+  syncToGitHub(read(), readSubcategories(), readRemovedSubcategories(), message)
 }
 
 export function getSubcategories(categorySlug) {
   const defaults = RANGES[categorySlug]?.subcategories || []
-  const customMap = readSubcategories()
-  const customList = customMap[categorySlug] || []
-  const removedMap = readRemovedSubcategories()
-  const removedList = removedMap[categorySlug] || []
+  const custom = readSubcategories()[categorySlug] || []
+  const removed = readRemovedSubcategories()[categorySlug] || []
 
   const combined = [...defaults]
-  for (const item of customList) {
-    if (!combined.includes(item)) {
-      combined.push(item)
-    }
-  }
-  return combined.filter(item => !removedList.includes(item))
+  for (const item of custom) if (!combined.includes(item)) combined.push(item)
+  return combined.filter(item => !removed.includes(item))
 }
 
-export function getCustomSubcategoriesOnly(categorySlug) {
-  const customMap = readSubcategories()
-  return customMap[categorySlug] || []
+export function isCustomSubcategory(categorySlug, name) {
+  return (readSubcategories()[categorySlug] || []).includes(name)
 }
 
 export function addSubcategory(categorySlug, name) {
-  const cleanName = (name || '').trim()
-  if (!cleanName || !categorySlug) return false
+  const clean = (name || '').trim()
+  if (!clean || !categorySlug) return false
+  if (getSubcategories(categorySlug).includes(clean)) return false
 
-  // Un-remove if it was previously removed
-  const removedMap = readRemovedSubcategories()
-  if (removedMap[categorySlug] && removedMap[categorySlug].includes(cleanName)) {
-    removedMap[categorySlug] = removedMap[categorySlug].filter(s => s !== cleanName)
-    writeRemovedSubcategories(removedMap)
+  const removed = readRemovedSubcategories()
+  if (removed[categorySlug]?.includes(clean)) {
+    removed[categorySlug] = removed[categorySlug].filter(s => s !== clean)
   }
 
   const map = readSubcategories()
   const list = map[categorySlug] || []
-  if (!list.includes(cleanName)) {
-    map[categorySlug] = [...list, cleanName]
-    writeSubcategories(map)
-  }
+  if (!list.includes(clean)) map[categorySlug] = [...list, clean]
+
+  commitSubs(map, removed, 'Add subcategory: ' + clean)
   return true
 }
 
 export function removeSubcategory(categorySlug, name) {
-  const cleanName = (name || '').trim()
-  if (!cleanName || !categorySlug) return
+  const clean = (name || '').trim()
+  if (!clean || !categorySlug) return
 
-  // Remove from custom list
-  const customMap = readSubcategories()
-  if (customMap[categorySlug]) {
-    customMap[categorySlug] = customMap[categorySlug].filter(s => s !== cleanName)
-    writeSubcategories(customMap)
-  }
+  const map = readSubcategories()
+  if (map[categorySlug]) map[categorySlug] = map[categorySlug].filter(s => s !== clean)
 
-  // Add to removed list
-  const removedMap = readRemovedSubcategories()
-  const list = removedMap[categorySlug] || []
-  if (!list.includes(cleanName)) {
-    removedMap[categorySlug] = [...list, cleanName]
-    writeRemovedSubcategories(removedMap)
-  }
+  const removed = readRemovedSubcategories()
+  const list = removed[categorySlug] || []
+  if (!list.includes(clean)) removed[categorySlug] = [...list, clean]
+
+  commitSubs(map, removed, 'Remove subcategory: ' + clean)
 }
+
+/*  How many products a subcategory removal would orphan. The operator
+    should not discover this after the fact. */
+export function countProductsInSubcategory(categorySlug, name) {
+  return read().filter(p => p.category === categorySlug && p.subcategory === name).length
+}
+
+/* ── publishing ────────────────────────────────────────────────── */
+
+export async function publishToGitHub(message) {
+  const ok = await syncNow(
+    read(), readSubcategories(), readRemovedSubcategories(),
+    message || 'Publish catalogue from Admin Panel',
+  )
+  if (ok) {
+    markDirty(false)
+    announce()
+  }
+  return ok
+}
+
+/* ── subscription ──────────────────────────────────────────────── */
 
 export function subscribe(fn) {
-  const handler = (e) => {
+  const handler = () => fn(read())
+  const storageHandler = (e) => {
     if (!e.key || e.key === KEY || e.key === SUB_KEY || e.key === REMOVED_SUB_KEY) fn(read())
   }
-  window.addEventListener('storage', handler)
-  return () => window.removeEventListener('storage', handler)
+  window.addEventListener(EVENT, handler)
+  window.addEventListener('storage', storageHandler)
+  return () => {
+    window.removeEventListener(EVENT, handler)
+    window.removeEventListener('storage', storageHandler)
+  }
 }
+
+export { ORDER }
