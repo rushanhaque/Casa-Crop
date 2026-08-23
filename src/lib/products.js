@@ -12,6 +12,28 @@ const DIRTY_KEY = 'casa-and-crop:unpublished'
 
 const EVENT = 'casa-and-crop:data'
 
+/*  Only the admin panel keeps a working copy in localStorage.
+
+    Every other page reads the published catalogue directly, and never
+    localStorage. That split matters: localStorage carries an
+    "unpublished edits" flag, and any device that ever opened the admin
+    panel and touched something would otherwise be frozen on that
+    device's stale copy FOREVER, because the flag exists precisely to
+    stop incoming data overwriting local work. A visitor's phone has no
+    local work to protect, so it should simply show what is published.
+
+    Splitting on the path rather than forcing an overwrite is deliberate
+    — the admin's own browser visits the public pages too, and a public
+    page that overwrote localStorage would destroy unpublished work from
+    the other tab. */
+const IS_ADMIN =
+  typeof location !== 'undefined' && /^\/admin(\/|$|\.html)/.test(location.pathname)
+
+/*  The published catalogue as this page currently understands it:
+    the bundled snapshot at first, replaced by the live file once the
+    fetch below lands. */
+let live = initialData
+
 /* ── storage plumbing ──────────────────────────────────────────── */
 
 function readJSON(key, fallback) {
@@ -69,9 +91,14 @@ function applyPublished(snapshot) {
   return true
 }
 
-/*  The snapshot compiled into this bundle. Correct at build time, and
-    only as fresh as the bundle the browser happens to be holding. */
-applyPublished(initialData)
+/*  Seed the admin's working copy from the snapshot compiled into this
+    bundle — correct at build time, and only as fresh as the bundle the
+    browser happens to be holding, which is why the fetch below follows.
+
+    Admin only: a public page has no working copy, and writing one from
+    a public page would risk clobbering unpublished edits made in an
+    admin tab on the same browser. */
+if (IS_ADMIN) applyPublished(initialData)
 
 /*  The snapshot as it stands RIGHT NOW.
 
@@ -96,12 +123,23 @@ export async function refreshFromPublished() {
     if (!res.headers.get('content-type')?.includes('json')) return false
     const snapshot = await res.json()
     if (!Array.isArray(snapshot?.products)) return false
-    if (!applyPublished(snapshot)) return false
+
+    /*  Public pages: the live snapshot IS the source of truth, so it is
+        taken unconditionally. No guard applies, because there is
+        nothing local here that could be lost. */
+    const changed = (snapshot.updatedAt || '') !== (live?.updatedAt || '')
+    live = snapshot
+
+    /*  Admin: seed the working copy too, under the guard that protects
+        edits which have not been published yet. */
+    const seeded = IS_ADMIN ? applyPublished(snapshot) : false
+
+    if (!changed && !seeded) return false
     announce()
     return true
   } catch {
     /*  Offline, or the host has not deployed the file yet. The bundled
-        copy already seeded localStorage, so there is nothing to do. */
+        snapshot is already in `live`, so the page still renders. */
     return false
   }
 }
@@ -160,14 +198,17 @@ function uid() {
 /* ── reads ─────────────────────────────────────────────────────── */
 
 function read() {
+  if (!IS_ADMIN) return live?.products ?? []
   return readJSON(KEY, []) ?? initialData?.products ?? []
 }
 
 function readSubcategories() {
+  if (!IS_ADMIN) return live?.subcategories ?? {}
   return readJSON(SUB_KEY, {}) ?? initialData?.subcategories ?? {}
 }
 
 function readRemovedSubcategories() {
+  if (!IS_ADMIN) return live?.removedSubcategories ?? {}
   return readJSON(REMOVED_SUB_KEY, {}) ?? initialData?.removedSubcategories ?? {}
 }
 
