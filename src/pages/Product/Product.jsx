@@ -6,7 +6,7 @@ import Progress from '../../components/Progress/Progress'
 import { addItem } from '../../lib/cart'
 import { useReveal } from '../../lib/useReveal'
 import { RANGES, ORDER } from '../../lib/data'
-import { getProducts } from '../../lib/products'
+import { getProducts, subscribe } from '../../lib/products'
 import Plate from '../../components/Plate/Plate'
 import s from './Product.module.css'
 
@@ -20,7 +20,14 @@ export default function Product() {
   const baseRange = known ? RANGES[slug] : RANGES[ORDER[0]]
   const activeSlug = known ? slug : ORDER[0]
 
-  const customProduct = getProducts().find(p => p.sku === sku)
+  /*  Held in state and subscribed, because the catalogue is re-fetched
+      from the published file just after mount. A plain synchronous read
+      would render "not found" for any product published since this
+      browser last downloaded the bundle, and never correct itself. */
+  const [catalogue, setCatalogue] = useState(getProducts)
+  useEffect(() => subscribe(setCatalogue), [])
+
+  const customProduct = catalogue.find(p => p.sku === sku)
 
   const range = customProduct ? {
     ...baseRange,

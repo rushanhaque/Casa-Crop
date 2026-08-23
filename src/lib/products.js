@@ -42,10 +42,10 @@ function writeJSON(key, value) {
     the old code seeded localStorage exactly once and never looked again.
 
     Runs on module load, before any read can observe stale state. */
-function reconcileWithPublished() {
-  if (typeof localStorage === 'undefined') return
+function applyPublished(snapshot) {
+  if (typeof localStorage === 'undefined') return false
 
-  const published = initialData?.updatedAt || ''
+  const published = snapshot?.updatedAt || ''
   let seeded = ''
   let dirty = false
   let firstRun = true
@@ -54,35 +54,87 @@ function reconcileWithPublished() {
     dirty = localStorage.getItem(DIRTY_KEY) === 'true'
     firstRun = localStorage.getItem(KEY) === null
   } catch {
-    return
+    return false
   }
 
-  if (!firstRun && (dirty || published <= seeded)) return
+  if (!firstRun && (dirty || published <= seeded)) return false
 
-  writeJSON(KEY, initialData?.products || [])
-  writeJSON(SUB_KEY, initialData?.subcategories || {})
-  writeJSON(REMOVED_SUB_KEY, initialData?.removedSubcategories || {})
+  writeJSON(KEY, snapshot?.products || [])
+  writeJSON(SUB_KEY, snapshot?.subcategories || {})
+  writeJSON(REMOVED_SUB_KEY, snapshot?.removedSubcategories || {})
   try {
     localStorage.setItem(STAMP_KEY, published)
     localStorage.setItem(DIRTY_KEY, 'false')
   } catch { /* quota */ }
+  return true
 }
 
-reconcileWithPublished()
+/*  The snapshot compiled into this bundle. Correct at build time, and
+    only as fresh as the bundle the browser happens to be holding. */
+applyPublished(initialData)
+
+/*  The snapshot as it stands RIGHT NOW.
+
+    The bundled copy above is not enough on its own. A publish commits
+    the catalogue, the host rebuilds, and the new JSON is baked into a
+    freshly hashed bundle — but a browser that already has the old
+    hashed bundle cached will not fetch it, so the device keeps showing
+    the catalogue as it was the day it first loaded the site. That is
+    why products added on one device never appeared on another.
+
+    /products.json is emitted under a name that never changes and
+    served must-revalidate, so this is the one request that always
+    reflects the last publish. It runs through exactly the same guard
+    as the bundled copy — an admin's unpublished edits are never
+    overwritten — and announces only when something actually changed,
+    so a no-op refresh does not re-render the page. */
+export async function refreshFromPublished() {
+  if (typeof fetch === 'undefined') return false
+  try {
+    const res = await fetch('/products.json', { cache: 'no-store' })
+    if (!res.ok) return false
+    if (!res.headers.get('content-type')?.includes('json')) return false
+    const snapshot = await res.json()
+    if (!Array.isArray(snapshot?.products)) return false
+    if (!applyPublished(snapshot)) return false
+    announce()
+    return true
+  } catch {
+    /*  Offline, or the host has not deployed the file yet. The bundled
+        copy already seeded localStorage, so there is nothing to do. */
+    return false
+  }
+}
+
+refreshFromPublished()
+
+/*  A device left open on the range page for a day should not still be
+    showing yesterday's catalogue. Re-checking when the tab is brought
+    back to the foreground costs one conditional request and is the
+    moment a visitor is most likely to be looking. */
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshFromPublished()
+  })
+}
 
 /*  Throw away this browser's working copy and take the published file as
     it stands. reconcileWithPublished() deliberately will not do this
     while there are unpublished edits — that guard is what stops a deploy
     eating someone's work — so there has to be a deliberate way to ask
     for it when the local copy is the thing that is wrong. */
-export function resetToPublished() {
-  writeJSON(KEY, initialData?.products || [])
-  writeJSON(SUB_KEY, initialData?.subcategories || {})
-  writeJSON(REMOVED_SUB_KEY, initialData?.removedSubcategories || {})
+export async function resetToPublished() {
+  /*  Clear the guard first: applyPublished refuses to overwrite a dirty
+      working copy, and discarding that copy is the entire point here. */
   try {
-    localStorage.setItem(STAMP_KEY, initialData?.updatedAt || '')
     localStorage.setItem(DIRTY_KEY, 'false')
+    localStorage.setItem(STAMP_KEY, '')
   } catch { /* quota */ }
+
+  /*  Prefer the live file over the bundled one — "discard local
+      changes" should land on the catalogue as it stands now, not as it
+      stood when this bundle was built. */
+  if (!(await refreshFromPublished())) applyPublished(initialData)
   announce()
 }
 
@@ -253,6 +305,17 @@ export async function publishToGitHub(message) {
   )
   if (ok) {
     markDirty(false)
+    /*  Advance the stamp to now.
+
+        Between a publish and the host finishing its rebuild, the
+        deployed /products.json is still the PREVIOUS catalogue. Without
+        this, the refresh would see a file newer than the stamp this
+        browser was seeded with and overwrite the very products that
+        were just published — they would vanish from the admin panel
+        until the deploy landed. The endpoint stamps its own write with
+        the server clock, so a later genuine publish still reads as
+        newer than this and wins. */
+    try { localStorage.setItem(STAMP_KEY, new Date().toISOString()) } catch { /* quota */ }
     announce()
   }
   return ok

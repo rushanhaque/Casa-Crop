@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import s from './Nav.module.css'
-import { getProducts } from '../../lib/products'
+import { getProducts, subscribe } from '../../lib/products'
 
 const LINKS = [
   { label: 'Home', href: '/' },
@@ -42,8 +42,13 @@ export default function Nav({ current }) {
   const [allProducts, setAllProducts] = useState([])
   const [searchResults, setSearchResults] = useState([])
 
+  /*  Subscribed rather than read once: the catalogue is re-fetched from
+      the published file after mount, so a search built from a single
+      synchronous read would miss everything published since this
+      browser last downloaded the bundle. */
   useEffect(() => {
     setAllProducts(getProducts())
+    return subscribe(setAllProducts)
   }, [])
 
   useEffect(() => {

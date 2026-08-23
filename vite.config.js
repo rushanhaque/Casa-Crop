@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+
+const CATALOGUE = resolve(import.meta.dirname, 'src/data/products.json')
 
 export default defineConfig({
   plugins: [
@@ -13,6 +16,38 @@ export default defineConfig({
             req.url = '/admin/index.html'
           }
           next()
+        })
+      },
+    },
+
+    /*  The catalogue, published at ONE stable unhashed URL.
+
+        The JSON is also imported by the bundle, but a bundled copy is
+        only as fresh as the last build the visitor's browser actually
+        downloaded — and the browser holds the hashed bundle for a year.
+        So a publish would reach a second device only after a rebuild
+        AND a cache miss on the entry HTML, which is why devices sat on
+        stale catalogues indefinitely.
+
+        Emitting it separately gives the client something it can re-read
+        at any time, under a name that never changes. */
+    {
+      name: 'catalogue-endpoint',
+      configureServer(server) {
+        /*  Dev has no build output, so it is served from source — and
+            read per request, so editing the file shows up on reload. */
+        server.middlewares.use((req, res, next) => {
+          if (req.url?.split('?')[0] !== '/products.json') return next()
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Cache-Control', 'no-store')
+          res.end(readFileSync(CATALOGUE, 'utf-8'))
+        })
+      },
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'products.json',
+          source: readFileSync(CATALOGUE, 'utf-8'),
         })
       },
     },
