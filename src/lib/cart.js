@@ -123,7 +123,11 @@ if (typeof window !== 'undefined') {
    has to survive being pasted into WhatsApp, a mail client, and
    whatever the buyer's procurement system is. */
 
-export const WHATSAPP = '915912458890'
+/*  The enquiry desk's WhatsApp number, and the single source of truth
+    for every WhatsApp redirect on the site — the cart, and anything
+    added later. wa.me takes bare digits: country code, no +, no spaces.
+    Matches the tel: number in the footer and on the contact page. */
+export const WHATSAPP = '917579239454'
 export const EMAIL = 'connect@casaandcrop.com'
 
 export function composeEnquiry(list = items) {
