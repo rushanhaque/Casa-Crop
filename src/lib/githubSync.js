@@ -204,7 +204,6 @@ async function run(payload) {
     token is corrected. */
 export function syncNow(products, subcategories, removedSubcategories, message) {
   const payload = buildPayload(products, subcategories, removedSubcategories, message)
-  clearTimeout(timer)
   if (inFlight) { queued = payload; return Promise.resolve(false) }
   return run(payload)
 }

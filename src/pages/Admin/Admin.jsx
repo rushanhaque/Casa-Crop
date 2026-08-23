@@ -410,10 +410,19 @@ export default function Admin() {
 
   /* ── publishing ──────────────────────────────────────────────── */
 
+  /*  Wrapped, because a throw anywhere in the publish path used to kill
+      the click handler outright: no request, no status change, no toast
+      — the button simply did nothing, which is the one failure mode an
+      operator cannot diagnose or work around. Whatever happens now, it
+      is reported. */
   const onPublish = async () => {
-    const ok = await publishToGitHub()
-    if (ok) toast('Published to GitHub. The live site rebuilds in a minute or two.')
-    else toast((SYNC[sync.status] || SYNC.error).hint, 'bad')
+    try {
+      const ok = await publishToGitHub()
+      if (ok) toast('Published to GitHub. The live site rebuilds in a minute or two.')
+      else toast((SYNC[sync.status] || SYNC.error).hint, 'bad')
+    } catch (err) {
+      toast(`Publish failed: ${err?.message || err}`, 'bad')
+    }
   }
 
   const saveToken = () => {
