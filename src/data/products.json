@@ -38,9 +38,22 @@
       "id": "mt8ho9qtk4co",
       "addedAt": 1787651713109,
       "updatedAt": 1787651713109
+    },
+    {
+      "name": "jsjsjs",
+      "sku": "CC-DEC-001",
+      "category": "decor",
+      "subcategory": "Photo Frames",
+      "alloy": "",
+      "finish": "",
+      "photo": "/product-photos/38795b2309d63b05c84d.jpg",
+      "bestSeller": false,
+      "id": "mt8jkbehu7nw",
+      "addedAt": 1787654887865,
+      "updatedAt": 1787654887865
     }
   ],
   "subcategories": {},
   "removedSubcategories": {},
-  "updatedAt": "2026-08-25T10:47:49.938Z"
+  "updatedAt": "2026-08-25T10:48:30.353Z"
 }
