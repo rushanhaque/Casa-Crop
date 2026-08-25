@@ -1245,6 +1245,26 @@
   color: var(--c-ink-muted);
 }
 
+/*  A notice that offers a way out carries the control inside itself,
+    rather than describing an action the operator then has to go and
+    find somewhere else in the panel. */
+.noticeBtn {
+  margin-top: 0.55rem;
+  padding: 0.32rem 0.66rem;
+  font: inherit;
+  font-size: 0.75rem;
+  color: inherit;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.noticeBtn:hover {
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
 .confirmBody {
   margin: 0 0 0.9rem;
   font-size: 0.875rem;

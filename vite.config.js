@@ -5,6 +5,21 @@ import { resolve } from 'node:path'
 
 const CATALOGUE = resolve(import.meta.dirname, 'src/data/products.json')
 
+/*  One identifier per build, handed to the client two ways: compiled
+    into the bundle as __BUILD_ID__, and served at the fixed URL
+    /version.json. A page compares the two and knows whether the code it
+    is running is the code the site is currently serving.
+
+    This is the answer to a device that is not stale in its DATA — the
+    catalogue endpoint keeps that current on its own — but stale in its
+    CODE, holding a year-cached hashed bundle from a deploy long gone.
+    Such a page looks and behaves like an older version of the site no
+    matter how fresh the data it fetches, which is exactly what "every
+    browser shows a different version" describes. */
+const BUILD_ID = process.env.VERCEL_GIT_COMMIT_SHA
+  || process.env.BUILD_ID
+  || `${Date.now().toString(36)}`
+
 export default defineConfig({
   plugins: [
     react(),
@@ -20,24 +35,51 @@ export default defineConfig({
       },
     },
 
-    /*  The catalogue, published at ONE stable unhashed URL.
+    /*  The build stamp, at a URL that never changes and is never
+        cached, so a page can always ask what the current build is. */
+    {
+      name: 'build-version-endpoint',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url?.split('?')[0] !== '/version.json') return next()
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Cache-Control', 'no-store')
+          res.end(JSON.stringify({ buildId: BUILD_ID, builtAt: new Date().toISOString() }))
+        })
+      },
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'version.json',
+          source: JSON.stringify({ buildId: BUILD_ID, builtAt: new Date().toISOString() }, null, 2),
+        })
+      },
+    },
 
-        The JSON is also imported by the bundle, but a bundled copy is
-        only as fresh as the last build the visitor's browser actually
-        downloaded — and the browser holds the hashed bundle for a year.
-        So a publish would reach a second device only after a rebuild
-        AND a cache miss on the entry HTML, which is why devices sat on
-        stale catalogues indefinitely.
-
-        Emitting it separately gives the client something it can re-read
-        at any time, under a name that never changes. */
+    /*  The catalogue as it stood at BUILD time, at one stable unhashed
+        URL. /api/catalogue outranks it — that one reads the repository
+        per request and so does not wait on a deploy — but this file is
+        the fallback for when the function cannot be reached, and is
+        still far better than the copy compiled into a hashed bundle the
+        browser may hold for a year. */
     {
       name: 'catalogue-endpoint',
       configureServer(server) {
-        /*  Dev has no build output, so it is served from source — and
-            read per request, so editing the file shows up on reload. */
+        /*  Dev has no build output and no serverless runtime, so both
+            catalogue routes are answered from the source file, read per
+            request so an edit shows up on reload.
+
+            /api/catalogue is answered here as well as /products.json.
+            Without it the dev server hands back the SOURCE of the
+            serverless function — Vite resolves the extensionless path
+            to api/catalogue.js and serves it as a module — which the
+            client correctly rejects on content type, but only after
+            paying for the request on every refresh. Answering it
+            properly also means dev exercises the same primary route
+            production does, rather than only ever testing the fallback. */
         server.middlewares.use((req, res, next) => {
-          if (req.url?.split('?')[0] !== '/products.json') return next()
+          const path = req.url?.split('?')[0]
+          if (path !== '/products.json' && path !== '/api/catalogue') return next()
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Cache-Control', 'no-store')
           res.end(readFileSync(CATALOGUE, 'utf-8'))
@@ -52,6 +94,10 @@ export default defineConfig({
       },
     },
   ],
+
+  define: {
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
+  },
 
   server: {
     port: Number(process.env.PORT) || 5173,

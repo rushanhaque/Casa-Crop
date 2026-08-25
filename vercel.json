@@ -2,6 +2,37 @@
   "cleanUrls": true,
   "headers": [
     {
+      "//": "Hashed filenames — the content of any given URL here can never change, so holding it forever is both safe and the reason a repeat visit paints instantly. Freshness for these is handled by the filename, not by revalidation.",
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "//": "Photo filenames are the hash of their own contents, so a given URL can never mean a different image — immutable is literally true, and replacing a product's photo can never leave a device showing the old one.",
+      "source": "/product-photos/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "//": "The build stamp. Every running page compares this against the build it was served from, so a cached copy of it would defeat the entire check.",
+      "source": "/version.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "//": "The build-time catalogue, used when /api/catalogue cannot be reached. Revalidated on every request so it is never served from a browser's disk cache after a deploy.",
       "source": "/products.json",
       "headers": [
         {
@@ -9,6 +40,37 @@
           "value": "public, max-age=0, s-maxage=0, must-revalidate"
         }
       ]
+    },
+    {
+      "//": "A write. Nothing about it is cacheable, and a cached 200 here would silently swallow a publish.",
+      "source": "/api/publish",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "//": "The admin panel itself is never served from a disk cache — the operator reloading after a deploy must get the new panel, not the one their browser kept.",
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "//": "Only consulted when nothing matches on disk. A photo committed by the panel is served statically the moment a build includes it; until then this hands the request to a function that reads it out of the repository, so a freshly published product never shows a broken image while the build runs.",
+      "source": "/product-photos/:name",
+      "destination": "/api/photo?name=:name"
     }
   ]
 }

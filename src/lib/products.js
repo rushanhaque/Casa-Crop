@@ -1,5 +1,6 @@
 import { RANGES, ORDER } from './data'
 import { syncNow } from './githubSync'
+import { stageInlinePhotos } from './photos'
 import initialData from '../data/products.json'
 
 const KEY = 'casa-and-crop:products'
@@ -34,6 +35,21 @@ const IS_ADMIN =
     fetch below lands. */
 let live = initialData
 
+/*  Where the snapshot in `live` came from. The live endpoint outranks
+    the static build artifact, which outranks the copy compiled into
+    this bundle — so a momentary failure of the first cannot demote the
+    page back to a catalogue that is a deploy behind. */
+let liveSource = 'bundle' // 'bundle' | 'static' | 'endpoint'
+
+/*  The catalogue read live from the repository, so a publish reaches
+    every device without waiting for — or depending on — a rebuild.
+    /products.json remains as the fallback for when that endpoint is
+    unreachable, and is only as fresh as the last successful deploy. */
+const LIVE_URL = '/api/catalogue'
+const STATIC_URL = '/products.json'
+
+export function getLiveStamp() { return live?.updatedAt || '' }
+
 /* ── storage plumbing ──────────────────────────────────────────── */
 
 function readJSON(key, fallback) {
@@ -47,9 +63,35 @@ function readJSON(key, fallback) {
   }
 }
 
+/*  Returns whether the write actually happened.
+
+    This used to swallow the exception silently, which produced the
+    worst bug in the panel: a browser whose localStorage was full would
+    accept a new product, show it in the grid, report "saved" — and lose
+    it on the next reload, because it was never written. Photos are
+    stored inline as data URIs, so a catalogue of a few dozen products
+    crosses the ~5MB quota easily, and every operator hits this
+    eventually. A failure has to be loud. */
 function writeJSON(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* quota */ }
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+    storageError = null
+    return true
+  } catch (err) {
+    storageError =
+      err?.name === 'QuotaExceededError' || /quota/i.test(String(err?.message || err))
+        ? 'This browser has run out of local storage — the catalogue photos have filled it. ' +
+          'Publish now to save your work, then replace the heaviest photos with smaller ones.'
+        : `This browser refused to save locally: ${err?.message || err}`
+    return false
+  }
 }
+
+let storageError = null
+
+/*  The last local-write failure, or null. The admin panel reads this
+    after every edit so a silent loss becomes a visible one. */
+export function getStorageError() { return storageError }
 
 /*  The published file is the source of truth; localStorage is a working
     copy of it. When a newer snapshot ships with the bundle — because
@@ -102,58 +144,146 @@ if (IS_ADMIN) applyPublished(initialData)
 
 /*  The snapshot as it stands RIGHT NOW.
 
-    The bundled copy above is not enough on its own. A publish commits
-    the catalogue, the host rebuilds, and the new JSON is baked into a
-    freshly hashed bundle — but a browser that already has the old
-    hashed bundle cached will not fetch it, so the device keeps showing
-    the catalogue as it was the day it first loaded the site. That is
-    why products added on one device never appeared on another.
+    The bundled copy above is not enough on its own, and neither is the
+    static /products.json beside it. Both are build artifacts: a publish
+    commits the catalogue, the host rebuilds, and only then do they
+    change. Everything between the publish and the end of that rebuild —
+    or all of time, if the build is failing or auto-deploy is off — every
+    device is served the previous catalogue while the panel says
+    "Published".
 
-    /products.json is emitted under a name that never changes and
-    served must-revalidate, so this is the one request that always
-    reflects the last publish. It runs through exactly the same guard
-    as the bundled copy — an admin's unpublished edits are never
-    overwritten — and announces only when something actually changed,
-    so a no-op refresh does not re-render the page. */
-export async function refreshFromPublished() {
+    /api/catalogue reads the file out of the repository per request, so
+    it reflects a publish within seconds and does not care whether a
+    build ever happens. The static file stays as the fallback for when
+    that endpoint is unreachable.
+
+    Ordering matters on failure: a static file that is a deploy behind
+    must never replace a snapshot already taken from the live endpoint,
+    or a transient blip would visibly roll the catalogue backwards. */
+async function fetchSnapshot(url, bust) {
+  const res = await fetch(bust ? `${url}${url.includes('?') ? '&' : '?'}fresh=${Date.now()}` : url, {
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) return null
+  if (!res.headers.get('content-type')?.includes('json')) return null
+  const snapshot = await res.json()
+  return Array.isArray(snapshot?.products) ? snapshot : null
+}
+
+let refreshing = null
+
+export function refreshFromPublished({ force = false } = {}) {
+  /*  One request at a time. The triggers below can fire together — a
+      tab restored from the back/forward cache is both visible and
+      focused in the same frame — and three identical fetches answer
+      three times, re-rendering the page for each. */
+  if (refreshing && !force) return refreshing
+  refreshing = doRefresh(force).finally(() => { refreshing = null })
+  return refreshing
+}
+
+async function doRefresh(force) {
   if (typeof fetch === 'undefined') return false
+
+  let snapshot = null
+  let source = null
+
   try {
-    const res = await fetch('/products.json', { cache: 'no-store' })
-    if (!res.ok) return false
-    if (!res.headers.get('content-type')?.includes('json')) return false
-    const snapshot = await res.json()
-    if (!Array.isArray(snapshot?.products)) return false
+    snapshot = await fetchSnapshot(LIVE_URL, force)
+    if (snapshot) source = 'endpoint'
+  } catch { /* fall through to the static copy */ }
 
-    /*  Public pages: the live snapshot IS the source of truth, so it is
-        taken unconditionally. No guard applies, because there is
-        nothing local here that could be lost. */
-    const changed = (snapshot.updatedAt || '') !== (live?.updatedAt || '')
-    live = snapshot
-
-    /*  Admin: seed the working copy too, under the guard that protects
-        edits which have not been published yet. */
-    const seeded = IS_ADMIN ? applyPublished(snapshot) : false
-
-    if (!changed && !seeded) return false
-    announce()
-    return true
-  } catch {
-    /*  Offline, or the host has not deployed the file yet. The bundled
-        snapshot is already in `live`, so the page still renders. */
-    return false
+  if (!snapshot) {
+    try {
+      snapshot = await fetchSnapshot(STATIC_URL, true)
+      if (snapshot) source = 'static'
+    } catch {
+      /*  Offline, or neither route is deployed yet. Whatever is in
+          `live` already — bundled at worst — still renders the page. */
+      return false
+    }
   }
+  if (!snapshot) return false
+
+  /*  A static answer may be older than what the live endpoint gave us
+      earlier in this page's life. Taking it would roll the catalogue
+      back, so it is only accepted when it is genuinely newer. An answer
+      from the live endpoint is authoritative and always taken — that is
+      what makes a rollback published from another device propagate. */
+  if (source === 'static' && liveSource === 'endpoint') {
+    if ((snapshot.updatedAt || '') <= (live?.updatedAt || '')) return false
+  }
+
+  const changed = (snapshot.updatedAt || '') !== (live?.updatedAt || '')
+  live = snapshot
+  liveSource = source
+
+  /*  Admin: seed the working copy too, under the guard that protects
+      edits which have not been published yet. */
+  const seeded = IS_ADMIN ? applyPublished(snapshot) : false
+
+  if (!changed && !seeded) return false
+  announce()
+  return true
 }
 
 refreshFromPublished()
 
-/*  A device left open on the range page for a day should not still be
-    showing yesterday's catalogue. Re-checking when the tab is brought
-    back to the foreground costs one conditional request and is the
-    moment a visitor is most likely to be looking. */
+/*  WHEN TO RE-CHECK.
+
+    A device should never be able to sit on a catalogue it has outgrown,
+    and there are more ways for that to happen than "the tab was
+    reloaded". Each listener below covers a hole that produced a
+    genuinely stuck device:
+
+    visibilitychange — the tab was in the background while a publish
+      happened. This is the common one: a phone with the range page open
+      in a background tab, picked up an hour later.
+
+    pageshow with persisted — restored from the back/forward cache. The
+      page is resurrected wholesale, module state and all; no script
+      re-runs and visibilitychange does not fire, so without this the
+      browser is showing a frozen snapshot of a page from days ago.
+      Pressing Back after visiting a product is enough to land here.
+
+    online — the device was offline when it loaded, so every fetch above
+      failed and it fell all the way back to the bundled snapshot. That
+      state has to end the moment the network returns.
+
+    the interval — a display left on one page for a day, never hidden,
+      never navigated. Sixty seconds of staleness is invisible to a
+      visitor; a day of it is the bug being reported. The request is
+      conditional and answers 304 with no body when nothing has changed,
+      and it is suspended while the tab is hidden.                     */
 if (typeof document !== 'undefined') {
-  document.addEventListener('visibilitychange', () => {
+  const recheck = () => {
     if (document.visibilityState === 'visible') refreshFromPublished()
+  }
+
+  document.addEventListener('visibilitychange', recheck)
+  window.addEventListener('focus', recheck)
+  window.addEventListener('online', () => refreshFromPublished({ force: true }))
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) refreshFromPublished({ force: true })
   })
+
+  const POLL_MS = 60_000
+  let timer = null
+  const startPolling = () => {
+    if (timer !== null) return
+    timer = setInterval(recheck, POLL_MS)
+  }
+  const stopPolling = () => {
+    if (timer === null) return
+    clearInterval(timer)
+    timer = null
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') startPolling()
+    else stopPolling()
+  })
+  if (document.visibilityState === 'visible') startPolling()
 }
 
 /*  Throw away this browser's working copy and take the published file as
@@ -172,7 +302,13 @@ export async function resetToPublished() {
   /*  Prefer the live file over the bundled one — "discard local
       changes" should land on the catalogue as it stands now, not as it
       stood when this bundle was built. */
-  if (!(await refreshFromPublished())) applyPublished(initialData)
+  if (!(await refreshFromPublished({ force: true }))) {
+    /*  Nothing on the wire answered, so the bundled snapshot is the
+        best copy that exists on this device. It is still an improvement
+        on the discarded working copy, which is by definition the thing
+        the operator just said was wrong. */
+    applyPublished(initialData)
+  }
   announce()
 }
 
@@ -182,6 +318,14 @@ function markDirty(dirty) {
 
 export function hasUnpublishedChanges() {
   try { return localStorage.getItem(DIRTY_KEY) === 'true' } catch { return false }
+}
+
+/*  The publish stamp this browser's working copy was last in agreement
+    with. Compared against the live stamp, it answers the question the
+    panel could not previously ask: has the catalogue moved on somewhere
+    else since the edits sitting in this browser were made? */
+export function getLocalBaseStamp() {
+  try { return localStorage.getItem(STAMP_KEY) || '' } catch { return '' }
 }
 
 function announce() {
@@ -339,27 +483,86 @@ export function countProductsInSubcategory(categorySlug, name) {
 
 /* ── publishing ────────────────────────────────────────────────── */
 
-export async function publishToGitHub(message) {
-  const ok = await syncNow(
-    read(), readSubcategories(), readRemovedSubcategories(),
-    message || 'Publish catalogue from Admin Panel',
-  )
-  if (ok) {
-    markDirty(false)
-    /*  Advance the stamp to now.
+/*  How long to keep asking the live endpoint whether it can see the
+    catalogue that was just written. GitHub is usually consistent within
+    a second or two; ten seconds of polling is generous and costs
+    nothing when the first attempt already succeeds. */
+const VERIFY_ATTEMPTS = 10
+const VERIFY_DELAY_MS = 1000
 
-        Between a publish and the host finishing its rebuild, the
-        deployed /products.json is still the PREVIOUS catalogue. Without
-        this, the refresh would see a file newer than the stamp this
-        browser was seeded with and overwrite the very products that
-        were just published — they would vanish from the admin panel
-        until the deploy landed. The endpoint stamps its own write with
-        the server clock, so a later genuine publish still reads as
-        newer than this and wins. */
-    try { localStorage.setItem(STAMP_KEY, new Date().toISOString()) } catch { /* quota */ }
-    announce()
+const wait = (ms) => new Promise(r => setTimeout(r, ms))
+
+/*  Publishing is not finished when GitHub accepts the write — it is
+    finished when the endpoint every other device reads from can see it.
+    Those are different moments, and the gap between them is exactly
+    where "I published it and my phone still shows the old one" lived.
+    Confirming it here means the panel's "Published" badge states
+    something that has been checked rather than assumed. */
+async function verifyPublished(expected) {
+  if (!expected) return false
+  for (let i = 0; i < VERIFY_ATTEMPTS; i++) {
+    try {
+      const snapshot = await fetchSnapshot(LIVE_URL, true)
+      if (snapshot && (snapshot.updatedAt || '') >= expected) {
+        live = snapshot
+        liveSource = 'endpoint'
+        announce()
+        return true
+      }
+    } catch { /* keep trying */ }
+    await wait(VERIFY_DELAY_MS)
   }
-  return ok
+  return false
+}
+
+export async function publishToGitHub(message, onPhotoProgress) {
+  /*  Photos still held inline are filed into the repository first, and
+      the catalogue is rewritten to point at them. Everything the
+      staging step produced is committed in the SAME commit as the
+      catalogue, so the site is never describing a product whose image
+      does not exist yet.
+
+      A photo that cannot be staged keeps its data URL and publishes
+      inline, which is the behaviour the panel had before photos became
+      files — worse, but never a lost photo. */
+  const { products: filed, photos } = await stageInlinePhotos(read(), onPhotoProgress)
+
+  const result = await syncNow(
+    filed, readSubcategories(), readRemovedSubcategories(),
+    message || 'Publish catalogue from Admin Panel',
+    photos,
+  )
+  if (!result?.ok) return false
+
+  /*  Only now is the local copy rewritten to use paths.
+
+      Staged blobs are loose until the commit references them, so a
+      catalogue pointing at those paths is a catalogue of broken images
+      until the publish succeeds. Writing this before knowing it landed
+      would turn a failed publish into permanently missing photos. */
+  if (photos.length) writeJSON(KEY, filed)
+
+  markDirty(false)
+
+  /*  Advance the stamp to the one the server wrote.
+
+      This browser's working copy and the published file now describe
+      the same catalogue, and the stamp is what says so. Taking the
+      SERVER's stamp rather than this browser's clock matters: a device
+      running a few minutes fast would otherwise write a stamp from the
+      future, and then reject every genuine publish made from anywhere
+      else until real time caught up with it. That is one device
+      silently frozen on its own copy of the catalogue — which is the
+      whole class of bug this is meant to end. */
+  const stamped = result.updatedAt || new Date().toISOString()
+  try { localStorage.setItem(STAMP_KEY, stamped) } catch { /* quota */ }
+  announce()
+
+  /*  Best-effort: an unverified publish is still a successful one, and
+      the endpoint will catch up on its own. The caller is told whether
+      it was seen so it can say so. */
+  const seen = await verifyPublished(result.updatedAt)
+  return { ok: true, verified: seen, updatedAt: stamped }
 }
 
 /* ── subscription ──────────────────────────────────────────────── */

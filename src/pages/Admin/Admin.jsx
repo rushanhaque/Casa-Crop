@@ -5,9 +5,11 @@ import {
   getSubcategories, isCustomSubcategory, addSubcategory, removeSubcategory,
   countProductsInSubcategory, publishToGitHub, hasUnpublishedChanges,
   nextSku, isSkuTaken, skuPrefix, resetToPublished,
+  refreshFromPublished, getLiveStamp, getLocalBaseStamp, getStorageError,
 } from '../../lib/products'
-import { subscribeSyncStatus, getStoredToken, setStoredToken } from '../../lib/githubSync'
+import { subscribeSyncStatus, getSyncState, getStoredToken, setStoredToken } from '../../lib/githubSync'
 import { compressImage, formatBytes } from '../../lib/image'
+import { isInlinePhoto } from '../../lib/photos'
 import s from './Admin.module.css'
 
 const AUTH_KEY = 'casa-and-crop:admin-authed'
@@ -40,6 +42,7 @@ const SYNC = {
   'token-needed':  { tone: 'warn',    label: 'Token needed',     hint: 'Add a GitHub token in Settings to publish.' },
   'token-invalid': { tone: 'bad',     label: 'Token rejected',   hint: 'GitHub refused the token. Update it in Settings.' },
   offline:         { tone: 'bad',     label: 'Offline',          hint: 'No connection to GitHub. Changes are saved locally.' },
+  'too-large':     { tone: 'bad',     label: 'Too large',        hint: 'The catalogue exceeds the 4.5MB publish limit. Replace the heaviest photos.' },
   error:           { tone: 'bad',     label: 'Publish failed',   hint: 'Something went wrong. Try Publish again.' },
 }
 
@@ -241,6 +244,15 @@ export default function Admin() {
   const [toasts, setToasts] = useState([])
   const [sync, setSync] = useState({ status: 'idle', time: null, detail: null })
   const [dirty, setDirty] = useState(hasUnpublishedChanges)
+  /*  The publish stamp on the catalogue the rest of the world is
+      reading. Held in state so the divergence banner below re-renders
+      when somebody publishes from another device. */
+  const [liveStamp, setLiveStamp] = useState(getLiveStamp)
+  /*  { done, total } while a publish is filing photos, null otherwise.
+      A publish carrying four photos makes four upload requests before
+      it commits anything, and without this the button simply sits
+      there looking broken for as long as that takes. */
+  const [photoProgress, setPhotoProgress] = useState(null)
 
   const fileRef = useRef(null)
   const searchRef = useRef(null)
@@ -254,7 +266,17 @@ export default function Admin() {
   useEffect(() => subscribe(list => {
     setProducts(list)
     setDirty(hasUnpublishedChanges())
+    setLiveStamp(getLiveStamp())
   }), [])
+
+  /*  Ask the live catalogue where it stands the moment the panel opens.
+
+      Without this the panel shows whatever this browser last wrote to
+      its own localStorage, with no way to tell whether that is the
+      catalogue the public site is serving or a copy that diverged from
+      it days ago on this one device. Divergence with nothing to show it
+      is what makes two browsers disagree about what the site contains. */
+  useEffect(() => { refreshFromPublished({ force: true }) }, [])
 
   useEffect(() => subscribeSyncStatus(next => {
     setSync(next)
@@ -316,16 +338,38 @@ export default function Admin() {
     return [...list].sort(by[sort] || by.newest)
   }, [products, category, query, sort])
 
-  /*  Every photo lives inside the JSON that gets committed, so the size
-      of the catalogue is an operational number, not trivia. */
-  const payloadBytes = useMemo(
-    () => products.reduce((n, p) => n + (p.photo ? p.photo.length * 0.75 : 0), 0),
+  /*  What a publish would still have to carry INSIDE the catalogue.
+
+      A filed photo contributes a short path and costs nothing here; only
+      photos not yet moved out to files count. So this reads as zero for
+      a catalogue that has been published since photos became files, and
+      it is the number that actually predicts a failed publish. */
+  const inlineBytes = useMemo(
+    () => products.reduce((n, p) => n + (isInlinePhoto(p.photo) ? p.photo.length * 0.75 : 0), 0),
+    [products],
+  )
+  const inlineCount = useMemo(
+    () => products.filter(p => isInlinePhoto(p.photo)).length,
     [products],
   )
   const missingSku = useMemo(() => products.filter(p => !(p.sku || '').trim()).length, [products])
 
+  /*  This browser is holding edits that were never published, AND the
+      live catalogue has moved on since those edits started. Publishing
+      from here would overwrite whatever was done elsewhere; discarding
+      would lose what was done here. Neither is a choice the panel should
+      make silently on the operator's behalf — which is precisely what it
+      used to do, by quietly keeping the local copy forever. */
+  const diverged = dirty && !!liveStamp && liveStamp > getLocalBaseStamp()
+
   const subs = getSubcategories(form.category)
-  const syncMeta = SYNC[sync.status] || SYNC.idle
+  const syncMeta = photoProgress
+    ? {
+        tone: 'busy',
+        label: `Uploading ${photoProgress.done + 1}/${photoProgress.total}`,
+        hint: 'Moving photos out of the catalogue and into their own files.',
+      }
+    : SYNC[sync.status] || SYNC.idle
 
   /* ── product form ────────────────────────────────────────────── */
 
@@ -341,7 +385,10 @@ export default function Admin() {
   const openEdit = (p) => {
     setForm({ ...EMPTY, ...p })
     setSkuTouched(true)
-    setPhotoInfo(p.photo ? { bytes: Math.round(p.photo.length * 0.75) } : null)
+    /*  Only an inline photo has a size worth quoting; a filed one is a
+        short path, and reporting "38 bytes" for a product photo reads
+        as a bug rather than as information. */
+    setPhotoInfo(isInlinePhoto(p.photo) ? { bytes: Math.round(p.photo.length * 0.75) } : null)
     setFormError({})
     setEditing(p.id)
   }
@@ -400,11 +447,19 @@ export default function Admin() {
     }
     if (editing === 'new') {
       addProduct(clean)
-      toast('Product added — press Publish to go live.')
     } else {
       updateProduct(editing, clean)
-      toast('Changes saved — press Publish to go live.')
     }
+
+    /*  Reported, not assumed. A full localStorage throws on write, and
+        the panel used to swallow it: the product appeared in the grid,
+        the toast said "saved", and it was gone on the next reload —
+        which reads as the panel randomly losing work. */
+    const failed = getStorageError()
+    if (failed) toast(failed, 'bad')
+    else if (editing === 'new') toast('Product added — press Publish to go live.')
+    else toast('Changes saved — press Publish to go live.')
+
     closeForm()
   }
 
@@ -417,13 +472,37 @@ export default function Admin() {
       is reported. */
   const onPublish = async () => {
     try {
-      const ok = await publishToGitHub()
-      if (ok) toast('Published to GitHub. The live site rebuilds in a minute or two.')
-      else toast((SYNC[sync.status] || SYNC.error).hint, 'bad')
+      const result = await publishToGitHub(undefined, (done, total) => {
+        setPhotoProgress(done < total ? { done, total } : null)
+      })
+      if (!result?.ok) {
+        /*  Read fresh rather than from the closure: `sync` here is the
+            state as it was when this handler was created, which is by
+            definition BEFORE the publish that just failed. Using it
+            reported the previous outcome — usually a cheerful "Ready" —
+            for a publish that had in fact just been rejected. */
+        const now = getSyncState()
+        toast(now.detail || (SYNC[now.status] || SYNC.error).hint, 'bad')
+        return
+      }
+      /*  The difference between these two messages is the difference
+          between a promise and a fact. `verified` means the panel went
+          back and read the live catalogue after writing it, and saw the
+          products that were just published — so it can say every device
+          is now serving them rather than that they should be soon. */
+      toast(result.verified
+        ? 'Published. Every device now reads this catalogue.'
+        : 'Published. It should reach every device within a minute.')
     } catch (err) {
       toast(`Publish failed: ${err?.message || err}`, 'bad')
+    } finally {
+      setPhotoProgress(null)
     }
   }
+
+  /*  Reuses the existing reset dialog rather than inventing a second
+      confirmation for the same destructive act. */
+  const onDiscardLocal = () => setConfirm({ kind: 'reset' })
 
   const saveToken = () => {
     setStoredToken(tokenInput)
@@ -506,7 +585,7 @@ export default function Admin() {
             className={s.btnPrimary}
             data-attention={dirty ? '' : undefined}
             onClick={onPublish}
-            disabled={sync.status === 'syncing'}
+            disabled={sync.status === 'syncing' || !!photoProgress}
             title="Write the catalogue to GitHub now"
           >
             <Icon name="up" />
@@ -559,9 +638,9 @@ export default function Admin() {
             </button>
 
             <dl className={s.stats}>
-              <div className={s.stat} data-warn={payloadBytes > PAYLOAD_WARN ? '' : undefined}>
-                <dt>Catalogue size</dt>
-                <dd>{formatBytes(payloadBytes)}</dd>
+              <div className={s.stat} data-warn={inlineBytes > PAYLOAD_WARN ? '' : undefined}>
+                <dt>Photos to upload</dt>
+                <dd>{inlineCount || '—'}</dd>
               </div>
               <div className={s.stat}>
                 <dt>Products</dt>
@@ -575,19 +654,44 @@ export default function Admin() {
               )}
             </dl>
 
-            {/*  Photos are base64-inlined into the one JSON file that a
-                 publish sends, and that request is capped at 4.5MB. The
-                 operator should see the ceiling coming rather than meet
-                 it as a failed publish. */}
-            {payloadBytes > PAYLOAD_WARN && (
+            {/*  The one state in which this panel and the live site
+                 genuinely disagree, made visible with both ways out
+                 attached. Every "my other device shows something else"
+                 report starts here. */}
+            {diverged && (
+              <div className={s.notice} data-tone="bad">
+                <Icon name="warn" />
+                <div>
+                  <p className={s.noticeTitle}>This browser has drifted</p>
+                  <p className={s.noticeBody}>
+                    The live catalogue was published elsewhere after the
+                    unpublished changes in this browser were made. Publish to
+                    make this browser&rsquo;s copy the live one, or discard it
+                    to take the live catalogue instead.
+                  </p>
+                  <button type="button" className={s.noticeBtn} onClick={onDiscardLocal}>
+                    Discard local changes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/*  Photos are moved out to files by the publish itself, so
+                 this only appears when a great many are waiting at once
+                 — a bulk import, or a run of publishes that could not
+                 reach the upload endpoint. Past the cap the publish is
+                 refused outright, and the operator should see it coming
+                 rather than meet it as a failure. */}
+            {inlineBytes > PAYLOAD_WARN && (
               <div className={s.notice} data-tone="warn">
                 <Icon name="warn" />
                 <div>
-                  <p className={s.noticeTitle}>Catalogue is getting large</p>
+                  <p className={s.noticeTitle}>A lot of photos are waiting</p>
                   <p className={s.noticeBody}>
-                    Publishing sends every photo in one request, which fails
-                    past about 4.5&nbsp;MB. Replace the heaviest photos with
-                    smaller crops, or move images out to files.
+                    {inlineCount} photo{inlineCount === 1 ? ' has' : 's have'} not
+                    been uploaded yet, and a publish that has to carry them all
+                    at once fails past about 4.5&nbsp;MB. Publish now to move
+                    them out to files, then carry on.
                   </p>
                 </div>
               </div>
@@ -783,7 +887,7 @@ export default function Admin() {
                 <p className={s.photoNote}>
                   {photoInfo
                     ? `${photoInfo.width ? `${photoInfo.width}×${photoInfo.height} · ` : ''}${formatBytes(photoInfo.bytes)}${photoInfo.from ? ` (from ${formatBytes(photoInfo.from)})` : ''}`
-                    : 'Resized to 1400px and compressed automatically — photos are stored inside the published catalogue file.'}
+                    : 'Resized and compressed automatically. Uploaded as its own file when you publish.'}
                 </p>
                 <div className={s.photoBtns}>
                   <button type="button" className={s.btnGhost} onClick={() => fileRef.current?.click()} disabled={photoBusy}>
@@ -1037,10 +1141,16 @@ export default function Admin() {
                     toast(`Deleted “${confirm.name || 'product'}”.`, 'warn')
                     if (editing === confirm.id) closeForm()
                   } else if (confirm.kind === 'reset') {
-                    resetToPublished()
-                    setDirty(false)
+                    /*  Awaited, so the stamps the drift banner reads are
+                        the ones that come back from the live catalogue
+                        rather than the ones being discarded — otherwise
+                        the banner stays up after the drift is resolved. */
+                    resetToPublished().then(() => {
+                      setDirty(false)
+                      setLiveStamp(getLiveStamp())
+                      toast('Local copy reset to the published catalogue.', 'warn')
+                    })
                     setSettingsOpen(false)
-                    toast('Local copy reset to the published catalogue.', 'warn')
                   } else {
                     removeSubcategory(confirm.slug, confirm.name)
                     toast(`Removed “${confirm.name}”.`, 'warn')

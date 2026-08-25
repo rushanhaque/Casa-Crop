@@ -36,6 +36,7 @@ const TOKEN_KEY = 'casa-and-crop:github-token'
       'token-needed'  no server token and no local token
       'token-invalid' the token we have was rejected
       'offline'       the network refused the request
+      'too-large'     the catalogue exceeds the one-request size cap
       'error'         anything else, with `detail` for the operator      */
 let state = { status: 'idle', time: null, detail: null }
 let listeners = []
@@ -69,11 +70,16 @@ export function setStoredToken(token) {
   } catch { /* private mode — the server route still works */ }
 }
 
-function buildPayload(products, subcategories, removedSubcategories, message) {
+function buildPayload(products, subcategories, removedSubcategories, message, photos) {
   return {
     products: products || [],
     subcategories: subcategories || {},
     removedSubcategories: removedSubcategories || {},
+    /*  Blobs already staged in the repository by /api/photo-blob, to be
+        committed alongside the catalogue in the same commit. Empty on
+        the browser-token route, which has no way to stage them and so
+        leaves photos inline exactly as it always did. */
+    photos: photos || [],
     message,
   }
 }
@@ -120,10 +126,27 @@ async function publishViaServer(payload) {
 
   if (res.ok && data.ok) {
     serverRoute = 'available'
-    return { outcome: 'ok' }
+    return { outcome: 'ok', updatedAt: data.updatedAt || null }
   }
   if (res.ok) return unavailable()
   if (res.status === 401 || res.status === 403) return { outcome: 'token-invalid' }
+
+  /*  Too large is a real answer from a working server, not a reason to
+      fall through to the browser route — which would send the same
+      oversized body to GitHub and fail again, slower. */
+  if (res.status === 413) {
+    serverRoute = 'available'
+    return { outcome: 'too-large', detail: data.message || 'The catalogue is too large to publish.' }
+  }
+
+  /*  The branch moved while this publish was being assembled — somebody
+      published from another device. Falling through to the browser
+      route would just overwrite their work, so it stops here and says
+      what happened. */
+  if (res.status === 409) {
+    serverRoute = 'available'
+    return { outcome: 'error', detail: data.message || 'The catalogue changed on GitHub. Reload, then publish again.' }
+  }
   return { outcome: 'error', detail: data.message || data.detail || `Server responded ${res.status}` }
 }
 
@@ -139,11 +162,12 @@ async function publishViaBrowser(payload) {
     'Content-Type': 'application/json',
   }
 
+  const updatedAt = new Date().toISOString()
   const file = {
     products: payload.products,
     subcategories: payload.subcategories,
     removedSubcategories: payload.removedSubcategories,
-    updatedAt: new Date().toISOString(),
+    updatedAt,
   }
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(file, null, 2))))
 
@@ -164,7 +188,7 @@ async function publishViaBrowser(payload) {
       }),
     })
 
-    if (put.ok) return { outcome: 'ok' }
+    if (put.ok) return { outcome: 'ok', updatedAt }
     if (put.status === 401 || put.status === 403) return { outcome: 'token-invalid' }
     if (put.status === 409 || put.status === 422) {
       return { outcome: 'error', detail: 'The file changed on GitHub since this page loaded. Reload, then publish again.' }
@@ -188,6 +212,7 @@ async function run(payload) {
   else if (result.outcome === 'token-needed') emit('token-needed')
   else if (result.outcome === 'token-invalid') emit('token-invalid')
   else if (result.outcome === 'offline') emit('offline')
+  else if (result.outcome === 'too-large') emit('too-large', { detail: result.detail || null })
   else emit('error', { detail: result.detail || null })
 
   /*  Anything that arrived while the request was in flight goes now, so
@@ -197,14 +222,17 @@ async function run(payload) {
     queued = null
     run(next)
   }
-  return result.outcome === 'ok'
+  /*  The publish stamp goes back to the caller, which needs it to tell
+      the difference between "the live file has not caught up yet" and
+      "the live file moved on because somebody else published". */
+  return result.outcome === 'ok' ? { ok: true, updatedAt: result.updatedAt || null } : { ok: false }
 }
 
 /*  Publish immediately — the Publish button, and the retry after a
     token is corrected. */
-export function syncNow(products, subcategories, removedSubcategories, message) {
-  const payload = buildPayload(products, subcategories, removedSubcategories, message)
-  if (inFlight) { queued = payload; return Promise.resolve(false) }
+export function syncNow(products, subcategories, removedSubcategories, message, photos) {
+  const payload = buildPayload(products, subcategories, removedSubcategories, message, photos)
+  if (inFlight) { queued = payload; return Promise.resolve({ ok: false }) }
   return run(payload)
 }
 
