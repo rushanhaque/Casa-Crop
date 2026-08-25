@@ -95,12 +95,12 @@ const EXHIBITS = [
 
 const getCover = (name) => {
   const map = {
-    'Funeral': 'Funeral.png',
-    'Lighting': 'Lighting.png',
-    'Kitchenware': 'KitchenWare.jpg',
-    'Décor': 'Decor.png',
-    'Accessories': 'Accessories.jpg',
-    'Furniture': 'Furniture.jpg'
+    'Funeral': 'Funeral.webp',
+    'Lighting': 'Lighting.webp',
+    'Kitchenware': 'KitchenWare.webp',
+    'Décor': 'Decor.webp',
+    'Accessories': 'Accessories.webp',
+    'Furniture': 'Furniture.webp'
   }
   return `/covers/${map[name]}`
 }

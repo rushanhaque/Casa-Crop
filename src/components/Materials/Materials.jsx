@@ -13,7 +13,7 @@ const MATERIALS = [
   { name: 'Wood', swatch: '#7A5637' },
   { name: 'Glass', swatch: '#A8B5B8' },
   { name: 'Ceramic', swatch: '#DDD5C6' },
-  { name: 'Paper Mache', swatch: '#C2A878', ext: 'jpeg' },
+  { name: 'Paper Mache', swatch: '#C2A878' },
 ]
 
 function Specimen({ m, i, isEcho = false }) {
@@ -22,7 +22,7 @@ function Specimen({ m, i, isEcho = false }) {
       className={`${s.alloy} ${isEcho ? s.echo : ''}`}
       style={{
         '--swatch': m.swatch,
-        '--mat-img': `url('/Materials/${m.name.replace(/\s+/g, '')}.${m.ext || 'jpg'}')`,
+        '--mat-img': `url('/Materials/${m.name.replace(/\s+/g, '')}.webp')`,
         '--i': i,
       }}
       {...(isEcho ? { 'aria-hidden': 'true' } : {})}

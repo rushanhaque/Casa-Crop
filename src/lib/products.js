@@ -206,13 +206,14 @@ async function doRefresh(force) {
   }
   if (!snapshot) return false
 
-  /*  A static answer may be older than what the live endpoint gave us
-      earlier in this page's life. Taking it would roll the catalogue
-      back, so it is only accepted when it is genuinely newer. An answer
-      from the live endpoint is authoritative and always taken — that is
-      what makes a rollback published from another device propagate. */
+  /*  Never accept a snapshot older than the one we already have.
+      This stops a cached response from the live endpoint overwriting
+      a fresh catalogue that just shipped with the bundle. */
+  if ((snapshot.updatedAt || '') < (live?.updatedAt || '')) return false
+
+  /*  A static answer of the same age does not outrank the live endpoint. */
   if (source === 'static' && liveSource === 'endpoint') {
-    if ((snapshot.updatedAt || '') <= (live?.updatedAt || '')) return false
+    if ((snapshot.updatedAt || '') === (live?.updatedAt || '')) return false
   }
 
   const changed = (snapshot.updatedAt || '') !== (live?.updatedAt || '')

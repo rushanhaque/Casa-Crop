@@ -179,7 +179,7 @@
       and looks identical. This is what stops a large flat field
       reading as screen rather than as material — the alpha is 14/255,
       felt rather than seen. */
-  --grain: url('/grain.png');
+  --grain: url('/grain.webp');
   --grain-size: 128px 128px;
 
   --depth-vignette: radial-gradient(

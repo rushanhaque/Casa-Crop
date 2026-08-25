@@ -34,6 +34,12 @@ function loadImage(file) {
 }
 
 function encode(canvas, quality) {
+  try {
+    const webp = canvas.toDataURL('image/webp', quality)
+    if (webp && webp.startsWith('data:image/webp')) {
+      return webp
+    }
+  } catch {}
   return canvas.toDataURL('image/jpeg', quality)
 }
 

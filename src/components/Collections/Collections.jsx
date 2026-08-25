@@ -25,8 +25,8 @@ const ITEMS = [
     slug: 'funeral',
     meta: 'Cast · Spun',
     subcategories: ['Cremation Urns', 'Pet Urns', 'Memorial Frames', 'Coffin Boxes', 'Caskets'],
-    imageBeforeHover: '/covers/Funeral.png',
-    imageAfterHover: '/covers/FuneralSketch.png',
+    imageBeforeHover: '/covers/Funeral.webp',
+    imageAfterHover: '/covers/FuneralSketch.webp',
   },
   {
     index: '02',
@@ -34,8 +34,8 @@ const ITEMS = [
     slug: 'lighting',
     meta: 'Spun · Plated',
     subcategories: ['Chandeliers', 'Pendant Lights', 'Table Lamps', 'Floor Lamps', 'Wall Sconces', 'Lanterns', 'Outdoor Lighting'],
-    imageBeforeHover: '/covers/Lighting.png',
-    imageAfterHover: '/covers/LightingSketch.png',
+    imageBeforeHover: '/covers/Lighting.webp',
+    imageAfterHover: '/covers/LightingSketch.webp',
   },
   {
     index: '03',
@@ -43,8 +43,8 @@ const ITEMS = [
     slug: 'decor',
     meta: 'Cast · Wrought',
     subcategories: ['Vases', 'Planters', 'Sculptures & Figurines', 'Wall Décor', 'Mirrors', 'Candle Holders', 'Photo Frames', 'Clocks', 'Tissue Boxes'],
-    imageBeforeHover: '/covers/Decor.png',
-    imageAfterHover: '/covers/DecorSketch.png',
+    imageBeforeHover: '/covers/Decor.webp',
+    imageAfterHover: '/covers/DecorSketch.webp',
   },
   {
     index: '04',
@@ -52,8 +52,8 @@ const ITEMS = [
     slug: 'kitchenware',
     meta: 'Steel · Copper',
     subcategories: ['Cake Stands', 'Trays', 'Bowls', 'Drinkware', 'Wine Accessories', 'Chopping Boards', 'Coasters', 'Napkin Holders', 'Cutlery Holders', 'Storage Containers', 'Baskets', 'Platters', 'Ice Buckets', 'Bar Accessories', 'Spice Containers', 'waste bins'],
-    imageBeforeHover: '/covers/KitchenWare.jpg',
-    imageAfterHover: '/covers/KitchenWareSketch.jpg',
+    imageBeforeHover: '/covers/KitchenWare.webp',
+    imageAfterHover: '/covers/KitchenWareSketch.webp',
   },
   {
     index: '05',
@@ -61,8 +61,8 @@ const ITEMS = [
     slug: 'accessories',
     meta: 'Brass · Zinc',
     subcategories: ['Hooks', 'Handles', 'Knobs', 'Hinges'],
-    imageBeforeHover: '/covers/Accessories.jpg',
-    imageAfterHover: '/covers/AccessoriesSketch.jpg',
+    imageBeforeHover: '/covers/Accessories.webp',
+    imageAfterHover: '/covers/AccessoriesSketch.webp',
   },
   {
     index: '06',
@@ -70,8 +70,8 @@ const ITEMS = [
     slug: 'furniture',
     meta: 'Tube · Inlay',
     subcategories: ['Coffee Tables', 'Side Tables', 'Console Tables', 'Accent Chairs', 'Benches', 'Stools', 'Bar Stools', 'Cabinets', 'Bookshelves', 'Display Shelves', 'Nesting Tables', 'Entryway Tables'],
-    imageBeforeHover: '/covers/Furniture.jpg',
-    imageAfterHover: '/covers/FurnitureSketch.jpg',
+    imageBeforeHover: '/covers/Furniture.webp',
+    imageAfterHover: '/covers/FurnitureSketch.webp',
   },
 ]
 
