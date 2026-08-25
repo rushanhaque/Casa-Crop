@@ -256,7 +256,7 @@ function BestSellers() {
           as="h2"
           className={s.sectionTitle}
           id="bestsellers-title"
-          lines={['Best Sellers']}
+          lines={['New Arrivals']}
           split="chars"
         />
       </header>
@@ -574,7 +574,7 @@ export default function Casa() {
           </div>
         </section>
 
-        {/* ── 4b. Best sellers ────────────────────────────────── */}
+        {/* ── 4b. New arrivals ───────────────────────────────── */}
         <BestSellers />
 
         {/* ── 5. Heritage ────────────────────────────────────── */}

@@ -784,7 +784,7 @@ export default function Admin() {
                   <div className={s.cardBody}>
                     <h3 className={s.cardName}>
                       {p.name || 'Untitled product'}
-                      {p.bestSeller && <span className={s.bsBadge} title="Best seller">★</span>}
+                      {p.bestSeller && <span className={s.bsBadge} title="New arrival">★</span>}
                     </h3>
                     <p className={s.cardMeta}>
                       <span className={s.cardSku} data-missing={!p.sku ? '' : undefined}>
@@ -956,7 +956,7 @@ export default function Admin() {
               />
               <span className={s.checkLabel}>
                 <span className={s.checkStar} aria-hidden="true">★</span>
-                Feature on homepage as a Best Seller
+                Feature on homepage as a New Arrival
               </span>
             </label>
 

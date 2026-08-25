@@ -1391,11 +1391,19 @@
 }
 
 
-/* ── Best Sellers ─────────────────────────────────────────────── */
+/* ── New Arrivals ─────────────────────────────────────────────── */
 
 .bestSellers {
   padding: 6rem var(--page-pad, 5vw);
   overflow: hidden;
+}
+
+/*  The heading sits a little higher than the shared .head spacing,
+    so it reads as a lead-in to the cards rather than a block of its
+    own. Scoped to this section — .head is shared elsewhere. */
+.bestSellers .head {
+  margin-top: -1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .bsTrack {
