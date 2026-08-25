@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/check-vercel-config.mjs && vite build",
     "preview": "vite preview",
     "analyze": "vite build --mode analyze",
-    "images": "node scripts/images.mjs"
+    "images": "node scripts/images.mjs",
+    "check:config": "node scripts/check-vercel-config.mjs",
+    "check:live": "node scripts/check-live.mjs"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.10.0",
