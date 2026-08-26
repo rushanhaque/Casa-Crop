@@ -12,48 +12,9 @@
       "id": "mt6030vhs1vk",
       "addedAt": 1787501236013,
       "updatedAt": 1787501236013
-    },
-    {
-      "name": "Nsjsbshs",
-      "sku": "CC-LIT-002",
-      "category": "lighting",
-      "subcategory": "",
-      "alloy": "",
-      "finish": "",
-      "photo": "/product-photos/33adb8bd70dfa13371c0.jpg",
-      "bestSeller": false,
-      "id": "mt8hny8zt74h",
-      "addedAt": 1787651698211,
-      "updatedAt": 1787651698211
-    },
-    {
-      "name": "Nsjsbshs",
-      "sku": "CC-LIT-003",
-      "category": "lighting",
-      "subcategory": "Wall Sconces",
-      "alloy": "Jsjs",
-      "finish": "Bsjsbs",
-      "photo": "/product-photos/a738ce3789dc526f88ed.jpg",
-      "bestSeller": true,
-      "id": "mt8ho9qtk4co",
-      "addedAt": 1787651713109,
-      "updatedAt": 1787651713109
-    },
-    {
-      "name": "jsjsjs",
-      "sku": "CC-DEC-001",
-      "category": "decor",
-      "subcategory": "Photo Frames",
-      "alloy": "",
-      "finish": "",
-      "photo": "/product-photos/38795b2309d63b05c84d.jpg",
-      "bestSeller": false,
-      "id": "mt8jkbehu7nw",
-      "addedAt": 1787654887865,
-      "updatedAt": 1787654887865
     }
   ],
   "subcategories": {},
   "removedSubcategories": {},
-  "updatedAt": "2026-08-25T10:48:30.353Z"
+  "updatedAt": "2026-08-26T10:02:30.995Z"
 }
