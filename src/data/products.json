@@ -1,19 +1,6 @@
 {
   "products": [
     {
-      "name": "frdfv",
-      "sku": "CC-LIT-001",
-      "category": "lighting",
-      "subcategory": "Pendant Lights",
-      "alloy": "vrd",
-      "finish": "vf",
-      "photo": "/product-photos/a32bb34c8124c33069e1.jpg",
-      "bestSeller": true,
-      "id": "mt6030vhs1vk",
-      "addedAt": 1787501236013,
-      "updatedAt": 1787501236013
-    },
-    {
       "name": "Botanical Grace Adult Urn",
       "sku": "CC-CU-001",
       "category": "funeral",
@@ -38,9 +25,22 @@
       "id": "mt9xir8yz2lh",
       "addedAt": 1787738795890,
       "updatedAt": 1787739090753
+    },
+    {
+      "name": "Midnight Pearl Shiny Silver Star Urn",
+      "sku": "CC-CU-003",
+      "category": "funeral",
+      "subcategory": "Cremation Urns",
+      "alloy": "Aluminum",
+      "finish": "Color Finished",
+      "photo": "/product-photos/a8b2f6d06d1dea718987.webp",
+      "bestSeller": false,
+      "id": "mt9xujj5e9hr",
+      "addedAt": 1787739345761,
+      "updatedAt": 1787739345761
     }
   ],
   "subcategories": {},
   "removedSubcategories": {},
-  "updatedAt": "2026-08-26T10:13:53.838Z"
+  "updatedAt": "2026-08-26T10:15:49.512Z"
 }
