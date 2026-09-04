@@ -92,9 +92,11 @@
   transform-origin: center;
 }
 
-.photoCol:hover .photo {
-  transform: scale(2.5);
-  transition: none;
+@media (hover: hover) {
+  .photoCol:hover .photo {
+    transform: scale(1.4);
+    transition: transform 400ms var(--ease-settle);
+  }
 }
 
 .infoCol {
